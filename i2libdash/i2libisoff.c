@@ -70,25 +70,23 @@ int write_stsz(u_char *data, int video_audio, i2ctx *context);
 //stco for audio and video files is the same
 int write_stco(u_char *data, int video_audio, i2ctx *context);
 
-
-
-//Nadim hasta aca estan todos los parametros ingresados, mañana lo miramos juntos
-
-
+//styp for audio and video files is the same
 int write_styp(u_char *data, int video_audio, i2ctx *context);
 
-int write_sidx(u_char *data, int video_audio);
+int write_sidx(u_char *data, int video_audio, i2ctx *context);
 
-int write_moof(u_char *data, int video_audio);
+int write_moof(u_char *data, int video_audio, i2ctx *context);
 
-int write_mfhd(u_char *data, int video_audio);
+//mfhd for audio and video files is the same
+int write_mfhd(u_char *data, int video_audio, i2ctx *context);
 
-int write_traf(u_char *data, int video_audio);
+int write_traf(u_char *data, int video_audio, i2ctx *context);
 
-int write_tfhd(u_char *data, int video_audio);
+//tfhd for audio and video files is the same
+int write_tfhd(u_char *data, int video_audio, i2ctx *context);
 
-int write_tfdt(u_char *data, int video_audio);
+int write_tfdt(u_char *data, int video_audio, i2ctx *context);
 
-int write_trun(u_char *data, int video_audio);
+int write_trun(u_char *data, int video_audio, i2ctx *context);
 
-int write_mdat(u_char *data, int video_audio);
+int write_mdat(u_char *data, int video_audio, i2ctx *context);
