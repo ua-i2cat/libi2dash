@@ -3,13 +3,15 @@
 
 
 #include "i2context.h"
-//LIBRERIA ISOMEDIA
+#include <netinet/in.h>
+//ISOMEDIA LIBRARY
 
-i2Err initVideoGenerator(u_char *sps, u_char *pps, i2ctx *context);
 
-i2Err initAudioGenerator(u_char *aac_data, i2ctx *context);
+i2Err initVideoGenerator(byte *sps, byte *pps, i2ctx *context);
+
+i2Err initAudioGenerator(byte *aac_data, i2ctx *context);
 //TODO mirar que es lo que nos importa de aac
 
-i2Err segmentGenerator(u_char *data, int video_audio, i2ctx *context);
+i2Err segmentGenerator(byte *data, uint32_t video_audio, i2ctx *context);
 
 #endif

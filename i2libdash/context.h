@@ -1,16 +1,18 @@
-#ifndef __ISOFF_LIB__
+#ifndef __CONTEXT__
 #define __CONTEXT__
+
+typedef unsigned char byte;
 
 //CONTEXT
 typedef struct {
-	u_char *sps;
-	u_char *pps;
-	u_int width;
-	u_int height;
-	u_int frame_rate;
-	u_int avc_profile;
-	u_int avc_compat;
-	u_int avc_level;
+	byte *sps;
+	byte *pps;
+	uint32_t width;
+	uint32_t height;
+	uint32_t frame_rate;
+	uint32_t avc_profile;
+	uint32_t avc_compat;
+	uint32_t avc_level;
 
 
 	
@@ -18,12 +20,12 @@ typedef struct {
 } i2ctx_video; //TODO
 
 typedef struct {
-	u_char *aac_header;
-	u_int channels;
-	u_int sample_rate;
-	u_int sample_size;
-	u_int aac_profile;
-	u_int data_rate;
+	byte *aac_header;
+	uint32_t channels;
+	uint32_t sample_rate;
+	uint32_t sample_size;
+	uint32_t aac_profile;
+	uint32_t data_rate;
 
 } i2ctx_audio; //TODO
 

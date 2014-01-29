@@ -1,92 +1,265 @@
+#include "i2libisoff.h"
 
 //ftyp for audio and video files is the same
-int write_ftyp(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_ftyp(byte *data, uint32_t video_audio, i2ctx *context);
 
-int write_moov(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_moov(byte *data, uint32_t video_audio, i2ctx *context);
 
 //mvhd for audio and video files is the same
-int write_mvhd(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_mvhd(byte *data, uint32_t video_audio, i2ctx *context);
 
 //mvex for audio and video files is the same
-int write_mvex(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_mvex(byte *data, uint32_t video_audio, i2ctx *context);
 
 //trex for audio and video files is the same
-int write_trex(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_trex(byte *data, uint32_t video_audio, i2ctx *context);
 
-int write_trak(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_trak(byte *data, uint32_t video_audio, i2ctx *context);
 
 //trex for audio and video files is the same
-int write_tkhd(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_tkhd(byte *data, uint32_t video_audio, i2ctx *context);
 
-int write_mdia(u_char *data, int video_audio, i2ctx *context);
-
-//mdhd for audio and video files is the same
-int write_mdhd(u_char *data, int video_audio, i2ctx *context);
-
-int write_hdlr(u_char *data, int video_audio, i2ctx *context);
-
-int write_minf(u_char *data, int video_audio, i2ctx *context);
-
-//only video
-int write_vmhd(u_char *data);
-
-//only audio
-int write_smhd(u_char *data);
+uint32_t write_mdia(byte *data, uint32_t video_audio, i2ctx *context);
 
 //mdhd for audio and video files is the same
-int write_dinf(u_char *data, int video_audio);
+uint32_t write_mdhd(byte *data, uint32_t video_audio, i2ctx *context);
+
+uint32_t write_hdlr(byte *data, uint32_t video_audio, i2ctx *context);
+
+uint32_t write_minf(byte *data, uint32_t video_audio, i2ctx *context);
+
+//only video
+uint32_t write_vmhd(byte *data);
+
+//only audio
+uint32_t write_smhd(byte *data);
 
 //mdhd for audio and video files is the same
-int write_dref(u_char *data, int video_audio);
+uint32_t write_dinf(byte *data, uint32_t video_audio);
 
-int write_stbl(u_char *data, int video_audio, i2ctx *context);
+//mdhd for audio and video files is the same
+uint32_t write_dref(byte *data, uint32_t video_audio);
 
-int write_stsd(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_stbl(byte *data, uint32_t video_audio, i2ctx *context);
 
-//only video
-int write_avc1(u_char *data, i2ctx_video ctxVideo);
-
-//only video
-int write_avc3(u_char *data, i2ctx_video ctxVideo);
+uint32_t write_stsd(byte *data, uint32_t video_audio, i2ctx *context);
 
 //only video
-int write_avcc(u_char *data, i2ctx_video ctxVideo);
+uint32_t write_avc1(byte *data, i2ctx_video ctxVideo);
+
+//only video
+uint32_t write_avc3(byte *data, i2ctx_video ctxVideo);
+
+//only video
+uint32_t write_avcc(byte *data, i2ctx_video ctxVideo);
 
 //only audio
-int write_mp4a(u_char *data, i2ctx_audio ctxAudio);
+uint32_t write_mp4a(byte *data, i2ctx_audio ctxAudio);
 
 //only audio
-int write_esds(u_char *data, i2ctx_audio ctxAudio);
+uint32_t write_esds(byte *data, i2ctx_audio ctxAudio);
 
 //stts for audio and video files is the same
-int write_stts(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_stts(byte *data, uint32_t video_audio, i2ctx *context);
 
 //stsc for audio and video files is the same
-int write_stsc(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_stsc(byte *data, uint32_t video_audio, i2ctx *context);
 
 //stsz for audio and video files is the same
-int write_stsz(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_stsz(byte *data, uint32_t video_audio, i2ctx *context);
 
 //stco for audio and video files is the same
-int write_stco(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_stco(byte *data, uint32_t video_audio, i2ctx *context);
 
 //styp for audio and video files is the same
-int write_styp(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_styp(byte *data, uint32_t video_audio, i2ctx *context);
 
-int write_sidx(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_sidx(byte *data, uint32_t video_audio, i2ctx *context);
 
-int write_moof(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_moof(byte *data, uint32_t video_audio, i2ctx *context);
 
 //mfhd for audio and video files is the same
-int write_mfhd(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_mfhd(byte *data, uint32_t video_audio, i2ctx *context);
 
-int write_traf(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_traf(byte *data, uint32_t video_audio, i2ctx *context);
 
 //tfhd for audio and video files is the same
-int write_tfhd(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_tfhd(byte *data, uint32_t video_audio, i2ctx *context);
 
-int write_tfdt(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_tfdt(byte *data, uint32_t video_audio, i2ctx *context);
 
-int write_trun(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_trun(byte *data, uint32_t video_audio, i2ctx *context);
 
-int write_mdat(u_char *data, int video_audio, i2ctx *context);
+uint32_t write_mdat(byte *data, uint32_t video_audio, i2ctx *context);
+
+i2Err initVideoGenerator(byte *sps, byte *pps, i2ctx *context){}
+
+i2Err initAudioGenerator(byte *aac_data, i2ctx *context){}
+//TODO mirar que es lo que nos importa de aac
+
+i2Err segmentGenerator(byte *data, uint32_t video_audio, i2ctx *context){}
+
+uint32_t write_ftyp(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_moov(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_mvhd(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_mvex(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_trex(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_trak(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_tkhd(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_mdia(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_mdhd(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_hdlr(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_minf(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_vmhd(byte *data) {
+
+	uint32_t count, size, hton_size, flag, hton_flag;
+	//Size is always 20, apparently
+	size = 20;
+	count = 0;
+	flag = 0x01;
+	//Box size
+	hton_size = htonl(size);
+	memcpy(data + count, hton_size, 4);
+	count = count + 4;
+	//Box type
+	memcpy(data + count, "vmhd", 4);
+	count = count + 4;
+
+    //Version and flags
+	hton_flag = htonl(flag);
+    memcpy(data + count, hton_flag, 4);
+	count = count + 4;
+
+    /* reserved (graphics mode=copy) */
+    ngx_rtmp_mp4_field_32(b, 0);
+    ngx_rtmp_mp4_field_32(b, 0);
+}
+
+uint32_t write_smhd(byte *data) {
+
+}
+
+uint32_t write_dinf(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+//mdhd for audio and video files is the same
+uint32_t write_dref(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_stbl(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_stsd(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+
+uint32_t write_avc1(byte *data, i2ctx_video ctxVideo) {
+
+}
+
+
+uint32_t write_avc3(byte *data, i2ctx_video ctxVideo) {
+
+}
+
+uint32_t write_avcc(byte *data, i2ctx_video ctxVideo) {
+
+}
+
+uint32_t write_mp4a(byte *data, i2ctx_audio ctxAudio) {
+
+}
+
+uint32_t write_esds(byte *data, i2ctx_audio ctxAudio) {
+
+}
+
+uint32_t write_stts(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_stsc(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_stsz(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_stco(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_styp(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_sidx(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_moof(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_mfhd(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_traf(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_tfhd(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_tfdt(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_trun(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
+uint32_t write_mdat(byte *data, uint32_t video_audio, i2ctx *context) {
+
+}
+
