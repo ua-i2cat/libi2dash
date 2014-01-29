@@ -145,11 +145,12 @@ uint32_t write_minf(byte *data, uint32_t video_audio, i2ctx *context) {
 
 uint32_t write_vmhd(byte *data) {
 
-	uint32_t count, size, hton_size, flag, hton_flag;
+	uint32_t count, size, hton_size, flag, hton_flag, zero;
 	//Size is always 20, apparently
 	size = 20;
 	count = 0;
 	flag = 0x01;
+	zero = 0;
 	//Box size
 	hton_size = htonl(size);
 	memcpy(data + count, hton_size, 4);
@@ -164,8 +165,12 @@ uint32_t write_vmhd(byte *data) {
 	count = count + 4;
 
     /* reserved (graphics mode=copy) */
-    ngx_rtmp_mp4_field_32(b, 0);
-    ngx_rtmp_mp4_field_32(b, 0);
+    memcpy(data + count, zero, 4);
+	count = count + 4;
+	memcpy(data + count, zero, 4);
+	count = count + 4;
+	
+	return count;
 }
 
 uint32_t write_smhd(byte *data) {
