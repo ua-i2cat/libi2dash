@@ -102,30 +102,37 @@ i2Err initAudioGenerator(byte *aac_data, i2ctx *context){}
 i2Err segmentGenerator(byte *data, uint32_t media_type, i2ctx *context){}
 
 uint32_t write_ftyp(byte *data, uint32_t media_type, i2ctx *context) {
-	uint32_t count, size, hton_size, flag, hton_flag, zero;
-	//Size is always 20, apparently
-	size = 24;
-	count = 0;
-	flag = 0x01;
+	uint32_t count, size, hton_size, version, hton_version, zero;
+
+	count = 4;
+	version = 1;
 	zero = 0;
-	//Box size
-	hton_size = htonl(size);
-	memcpy(data + count, hton_size, 4);
-	count = count + 4;
+	
 	//Box type
-	memcpy(data + count, "vmhd", 4);
-	count = count + 4;
-    //Version and flags
-	hton_flag = htonl(flag);
-    memcpy(data + count, hton_flag, 4);
+	memcpy(data + count, "ftyp", 4);
 	count = count + 4;
 
-    /* reserved (graphics mode=copy) */
-    memcpy(data + count, zero, 4);
+	//Major brand
+    memcpy(data + count, "iso6", 4);
 	count = count + 4;
-	memcpy(data + count, zero, 4);
+
+    //Version
+	hton_version = htonl(version);
+    memcpy(data + count, hton_version, 4);
+	count = count + 4;
+
+    //Compatible brands
+    memcpy(data + count, "isom", 4);
+	count = count + 4;
+    memcpy(data + count, "iso6", 4);
+	count = count + 4;
+    memcpy(data + count, "dash", 4);
 	count = count + 4;
 	
+	//Box size
+	size = count;
+	hton_size = htonl(size);
+	memcpy(data + count, hton_size, 4);
 	return count;
 }
 
