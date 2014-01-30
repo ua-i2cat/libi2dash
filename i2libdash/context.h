@@ -5,11 +5,11 @@ typedef unsigned char byte;
 
 //CONTEXT
 typedef struct {
-	byte *sps;
-	byte *pps;
-	uint32_t width;
-	uint32_t height;
+	u_char *avc_header;
+	uint16_t *width;
+	uint16_t *height;
 	uint32_t frame_rate;
+	uint32_t avc_version;
 	uint32_t avc_profile;
 	uint32_t avc_compat;
 	uint32_t avc_level;
