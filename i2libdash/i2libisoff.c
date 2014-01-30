@@ -100,7 +100,32 @@ i2Err initAudioGenerator(byte *aac_data, i2ctx *context){}
 i2Err segmentGenerator(byte *data, uint32_t video_audio, i2ctx *context){}
 
 uint32_t write_ftyp(byte *data, uint32_t video_audio, i2ctx *context) {
+	uint32_t count, size, hton_size, flag, hton_flag, zero;
+	//Size is always 20, apparently
+	size = 24;
+	count = 0;
+	flag = 0x01;
+	zero = 0;
+	//Box size
+	hton_size = htonl(size);
+	memcpy(data + count, hton_size, 4);
+	count = count + 4;
+	//Box type
+	memcpy(data + count, "vmhd", 4);
+	count = count + 4;
 
+    //Version and flags
+	hton_flag = htonl(flag);
+    memcpy(data + count, hton_flag, 4);
+	count = count + 4;
+
+    /* reserved (graphics mode=copy) */
+    memcpy(data + count, zero, 4);
+	count = count + 4;
+	memcpy(data + count, zero, 4);
+	count = count + 4;
+	
+	return count;
 }
 
 uint32_t write_moov(byte *data, uint32_t video_audio, i2ctx *context) {
