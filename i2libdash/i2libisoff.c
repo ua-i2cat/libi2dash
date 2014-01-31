@@ -248,6 +248,7 @@ uint32_t write_smhd(byte *data) {
 }
 
 uint32_t write_dinf(byte *data, uint32_t media_type, i2ctx *context) {
+	// TODO
 }
 
 //mdhd for audio and video files is the same
@@ -274,20 +275,22 @@ uint32_t write_dref(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_url(byte * data) {
-	uint32_t count, size, version_flags;
+	uint32_t count, size, hton_size, flags, hton_flag;
 	// I think that url_size don't need hton
 	count = 0;
 	size = 0xc;
 	flags = 0x00000001;
 	// TODO check this call
 	// size
-	memcpy(data + count, size, 4);
+	hton_size = htonl(size);
+	memcpy(data + count, hton_size, 4);
 	count = count + 4;
 	// box type
 	memcpy(data + count, "url ", 4);
 	count = count + 4;
 	// version and flags
-	memcpy(data + count, flags);
+	hton_flag = htonl(flags);
+	memcpy(data + count, hton_flag, 4);
 	count = count + 4;
 
 	return count;
@@ -500,7 +503,7 @@ uint32_t write_styp(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
-	// TODO
+	// TODO not mandatory
 }
 
 uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
@@ -509,6 +512,7 @@ uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
 
 uint32_t write_mfhd(byte *data, uint32_t media_type, i2ctx *context) {
 	// TODO
+
 }
 
 uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context) {
