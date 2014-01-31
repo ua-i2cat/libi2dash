@@ -43,6 +43,7 @@ typedef struct {
     uint32_t        delay;
     uint32_t        timestamp;
     unsigned        key:1;
+    uint32_t		index;
 } i2ctx_sample;
 
  /* assume config fits one chunk (highly probable) */
