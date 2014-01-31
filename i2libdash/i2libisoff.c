@@ -490,9 +490,26 @@ uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
 	// TODO
 }
 
-uint32_t write_mfhd(byte *data, uint32_t media_type, i2ctx *context) {
-	// TODO
+// Esta función precisa i2ctx_sample. TODO check que respeta desde arriba
+uint32_t write_mfhd(byte *data, uint32_t media_type, i2ctx_sample *context) {
+	uint32_t count, zero, hton_seqnum;
+	count = 0;
+	zero = 0;
+	// size
+	memcpy(data + count, zero, 4);
+	count = count + 4;
+	// box type
+	memcpy(data + count, "mfhd", 4);
+	count = count + 4;
+	// version and flags
+	memcpy(data + count, zero, 4);
+	count = count + 4;
+	// sequence number
+	hton_seqnum = htonl(context->index);
+	memcpy(data + count, hton_seqnum, 4);
+	count = count + 4;
 
+	return count;
 }
 
 uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context) {
@@ -500,7 +517,27 @@ uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_tfhd(byte *data, uint32_t media_type, i2ctx *context) {
-	// TODO
+	uint32_t count, size, zero, one, flags, hton_flag;
+	// I think that url_size don't need hton
+	count = 0;
+	zero = 0;
+	one = 1;
+	flags = 0x0002000;
+
+	memcpy(data + count, zero, 4);
+	count = count + 4;
+	// box type
+	memcpy(data + count, "tfhd", 4);
+	count = count + 4;
+	// version and flags
+	hton_flag = htonl(flags);
+	memcpy(data + count, hton_flag, 4);
+	count = count + 4;
+	// track id
+	memcpy(data + count, one, 4);
+	count = count + 4;
+
+	return count;
 }
 
 uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
