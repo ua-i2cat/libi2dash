@@ -132,11 +132,31 @@ uint32_t write_ftyp(byte *data, uint32_t media_type, i2ctx *context) {
 	//Box size
 	size = count;
 	hton_size = htonl(size);
-	memcpy(data + count, hton_size, 4);
+	memcpy(data, hton_size, 4);
 	return count;
 }
 
 uint32_t write_moov(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, size, size_mvhd, size_mvex, size_trak, hton_size;
+	count = 4;
+	
+	//Box type
+	memcpy(data + count, "moov", 4);
+	count = count + 4;
+
+    size_mvhd = write_mvhd(data + count, media_type, context);
+	count = count + size_mvhd;
+	size_mvex = write_mvex(data + count, media_type, context);
+	count = count + size_mvex;
+	size_trak = write_trak(data + count, media_type, context);
+	count = count + size_trak;
+
+	//Box size
+	size = count;
+	hton_size = htonl(size);
+	memcpy(data, hton_size, 4);
+	return count;
+
 
 }
 
