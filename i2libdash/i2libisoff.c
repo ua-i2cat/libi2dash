@@ -156,8 +156,6 @@ uint32_t write_moov(byte *data, uint32_t media_type, i2ctx *context) {
 	hton_size = htonl(size);
 	memcpy(data, hton_size, 4);
 	return count;
-
-
 }
 
 uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
