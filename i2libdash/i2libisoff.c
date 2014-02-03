@@ -275,7 +275,11 @@ uint32_t write_minf(byte *data, uint32_t media_type, i2ctx *context) {
 
 uint32_t write_vmhd(byte *data) {
 
+<<<<<<< HEAD
 	uint32_t count, size, hton_size, flag32, hton_flag, zero;
+=======
+	uint32_t count, size, hton_size, flag, zero;
+>>>>>>> 5df8cf284295e9c2a3f3cacbd87211480709c170
 	//Size is always 20, apparently
 	size = 20;
 	count = 0;
@@ -290,8 +294,12 @@ uint32_t write_vmhd(byte *data) {
 	count = count + 4;
 
     //Version and flags
+<<<<<<< HEAD
 	hton_flag = htonl(flag32);
     memcpy(data + count, hton_flag, 4);
+=======
+    memcpy(data + count, flag, 4);
+>>>>>>> 5df8cf284295e9c2a3f3cacbd87211480709c170
 	count = count + 4;
 
     /* reserved (graphics mode=copy) */
@@ -363,20 +371,18 @@ uint32_t write_dref(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_url(byte * data) {
-	uint32_t count, size, hton_size, flags, hton_flag;
+	uint32_t count, size, flags;
 	count = 0;
 	size = 0xc;
 	flags = 0x00000001;
 	// size
-	hton_size = htonl(size);
-	memcpy(data + count, hton_size, 4);
+	memcpy(data + count, size, 4);
 	count = count + 4;
 	// box type
 	memcpy(data + count, "url ", 4);
 	count = count + 4;
 	// version and flags
-	hton_flag = htonl(flags);
-	memcpy(data + count, hton_flag, 4);
+	memcpy(data + count, flags, 4);
 	count = count + 4;
 
 	return count;
@@ -467,6 +473,7 @@ uint32_t write_avc1(byte *data, i2ctx_video ctxVideo) {
 	zero_32 = 0;
 	zero_64 = 0;
 	one = 1;
+	hv_resolution = 0x00480000;
 	// size
 	memcpy(data + count, zero_32, 4);
 	count = count + 4;
@@ -495,7 +502,6 @@ uint32_t write_avc1(byte *data, i2ctx_video ctxVideo) {
 	memcpy(data + count, hton_height, 2);
 	count = count + 2;
 	// horitzonal and vertical resolution 72dpi
-	hv_resolution = htonl(0x00480000);
 	memcpy(data + count, hv_resolution, 4);
 	count = count + 4;
 	memcpy(data + count, hv_resolution, 4);
@@ -518,9 +524,9 @@ uint32_t write_avc1(byte *data, i2ctx_video ctxVideo) {
 	count = count + 8;
 	memcpy(data + count, zero_32, 4);
 	count = count + 4;
-	memcpy(data + count, htonl(0x18), 2);
+	memcpy(data + count, 0x18, 2);
 	count = count + 2;
-	memcpy(data + count, htonl(0xffff), 2);
+	memcpy(data + count, 0xffff, 2);
 	count = count + 2;
 	// write avcC
 	avcc = write_avcc(data + count, ctxVideo);
@@ -584,7 +590,7 @@ uint32_t write_mp4a(byte *data, i2ctx_audio ctxAudio) {
 	count = count + 4;
 	memcpy(data + count, htonl(1000), 2);
 	count = count + 2;			
-	
+
 }
 
 uint32_t write_esds(byte *data, i2ctx_audio ctxAudio) {
@@ -734,7 +740,7 @@ uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_tfhd(byte *data, uint32_t media_type, i2ctx *context) {
-	uint32_t count, size, zero, one, flags, hton_flag;
+	uint32_t count, size, zero, one, flags;
 	// I think that url_size don't need hton
 	count = 0;
 	zero = 0;
@@ -747,8 +753,7 @@ uint32_t write_tfhd(byte *data, uint32_t media_type, i2ctx *context) {
 	memcpy(data + count, "tfhd", 4);
 	count = count + 4;
 	// version and flags
-	hton_flag = htonl(flags);
-	memcpy(data + count, hton_flag, 4);
+	memcpy(data + count, flags, 4);
 	count = count + 4;
 	// track id
 	memcpy(data + count, one, 4);
