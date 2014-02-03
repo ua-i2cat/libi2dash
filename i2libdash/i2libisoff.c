@@ -275,11 +275,7 @@ uint32_t write_minf(byte *data, uint32_t media_type, i2ctx *context) {
 
 uint32_t write_vmhd(byte *data) {
 
-<<<<<<< HEAD
 	uint32_t count, size, hton_size, flag32, hton_flag, zero;
-=======
-	uint32_t count, size, hton_size, flag, zero;
->>>>>>> 5df8cf284295e9c2a3f3cacbd87211480709c170
 	//Size is always 20, apparently
 	size = 20;
 	count = 0;
@@ -294,12 +290,8 @@ uint32_t write_vmhd(byte *data) {
 	count = count + 4;
 
     //Version and flags
-<<<<<<< HEAD
-	hton_flag = htonl(flag32);
-    memcpy(data + count, hton_flag, 4);
-=======
-    memcpy(data + count, flag, 4);
->>>>>>> 5df8cf284295e9c2a3f3cacbd87211480709c170
+    memcpy(data + count, flag32, 4);
+
 	count = count + 4;
 
     /* reserved (graphics mode=copy) */
