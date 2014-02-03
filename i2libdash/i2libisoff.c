@@ -159,6 +159,65 @@ uint32_t write_moov(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, size, hton_size, flag32, hton_flag32;
+	uint16_t flag16;
+	count = 4;
+	
+	//Box type
+	memcpy(data + count, "mvhd", 4);
+	count = count + 4;
+
+	//Version
+	flag32 = 0x0;
+    memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+    //Creation time
+	flag32 = 0x0;
+    memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+    //Modification time
+	flag32 = 0x0;
+    memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+    //Timescale
+	flag32 = 1000;
+	hton_flag32 = htonl(flag32);
+    memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+    //Duration
+	flag32 = 0x0;
+    memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+    //Reserved
+	flag32 = 0x00010000;
+    memcpy(data + count, flag32, 4);
+	count = count + 4;
+	flag16 = 0x0100;
+    memcpy(data + count, flag16, 2);
+	count = count + 2;
+    ngx_rtmp_mp4_field_16(b, 0);
+    ngx_rtmp_mp4_field_32(b, 0);
+    ngx_rtmp_mp4_field_32(b, 0);
+
+    ngx_rtmp_mp4_write_matrix(b, 1, 0, 0, 1, 0, 0);
+
+    /* reserved */
+    ngx_rtmp_mp4_field_32(b, 0);
+    ngx_rtmp_mp4_field_32(b, 0);
+    ngx_rtmp_mp4_field_32(b, 0);
+    ngx_rtmp_mp4_field_32(b, 0);
+    ngx_rtmp_mp4_field_32(b, 0);
+    ngx_rtmp_mp4_field_32(b, 0);
+
+    /* next track id */
+    ngx_rtmp_mp4_field_32(b, 1);
+
+    ngx_rtmp_mp4_update_box_size(b, pos);
 
 }
 
@@ -196,11 +255,11 @@ uint32_t write_minf(byte *data, uint32_t media_type, i2ctx *context) {
 
 uint32_t write_vmhd(byte *data) {
 
-	uint32_t count, size, hton_size, flag, hton_flag, zero;
+	uint32_t count, size, hton_size, flag32, hton_flag, zero;
 	//Size is always 20, apparently
 	size = 20;
 	count = 0;
-	flag = 0x01;
+	flag32 = 0x01;
 	zero = 0;
 	//Box size
 	hton_size = htonl(size);
@@ -211,7 +270,7 @@ uint32_t write_vmhd(byte *data) {
 	count = count + 4;
 
     //Version and flags
-	hton_flag = htonl(flag);
+	hton_flag = htonl(flag32);
     memcpy(data + count, hton_flag, 4);
 	count = count + 4;
 
