@@ -200,24 +200,44 @@ uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 	flag16 = 0x0100;
     memcpy(data + count, flag16, 2);
 	count = count + 2;
-    ngx_rtmp_mp4_field_16(b, 0);
-    ngx_rtmp_mp4_field_32(b, 0);
-    ngx_rtmp_mp4_field_32(b, 0);
+	flag16 = 0x0;
+    memcpy(data + count, flag16, 2);
+	count = count + 2;
+	flag32 = 0x0;
+    memcpy(data + count, flag32, 4);
+	count = count + 4;
+    memcpy(data + count, flag32, 4);
+	count = count + 4;
 
+	//TODO
     ngx_rtmp_mp4_write_matrix(b, 1, 0, 0, 1, 0, 0);
 
-    /* reserved */
-    ngx_rtmp_mp4_field_32(b, 0);
-    ngx_rtmp_mp4_field_32(b, 0);
-    ngx_rtmp_mp4_field_32(b, 0);
-    ngx_rtmp_mp4_field_32(b, 0);
-    ngx_rtmp_mp4_field_32(b, 0);
-    ngx_rtmp_mp4_field_32(b, 0);
+    //Reserved
+	flag32 = 0x0;
+    memcpy(data + count, flag32, 4);
+	count = count + 4;
+    memcpy(data + count, flag32, 4);
+	count = count + 4;
+    memcpy(data + count, flag32, 4);
+	count = count + 4;
+    memcpy(data + count, flag32, 4);
+	count = count + 4;
+    memcpy(data + count, flag32, 4);
+	count = count + 4;
+    memcpy(data + count, flag32, 4);
+	count = count + 4;
 
-    /* next track id */
-    ngx_rtmp_mp4_field_32(b, 1);
+    //Next track id
+	flag32 = 1;
+	hton_flag32 = htonl(flag32);
+    memcpy(data + count, flag32, 4);
+	count = count + 4;
 
-    ngx_rtmp_mp4_update_box_size(b, pos);
+	//Box size
+	size = count;
+	hton_size = htonl(size);
+	memcpy(data, hton_size, 4);
+	return count;
 
 }
 
