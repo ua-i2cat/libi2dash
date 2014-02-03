@@ -162,7 +162,7 @@ uint32_t write_moov(byte *data, uint32_t media_type, i2ctx *context) {
 
 uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, size, hton_size, size_matrix, flag32, hton_flag32;
-	uint16_t flag16;
+	uint16_t flag16, hton_flag16;
 	byte *matrix;
 	count = 4;
 	
@@ -198,9 +198,11 @@ uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 
     //Reserved
 	flag32 = 0x00010000;
-    memcpy(data + count, flag32, 4);
+	hton_flag32 = htonl(flag32);
+    memcpy(data + count, hton_flag32, 4);
 	count = count + 4;
 	flag16 = 0x0100;
+	hton_flag16 = htons(flag16);
     memcpy(data + count, flag16, 2);
 	count = count + 2;
 	flag16 = 0x0;
