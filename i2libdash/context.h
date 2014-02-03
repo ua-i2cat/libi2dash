@@ -43,6 +43,7 @@ typedef struct {
     uint32_t		index;
     uint32_t 		decode_time_ms;
     uint32_t		mdat_size;
+    uint32_t		moof_pos;
 } i2ctx_sample;
 
  /* assume config fits one chunk (highly probable) */

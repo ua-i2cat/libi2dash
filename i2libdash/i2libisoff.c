@@ -427,10 +427,14 @@ uint32_t write_stbl(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_stsd(byte *data, uint32_t media_type, i2ctx *context) {
-	uint32_t count, zero, one;
+	uint32_t count, zero, one, avc1, mp4a;
+	i2ctx_audio *ctxaudio;
+	i2ctx_video *ctxvideo;
 	count = 0;
 	zero = 0;
 	one = 1;
+	ctxvideo = context->ctxvideo;
+	ctxaudio = context->ctxaudio;
 	// size
 	memcpy(data + count, zero, 4);
 	count = count + 4;
@@ -451,13 +455,22 @@ uint32_t write_stsd(byte *data, uint32_t media_type, i2ctx *context) {
 	*/
 	// write avcX or AAC boxes
 	if(media_type == 1) {
-		// TODO call write_avc1 or write_avc3...
+		// write avc1
+		avc1 = write_avc1(data + count, ctxvideo);
+		if !(avc1 > 0)
+			return I2ERROR
+		count = count + avc1;
 	} else if(media_type == 2) {
-		// TODO call write_aac
+		// write mp4a
+		mp4a = write_mp4a(data + count, ctxaudio);
+		if !(mp4a > 0)
+			return I2ERROR
+		count = count + mp4a;
 	} else if(media_type == 3) {
-		// TODO Handle video+audio case
+		// TODO
+		return I2ERROR;
 	} else {
-		return I2ERR;
+		return I2ERROR;
 	}
 
 	return count;
@@ -599,7 +612,7 @@ uint32_t write_mp4a(byte *data, i2ctx_audio ctxAudio) {
 	memcpy(data + count, htonl(sample_rate), 2);
 	count = count + 2;
 	// write esds
-	esds = write_esds(data + count, ctxVideo);
+	esds = write_esds(data + count, ctxAudio);
 	if !(esds > 0)
 		return I2ERROR
 	count = count + esds;
@@ -778,7 +791,27 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
-	// TODO
+	uint32_t count, zero;
+	count = 0;
+	zero = 0;
+	// size
+	memcpy(data + count, zero, 4);
+	count = count + 4;
+	// box type
+	memcpy(data + count, "moof", 4);
+	count = count + 4;
+	// write mfhd
+	mfhd = write_mfhd(data + count, media_type, context);
+	if !(mfhd > 0)
+		return I2ERROR
+	count = count + mfhd;
+	// write traf
+	traf = write_traf(data + count, media_type, context);
+	if !(traf > 0)
+		return I2ERROR
+	count = count + traf;
+
+	return count;
 }
 
 // Esta función precisa ctxsample. TODO check que respeta desde arriba
@@ -804,13 +837,36 @@ uint32_t write_mfhd(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context) {
-	// TODO
+	uint32_t zero, count, tfhd, tfdt, trun;
+	count = 0;
+	zero = 0;
+	// size
+	memcpy(data + count, zero, 4);
+	count = count + 4;
+	// box type
+	memcpy(data + count, "traf", 4);
+	count = count + 4;
+	// write tfhd
+	tfhd = write_tfhd(data + count, media_type, context);
+	if !(tfhd > 0)
+		return I2ERROR
+	count = count + tfhd;
+	// write tfdt
+	tfdt = write_tfdt(data + count, media_type, context);
+	if !(tfdt > 0)
+		return I2ERROR
+	count = count + tfdt;
+	// write trun
+	trun = write_trun(data + count, media_type, context);
+	if !(trun > 0)
+		return I2ERROR
+	count = count + trun;
 
+	return count;
 }
 
 uint32_t write_tfhd(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, size, zero, one, flags;
-	// I think that url_size don't need hton
 	count = 0;
 	zero = 0;
 	one = 1;
