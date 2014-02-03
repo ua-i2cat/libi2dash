@@ -909,7 +909,10 @@ uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
-	// TODO
+	uint32_t count, zero, num_samples;
+	count = 0;
+	zero = 0;
+	num_samples = 0;
 }
 
 uint32_t write_mdat(byte *data, uint32_t media_type, i2ctx *context) {
