@@ -379,7 +379,9 @@ uint32_t write_stsd(byte *data, uint32_t media_type, i2ctx *context) {
 
 
 uint32_t write_avc1(byte *data, i2ctx_video ctxVideo) {
-	uint32_t count, zero_16, zero_32, zero_64, one, hton_width, hton_height, hv_resolution, avcc;
+	uint32_t count, zero_32, one, hton_width, hton_height, hv_resolution, avcc;
+	uint64_t zero_64;
+	uint16_t zero_16;
 	count = 0;
 	zero_16 = 0;
 	zero_32 = 0;
@@ -475,7 +477,9 @@ uint32_t write_avcc(byte *data, i2ctx_video ctxVideo) {
 }
 
 uint32_t write_mp4a(byte *data, i2ctx_audio ctxAudio) {
-	uint32_t count, zero_16, zero_32, zero_64;
+	uint32_t count, zero_32, esds;
+	uint16_t zero_16;
+	uint64_t zero_64;
 	count = 0;
 	zero_16 = 0;
 	zero_32 = 0;
@@ -495,14 +499,24 @@ uint32_t write_mp4a(byte *data, i2ctx_audio ctxAudio) {
 	memcpy(data + count, htonl(ctxAudio.channels), 2);
 	count = count + 2;
 	// sample size
-	memcpy(data + count, (htonl(ctxAudio.channels) * 8), 2);
+	memcpy(data + count, (htonl(ctxAudio.sample_size) * 8), 2);
 	count = count + 2;
 	// reserved
 	memcpy(data + count, zero_32, 4);
 	count = count + 4;
+	// timescale
 	memcpy(data + count, htonl(1000), 2);
-	count = count + 2;			
+	count = count + 2;
+	// sample rate
+	memcpy(data + count, htonl(ctxAudio.sample_rate), 2);
+	count = count + 2;
+	// write esds
+	esds = write_esds(data + count, ctxVideo);
+	if !(esds > 0)
+		return I2ERROR
+	count = count + esds;
 
+	return count;
 }
 
 uint32_t write_esds(byte *data, i2ctx_audio ctxAudio) {
@@ -617,7 +631,62 @@ uint32_t write_styp(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
-	// TODO not mandatory
+	uint32_t count, zero_32, duration_ms, decode_time_ms, one_32, reference_size, subseg_duration_ms;
+	uint8_t zero_8;
+	uint16_t zero_16, one_16;
+	count = 0;
+	zero_8 = 0;
+	zero_16 = 0;
+	zero_32 = 0;
+	one_16 = 1;
+	one_32 = 1;
+	subseg_duration_ms = context->i2ctx_sample.duration_ms;
+	decode_time_ms = context->i2ctx_sample.decode_time_ms;
+	reference_size = context.reference_size;
+	duration_ms = context.duration_ms;
+	// size
+	memcpy(data + count, zero_32, 4);
+	count = count + 4;
+	// box type
+	memcpy(data + count, "sidx", 4);
+	count = count + 4;
+	// version
+	memcpy(data + count, zero_32, 4);
+	count = count + 4;
+	// reference id
+	memcpy(data + count, one_32, 4);
+	count = count + 4;
+	// timescale
+	memcpy(data + count, htonl(1000), 4);
+	count = count + 4;
+	// decode time
+	memcpy(data + count, htonl(decode_time_ms), 4);
+	count = count + 4;
+	// duration
+	memcpy(data + count, htonl(duration_ms), 4);
+	count = count + 4;
+	// reserved
+	memcpy(data + count, zero_16, 2);
+	count = count + 2;	
+	// reference count = 1
+	memcpy(data + count, one_16, 2);
+	count = count + 2;
+	// reference size
+	memcpy(data + count, htonl(reference_size), 4);
+	count = count + 4;
+	// subsegment_duration 
+	memcpy(data + count, htonl(subseg_duration_ms), 4);
+	count = count + 4;
+	// 1st bit is reference type, the rest is reference size
+	memcpy(data + count, 0x90, 1);
+	count = count + 1;
+	// SAP delta time
+	memcpy(data + count, zero_16, 2);
+	count = count + 2;
+	memcpy(data + count, zero_8, 1);
+	count = count + 1;
+
+	return count;
 }
 
 uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
@@ -707,5 +776,7 @@ uint32_t write_mdat(byte *data, uint32_t media_type, i2ctx *context) {
 	count = count + 4;
 	memcpy(data + count, "mdat", 4);
 	count = count + 4;
+
+	return count;
 }
 
