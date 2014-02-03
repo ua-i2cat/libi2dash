@@ -28,14 +28,15 @@ typedef struct {
 	i2ctx_audio *ctxaudio;
 	i2ctx_video *ctxvideo;
 	i2ctx_sample *ctxsample;
-	int duration_ms; // Optimum duration
+	uint32_t duration_ms; // Optimum duration
 	int threshold_ms; // Segment duration threshold
 	char *path;
+	uint32_t reference_size;
 } i2ctx; //TODO
 
 typedef struct {
     uint32_t        size;
-    uint32_t        duration;
+    uint32_t        duration_ms;
     uint32_t        delay;
     uint32_t        timestamp;
     unsigned        key:1;
