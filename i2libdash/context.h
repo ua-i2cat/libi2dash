@@ -2,12 +2,16 @@
 #define __CONTEXT__
 
 typedef unsigned char byte;
+#define NO_TYPE 0
+#define VIDEO_TYPE 1
+#define AUDIO_TYPE 2
+#define AUDIOVIDEO_TYPE 3
 
 //CONTEXT
 typedef struct {
 	u_char *avc_header;
-	uint16_t *width;
-	uint16_t *height;
+	uint16_t width;
+	uint16_t height;
 	uint32_t frame_rate;
 	uint32_t avc_version;
 	uint32_t avc_profile;

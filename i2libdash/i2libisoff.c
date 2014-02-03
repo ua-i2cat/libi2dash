@@ -16,7 +16,7 @@ uint32_t write_trex(byte *data, uint32_t media_type, i2ctx *context);
 
 uint32_t write_trak(byte *data, uint32_t media_type, i2ctx *context);
 
-//trex for audio and video files is the same
+//tkhd for audio and video files is the same
 uint32_t write_tkhd(byte *data, uint32_t media_type, i2ctx *context);
 
 uint32_t write_mdia(byte *data, uint32_t media_type, i2ctx *context);
@@ -163,9 +163,8 @@ uint32_t write_moov(byte *data, uint32_t media_type, i2ctx *context) {
 uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, size, hton_size, size_matrix, flag32, hton_flag32;
 	uint16_t flag16, hton_flag16;
-	byte *matrix;
-	count = 4;
-	
+
+	count = 4;	
 	//Box type
 	memcpy(data + count, "mvhd", 4);
 	count = count + 4;
@@ -205,10 +204,10 @@ uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 	hton_flag16 = htons(flag16);
     memcpy(data + count, flag16, 2);
 	count = count + 2;
-	flag16 = 0x0;
+	flag16 = 0;
     memcpy(data + count, flag16, 2);
 	count = count + 2;
-	flag32 = 0x0;
+	flag32 = 0;
     memcpy(data + count, flag32, 4);
 	count = count + 4;
     memcpy(data + count, flag32, 4);
@@ -219,7 +218,7 @@ uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 	count = count + size_matrix;
 
     //Reserved
-	flag32 = 0x0;
+	flag32 = 0;
     memcpy(data + count, flag32, 4);
 	count = count + 4;
     memcpy(data + count, flag32, 4);
@@ -234,7 +233,7 @@ uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 	count = count + 4;
 
     //Next track id
-	flag32 = 1;
+	flag32 = 0x01;
 	hton_flag32 = htonl(flag32);
     memcpy(data + count, flag32, 4);
 	count = count + 4;
@@ -248,35 +247,348 @@ uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_mvex(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, size, hton_size, size_trex;
+	
+	count = 4;
+	//Box type
+	memcpy(data + count, "mvex", 4);
+	count = count + 4;
 
+	size_trex = write_trex(data + count, media_type, context);
+	count = count + size_trex;
+
+	//Box size
+	size = count;
+	hton_size = htonl(size);
+	memcpy(data, hton_size, 4);
+	return count;
 }
 
 uint32_t write_trex(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, size, hton_size, flag32, hton_flag32;
+	
+	count = 0;
+	//Size is always 32, apparently	
+	//Box size
+	size = 32; //0x20
+	hton_size = htonl(size);
+	memcpy(data, hton_size, 4);
+	count = count + 4;
 
+	//Box type
+	memcpy(data + count, "trex", 4);
+	count = count + 4;
+
+    //Version & flags
+	flag32 = 0x0;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+    //Track id
+	flag32 = 1;
+	hton_flag32 = htonl(flag32);
+	memcpy(data + count, hton_flag32, 4);
+	count = count + 4;
+
+    //Default sample description index
+	flag32 = 1;
+	hton_flag32 = htonl(flag32);
+	memcpy(data + count, hton_flag32, 4);
+	count = count + 4;
+
+    //Default sample duration
+	flag32 = 0;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+    //Default sample size, 1024 for AAC
+	flag32 = 0;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+    //Default sample flags, key on
+	flag32 = 0;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+	return count;
 }
 
 uint32_t write_trak(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, size, hton_size, size_trex, size_mdia;
 
+	count = 4;
+	//Box type
+	memcpy(data + count, "trak", 4);
+	count = count + 4;
+
+	size_tkhd = write_tkhd(data + count, media_type, context);
+	count = count + size_tkhd;
+	size_mdia = write_mdia(data + count, media_type, context);
+	count = count + size_tkhd;
+
+	//Box size
+	size = count;
+	hton_size = htonl(size);
+	memcpy(data, hton_size, 4);
+
+	return count;
 }
 
 uint32_t write_tkhd(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, size, hton_size, size_matrix, flag32, hton_flag32;
+	uint16_t flag16, hton_flag16;
+	uint8_t flag8;
 
+	count = 4;	
+	//Box type
+	memcpy(data + count, "tkhd", 4);
+	count = count + 4;
+
+    /* version */
+	flag8 = 0;
+	memcpy(data + count, flag8, 1);
+	count = count + 1;
+
+    //Flags: TrackEnabled
+	flag8 = 0;
+	memcpy(data + count, flag8, 1);
+	count = count + 1;
+	flag16 = 0x0000f;
+	hton_flag16 = htons(flag16);
+	memcpy(data + count, hton_flag16, 2);
+	count = count + 2;
+
+    //Creation time
+	flag32 = 0;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+    //Modification time
+	flag32 = 0;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+    //Track id
+	flag32 = 1;
+	flag32 = htonl(flag32);
+	memcpy(data + count, hton_flag32, 4);
+	count = count + 4;
+
+    //Reserved
+	flag32 = 0;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+    //Duration
+	flag32 = 0;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+    //Reserved
+	flag32 = 0;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+    //Reserved
+	if (media_type == VIDEO_TYPE)
+		flag16 = 0;
+	else
+		flag16 = 0x0100;
+	hton_flag16 = htons(flag16);
+	memcpy(data + count, hton_flag16, 2);
+	count = count + 2;
+
+    //Reserved
+	flag16 = 0;
+	memcpy(data + count, hton_flag16, 2);
+	count = count + 2;
+
+    size_matrix = write_matrix(data, 1, 0, 0, 1, 0, 0);
+	count = count + size_matrix;
+
+    if (media_type == VIDEO_TYPE) {
+		flag32 = 0;
+		flag32 = context->ctxvideo->width << 16;
+		hton_flag32 = htonl(flag32);
+		memcpy(data + count, hton_flag32, 4);
+		count = count + 4;
+		flag32 = 0;
+		flag32 = context->ctxvideo->height << 16;
+		hton_flag32 = htonl(flag32);
+		memcpy(data + count, hton_flag32, 4);
+		count = count + 4;	
+    } else {
+		flag32 = 0;
+		memcpy(data + count, flag32, 4);
+		count = count + 4;	
+		memcpy(data + count, flag32, 4);
+		count = count + 4;	
+    }
+
+	//Box size
+	size = count;
+	hton_size = htonl(size);
+	memcpy(data, hton_size, 4);
+	return count;
 }
 
 uint32_t write_mdia(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, size, hton_size, size_trex, size_;
+	count = 4;
+	//Box type
+	memcpy(data + count, "mdia", 4);
+	count = count + 4;
+
+	size_mdhd = write_mdhd(data + count, media_type, context);
+	count = count + size_mdhd;
+	size_hdlr = write_hdlr(data + count, media_type, context);
+	count = count + size_hdlr;
+	size_minf = write_minf(data + count, media_type, context);
+	count = count + size_minf;
+
+	//Box size
+	size = count;
+	hton_size = htonl(size);
+	memcpy(data, hton_size, 4);
+	return count;
 
 }
 
 uint32_t write_mdhd(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, size, hton_size, flag32, hton_flag32;
+	uint16_t flag16, hton_flag16;
 
+	count = 4;
+	//Box type
+	memcpy(data + count, "mdhd", 4);
+	count = count + 4;
+
+	//Version
+	flag32 = 0;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+	//Creation time
+	flag32 = 0;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+	//Modification time
+	flag32 = 0;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+	//Time scale
+	flag32 = 1000;
+	hton_flag32 = htonl(flag32);
+	memcpy(data + count, hton_flag32, 4);
+	count = count + 4;
+
+	//Duration
+	flag32 = 0;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+	//Lanuguage
+	flag16 = 0x15C7;
+	hton_flag16 = htonl(flag16);
+	memcpy(data + count, hton_flag16, 2);
+	count = count + 2;
+
+	//Reserved
+	flag16 = 0;
+	memcpy(data + count, flag16, 2);
+	count = count + 2;
+
+	//Box size
+	size = count;
+	hton_size = htonl(size);
+	memcpy(data, hton_size, 4);
+	return count;
 }
 
 uint32_t write_hdlr(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, size, hton_size, flag32, hton_flag32;
 
+	count = 4;
+	//Box type
+	memcpy(data + count, "hdlr", 4);
+	count = count + 4;
+	//Version and flags
+	flag32 = 0;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+	//Pre defined
+	flag32 = 0;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+	if (media_type == VIDEO_TYPE) {
+		memcpy(data + count, "vide", 4);
+		count = count + 4;
+	} else {
+		memcpy(data + count, "soun", 4);
+		count = count + 4;
+	}
+
+	//Reserved
+	flag32 = 0;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+	memcpy(data + count, flag32, 4);
+	count = count + 4;
+
+	if (media_type == VIDEO_TYPE) {
+		//Video handler string, NULL-terminated
+		memcpy(data + count, "VideoHandler", sizeof("VideoHandler"));
+		count = count + sizeof("VideoHandler");
+    } else {
+		//Sound handler string, NULL-terminated
+		memcpy(data + count, "SoundHandler", sizeof("SoundHandler"));
+		count = count + sizeof("SoundHandler");
+	}
+
+	//Box size
+	size = count;
+	hton_size = htonl(size);
+	memcpy(data, hton_size, 4);
+	return count;
 }
 
 uint32_t write_minf(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, size, hton_size, size_vmhd, size_smhd, size_stbl, flag32, hton_flag32;
 
+	count = 4;
+	//Box type
+	memcpy(data + count, "minf", 4);
+	count = count + 4;
+
+	if (media_type == VIDEO_TYPE) {
+		size_vmhd = write_vmhd(data + count, media_type, context);
+		count = count + size_vmhd;
+	} else {
+		size_smhd = write_smhd(data + count, media_type, context);
+		count = count + size_smhd;
+	}
+	
+	size_dinf = write_dinf(data + count, media_type, context);
+	count = count + size_dinf;
+	size_stbl = write_stbl(data + count, media_type, context);
+	count = count + size_stbl;
+
+	//Box size
+	size = count;
+	hton_size = htonl(size);
+	memcpy(data, hton_size, 4);
+	return count;
 }
 
 uint32_t write_vmhd(byte *data) {
