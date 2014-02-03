@@ -311,15 +311,14 @@ uint32_t write_vmhd(byte *data) {
 }
 
 uint32_t write_smhd(byte *data) {
-	uint32_t count, size, hton_size;
+	uint32_t count, size;
 	uint64_t zero;
 	// smhd size is always 16, apparently
 	size = 16;
 	count = 0;
 	zero = 0;
 	// Box size
-	hton_size = htonl(size);
-	memcpy(data + count, hton_size, 4);
+	memcpy(data + count, htonl(size), 4);
 	count = count + 4;
 	// Box type
 	memcpy(data + count, "smhd", 4);
@@ -375,13 +374,13 @@ uint32_t write_url(byte * data) {
 	size = 0xc;
 	flags = 0x00000001;
 	// size
-	memcpy(data + count, size, 4);
+	memcpy(data + count, htonl(size), 4);
 	count = count + 4;
 	// box type
 	memcpy(data + count, "url ", 4);
 	count = count + 4;
 	// version and flags
-	memcpy(data + count, flags, 4);
+	memcpy(data + count, htonl(flags), 4);
 	count = count + 4;
 
 	return count;
@@ -466,15 +465,17 @@ uint32_t write_stsd(byte *data, uint32_t media_type, i2ctx *context) {
 
 
 uint32_t write_avc1(byte *data, i2ctx_video ctxVideo) {
-	uint32_t count, zero_32, one, hton_width, hton_height, hv_resolution, avcc;
+	uint32_t count, zero_32, one, hv_resolution, avcc;
 	uint64_t zero_64;
-	uint16_t zero_16;
+	uint16_t zero_16, width, height;
 	count = 0;
 	zero_16 = 0;
 	zero_32 = 0;
 	zero_64 = 0;
 	one = 1;
 	hv_resolution = 0x00480000;
+	width = ctxVideo.width;
+	height = ctxVideo.height;
 	// size
 	memcpy(data + count, zero_32, 4);
 	count = count + 4;
@@ -495,17 +496,15 @@ uint32_t write_avc1(byte *data, i2ctx_video ctxVideo) {
 	memcpy(data + count, zero_64, 8);
 	count = count + 8;
 	// width
-	hton_width = htonl(ctxVideo.width);
-	memcpy(data + count, hton_width, 2);
+	memcpy(data + count, htonl(width), 2);
 	count = count + 2;
 	// height
-	hton_height = htonl(ctxVideo.height);
-	memcpy(data + count, hton_height, 2);
+	memcpy(data + count, htonl(height), 2);
 	count = count + 2;
 	// horitzonal and vertical resolution 72dpi
-	memcpy(data + count, hv_resolution, 4);
+	memcpy(data + count, htonl(hv_resolution), 4);
 	count = count + 4;
-	memcpy(data + count, hv_resolution, 4);
+	memcpy(data + count, htonl(hv_resolution), 4);
 	count = count + 4;
 	// data size
 	memcpy(data + count, zero_32, 4);
@@ -525,9 +524,9 @@ uint32_t write_avc1(byte *data, i2ctx_video ctxVideo) {
 	count = count + 8;
 	memcpy(data + count, zero_32, 4);
 	count = count + 4;
-	memcpy(data + count, 0x18, 2);
+	memcpy(data + count, htonl(0x18), 2);
 	count = count + 2;
-	memcpy(data + count, 0xffff, 2);
+	memcpy(data + count, htonl(0xffff), 2);
 	count = count + 2;
 	// write avcC
 	avcc = write_avcc(data + count, ctxVideo);
@@ -538,16 +537,16 @@ uint32_t write_avc1(byte *data, i2ctx_video ctxVideo) {
 	return count;
 }
 
-
 uint32_t write_avc3(byte *data, i2ctx_video ctxVideo) {
 	// TODO
 }
 
 uint32_t write_avcc(byte *data, i2ctx_video ctxVideo) {
 	uint32_t count, zero, size;
-	u_char hton_header;
+	u_char avc_header;
 	count = 0;
 	zero = 0;
+	avc_header = i2ctx_video.avc_header;
 	// size
 	memcpy(data + count, zero, 4);
 	count = count + 4;
@@ -555,9 +554,8 @@ uint32_t write_avcc(byte *data, i2ctx_video ctxVideo) {
 	memcpy(data + count, "avcC", 4);
 	count = count + 4;
 	// avc header, includes version, profile, level, sps and pps
-	hton_header = htonl(i2ctx_video.avc_header);
-	size = sizeof(hton_header)
-	memcpy(data + count, hton_size, size);
+	size = sizeof(avc_header);
+	memcpy(data + count, htonl(avc_header), size);
 	count = count + size;
 
 	return count;
@@ -565,12 +563,15 @@ uint32_t write_avcc(byte *data, i2ctx_video ctxVideo) {
 
 uint32_t write_mp4a(byte *data, i2ctx_audio ctxAudio) {
 	uint32_t count, zero_32, esds;
-	uint16_t zero_16;
+	uint16_t zero_16, audio_channels, sample_size, sample_rate;
 	uint64_t zero_64;
 	count = 0;
 	zero_16 = 0;
 	zero_32 = 0;
 	zero_64 = 0;
+	audio_channels = ctxAudio.channels;
+	sample_size = ctxAudio.sample_size;
+	sample_rate = ctxAudio.sample_rate;
 	// size
 	memcpy(data + count, zero_32, 4);
 	count = count + 4;
@@ -583,10 +584,10 @@ uint32_t write_mp4a(byte *data, i2ctx_audio ctxAudio) {
 	memcpy(data + count, zero_16, 2);
 	count = count + 2;
 	// channel count
-	memcpy(data + count, htonl(ctxAudio.channels), 2);
+	memcpy(data + count, htonl(audio_channels), 2);
 	count = count + 2;
 	// sample size
-	memcpy(data + count, (htonl(ctxAudio.sample_size) * 8), 2);
+	memcpy(data + count, (htonl(sample_size) * 8), 2);
 	count = count + 2;
 	// reserved
 	memcpy(data + count, zero_32, 4);
@@ -595,7 +596,7 @@ uint32_t write_mp4a(byte *data, i2ctx_audio ctxAudio) {
 	memcpy(data + count, htonl(1000), 2);
 	count = count + 2;
 	// sample rate
-	memcpy(data + count, htonl(ctxAudio.sample_rate), 2);
+	memcpy(data + count, htonl(sample_rate), 2);
 	count = count + 2;
 	// write esds
 	esds = write_esds(data + count, ctxVideo);
@@ -765,7 +766,7 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 	memcpy(data + count, htonl(subseg_duration_ms), 4);
 	count = count + 4;
 	// 1st bit is reference type, the rest is reference size
-	memcpy(data + count, 0x90, 1);
+	memcpy(data + count, htonl(0x90), 1);
 	count = count + 1;
 	// SAP delta time
 	memcpy(data + count, zero_16, 2);
@@ -782,9 +783,10 @@ uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
 
 // Esta función precisa ctxsample. TODO check que respeta desde arriba
 uint32_t write_mfhd(byte *data, uint32_t media_type, i2ctx *context) {
-	uint32_t count, zero, hton_seqnum;
+	uint32_t count, zero, seqnum;
 	count = 0;
 	zero = 0;
+	seqnum = context->ctxsample.index;
 	// size
 	memcpy(data + count, zero, 4);
 	count = count + 4;
@@ -795,8 +797,7 @@ uint32_t write_mfhd(byte *data, uint32_t media_type, i2ctx *context) {
 	memcpy(data + count, zero, 4);
 	count = count + 4;
 	// sequence number
-	hton_seqnum = htonl(context->ctxsample.index);
-	memcpy(data + count, hton_seqnum, 4);
+	memcpy(data + count, htonl(seqnum), 4);
 	count = count + 4;
 
 	return count;
@@ -821,7 +822,7 @@ uint32_t write_tfhd(byte *data, uint32_t media_type, i2ctx *context) {
 	memcpy(data + count, "tfhd", 4);
 	count = count + 4;
 	// version and flags
-	memcpy(data + count, flags, 4);
+	memcpy(data + count, htonl(flags), 4);
 	count = count + 4;
 	// track id
 	memcpy(data + count, one, 4);
@@ -831,9 +832,10 @@ uint32_t write_tfhd(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
-	uint32_t count, zero, hton_decode;
+	uint32_t count, zero, decode_time_ms;
 	count = 0;
 	zero = 0;
+	decode_time_ms = context->i2ctx_sample.decode_time_ms;
 	// size
 	memcpy(data + count, zero, 4);
 	count = count + 4;
@@ -844,8 +846,7 @@ uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
 	memcpy(data + count, zero, 4);
 	count = count + 4;
 	// decode time
-	hton_decode = htonl(context->i2ctx_sample.decode_time_ms);
-	memcpy(data + count, hton_decode, 4);
+	memcpy(data + count, htonl(decode_time_ms), 4);
 	count = count + 4;
 
 	return count;
@@ -856,10 +857,10 @@ uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_mdat(byte *data, uint32_t media_type, i2ctx *context) {
-	uint32_t count, hton_mdat_size;
+	uint32_t count, mdat_size;
 	count = 0;
-	hton_mdat_size = htonl(context->i2ctx_sample.mdat_size);
-	memcpy(data + count, hton_mdat_size, 4);
+	mdat_size = context->i2ctx_sample.mdat_size;
+	memcpy(data + count, htonl(mdat_size), 4);
 	count = count + 4;
 	memcpy(data + count, "mdat", 4);
 	count = count + 4;
