@@ -211,10 +211,11 @@ uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 	count = count + 4;
     memcpy(data + count, flag32, 4);
 	count = count + 4;
-
-	//TODO
+	
+	//transformation matrix
     size_matrix = write_matrix(data, 1, 0, 0, 1, 0, 0);
 	count = count + size_matrix;
+
     //Reserved
 	flag32 = 0x0;
     memcpy(data + count, flag32, 4);
