@@ -101,6 +101,8 @@ i2Err initAudioGenerator(byte *aac_data, i2ctx *context){}
 
 i2Err segmentGenerator(byte *data, uint32_t media_type, i2ctx *context){}
 
+uint32_t write_matrix(byte *data, uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t tx, uint32_t ty);
+
 uint32_t write_ftyp(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, size, hton_size, version, hton_version, zero;
 
@@ -159,8 +161,9 @@ uint32_t write_moov(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
-	uint32_t count, size, hton_size, flag32, hton_flag32;
+	uint32_t count, size, hton_size, size_matrix, flag32, hton_flag32;
 	uint16_t flag16;
+	byte *matrix;
 	count = 4;
 	
 	//Box type
@@ -210,8 +213,8 @@ uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 	count = count + 4;
 
 	//TODO
-    ngx_rtmp_mp4_write_matrix(b, 1, 0, 0, 1, 0, 0);
-
+    size_matrix = write_matrix(data, 1, 0, 0, 1, 0, 0);
+	count = count + size_matrix;
     //Reserved
 	flag32 = 0x0;
     memcpy(data + count, flag32, 4);
@@ -797,3 +800,59 @@ uint32_t write_mdat(byte *data, uint32_t media_type, i2ctx *context) {
 	count = count + 4;
 }
 
+uint32_t write_matrix(byte *data, uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t tx, uint32_t ty) {
+	uint32_t count, value, hton_value;
+	count = 0;
+	value = 0x0;
+
+	// transformation matrix
+	// |a  b  u|
+	// |c  d  v|
+	// |tx ty w|
+
+	//a in 16.16 format
+	value = a << 16;
+	hton_value = htonl(value);
+	memcpy(data + count, hton_value, 4);
+	count = count + 4;
+	//b in 16.16 format
+	value = b << 16;
+	hton_value = htonl(value);
+	memcpy(data + count, hton_value, 4);
+	count = count + 4;
+	//u in 2.30 format
+	value = 0
+	memcpy(data + count, value, 4);
+	count = count + 4;
+	//c in 16.16 format
+	value = c << 16;
+	hton_value = htonl(value);
+	memcpy(data + count, hton_value, 4);
+	count = count + 4;
+	//d in 16.16 format
+	value = d << 16;
+	hton_value = htonl(value);
+	memcpy(data + count, hton_value, 4);
+	count = count + 4;
+	//v in 2.30 format
+	value = 0
+	memcpy(data + count, value, 4);
+	count = count + 4;
+	//tx in 16.16 format
+	value = tx << 16;
+	hton_value = htonl(value);
+	memcpy(data + count, hton_value, 4);
+	count = count + 4;
+	//ty in 16.16 format
+	value = ty << 16;
+	hton_value = htonl(value);
+	memcpy(data + count, hton_value, 4);
+	count = count + 4;
+	//w in 2.30 format
+	value = 1;
+	hton_value = htonl(value);
+	memcpy(data + count, hton_value, 4);
+	count = count + 4;
+
+    return count;
+}
