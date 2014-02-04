@@ -23,6 +23,7 @@ typedef struct {
 
 typedef struct {
 	byte 			*aac_header;
+	uint8_t 		aac_header_length;
 	uint16_t 		channels;
 	uint16_t 		sample_rate;
 	uint16_t 		sample_size;

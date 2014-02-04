@@ -1018,9 +1018,44 @@ uint32_t write_mp4a(byte *data, i2ctx_audio ctxAudio) {
 }
 
 uint32_t write_esds(byte *data, i2ctx_audio ctxAudio) {
+	uint32_t count, zero_32;
+	uint16_t one, zero_16;
+	uint8_t zero_8;
+	u_char *descriptor;
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-	// TODO
+	count = 0;
+	zero_32 = 0;
+	zero_16 = 0;
+	zero_8 = 0;
+	one = 1;
+	//size
+	memcpy(data + count, zero, 4);
+	count = count + 4;
+	// box type
+	memcpy(data + count, "esds", 4);
+	count = count + 4;
+	// box version
+	memcpy(data + count, zero_32, 4);
+	count = count + 4;
+	
+
+
+
+/*
+	static ngx_int_t
+	ngx_rtmp_mp4_put_descr(ngx_buf_t *b, int tag, size_t size)
+	{
+	    ngx_rtmp_mp4_field_8(b, (uint8_t) tag);
+	    ngx_rtmp_mp4_field_8(b, size & 0x7F);
+
+	    return NGX_OK;
+	}
+*/
+
+
+
+
 }
 
 uint32_t write_stts(byte *data, uint32_t media_type, i2ctx *context) {
