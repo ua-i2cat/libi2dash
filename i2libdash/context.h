@@ -11,6 +11,7 @@ typedef unsigned char byte;
 //CONTEXT
 typedef struct {
 	byte			*pps_sps_data;
+	uint32_t 		pps_sps_data_length;
 	uint16_t 		width;
 	uint16_t 		height;
 	uint32_t 		frame_rate;
@@ -23,7 +24,7 @@ typedef struct {
 
 typedef struct {
 	byte 			*aac_data;
-	uint8_t 		aac_data_length;
+	uint32_t 		aac_data_length;
 	uint16_t 		channels;
 	uint16_t 		sample_rate;
 	uint16_t 		sample_size;

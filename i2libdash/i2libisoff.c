@@ -100,22 +100,50 @@ uint32_t initVideoGenerator(byte *source_data, uint32_t size_source_data, byte *
 	count = 0;
 	context->ctxvideo->pps_sps_data = (byte*) malloc(size_source_data);
 	memcpy(context->ctxvideo->pps_sps_data, source_data, size_source_data);
+	context->ctxvideo->pps_sps_data_length = size_source_data;
 	size_ftyp = write_ftyp(destintation_data, VIDEO_TYPE, context);
+
 	if (size_ftyp < 8)
 		return I2ERROR;
+
 	count = count + size_ftyp;
 	size_moov = write_moov(destintation_data + count, VIDEO_TYPE, context);
+
 	if (size_moov < 8)
 		return I2ERROR;
+
 	count = count + size_moov;
 
 	return count;
 }
 
 uint32_t initAudioGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, i2ctx *context) {
+	uint32_t count, size_ftyp, size_moov;
+	
+	count = 0;
+	context->ctxaudio->aac_data = (byte*) malloc(size_source_data);
+	memcpy(context->ctxaudio->aac_data, source_data, size_source_data);
+	context->ctxaudio->aac_data_length = size_source_data;
+	size_ftyp = write_ftyp(destintation_data, AUDIO_TYPE, context);
+	
+	if (size_ftyp < 8)
+		return I2ERROR;
+
+	count = count + size_ftyp;
+	size_moov = write_moov(destintation_data + count, AUDIO_TYPE, context);
+
+	if (size_moov < 8)
+		return I2ERROR;
+
+	count = count + size_moov;
+
+	return count;
 }
 
-uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, uint32_t media_type, i2ctx *context){}
+uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, uint32_t media_type, i2ctx *context) {
+
+
+}
 
 uint32_t write_matrix(byte *data, uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t tx, uint32_t ty);
 
