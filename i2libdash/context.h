@@ -10,7 +10,7 @@ typedef unsigned char byte;
 
 //CONTEXT
 typedef struct {
-	u_char 			*avc_header;
+	byte			*pps_sps_data;
 	uint16_t 		width;
 	uint16_t 		height;
 	uint32_t 		frame_rate;
@@ -22,8 +22,8 @@ typedef struct {
 } i2ctx_video; //TODO
 
 typedef struct {
-	byte 			*aac_header;
-	uint8_t 		aac_header_length;
+	byte 			*aac_data;
+	uint8_t 		aac_data_length;
 	uint16_t 		channels;
 	uint16_t 		sample_rate;
 	uint16_t 		sample_size;
