@@ -39,15 +39,16 @@ typedef struct {
 } i2ctx; //TODO
 
 typedef struct {
-    uint32_t        size;
-    uint32_t        duration_ms;
-    uint32_t        delay;
+    uint32_t        size; // sample_size
+    uint32_t        duration_ms; // sample_duration
+    uint32_t        delay; // sample_delay
     uint32_t        timestamp;
-    unsigned        key:1;
+    unsigned        key:1; // sample_key_frame
     uint32_t		index;
     uint32_t 		decode_time_ms;
     uint32_t		mdat_size;
     uint32_t		moof_pos;
+    uint32_t		sample_count; // number of samples per segment
 } i2ctx_sample;
 
  /* assume config fits one chunk (highly probable) */

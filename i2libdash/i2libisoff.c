@@ -1221,10 +1221,92 @@ uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
-	uint32_t count, zero, num_samples;
+	uint32_t count, zero, nitems, flags, sample_size, sample_duration, sample_delay, sample_count, offset, moof_pos;
+	i2ctx_sample *samples = context->i2ctx_sample; //TODO revisar correcto
+	unsigned sample_key;
+	int i  = 0;
+
+	sample_size = context->i2ctx_sample.size;
+	sample_duration = context->i2ctx_sample.duration_ms;
+	sample_delay = context->i2ctx_sample.delay;
+	sample_key = context->i2ctx_sample.key:1;
+	sample_count = context->i2ctx_sample.sample_count;
+	moof_pos = context->i2ctx_sample.moof_pos;
 	count = 0;
 	zero = 0;
-	num_samples = 0;
+	nitems = 0;
+
+	// data offset present
+	flags = 0x01;
+	// size
+	memcpy(data + count, zero, 4);
+	count = count + 4;
+	// box type
+	memcpy(data + count, "trun", 4);
+	count = count + 4;
+	/*
+	* media_type = 0 none
+	* media_type = 1 video
+	* media_type = 2 audio
+	* media_type = 3 video_audio
+	*/
+	// sample duration present
+	if((media_type = 1 || media_type = 2) && sample_duration > 0) {
+		nitems++;
+		flags |= 0x000100;
+	}
+	// sample size present
+	if((media_type = 1 || media_type = 2) && sample_size > 0) {
+		nitems++;
+		flags |= 0x000200;
+	}
+	// sample composition time offsets present
+	if((media_type = 1) && sample_delay > 0) {
+		nitems++;
+		flags |= 0x000800;
+	}
+	// sample flags presents
+	if((media_type = 1) && sample_key == 1){
+		nitems++;
+		flags |= 0x000400;
+	}
+	// flags
+	memcpy(data + count, htonl(flags), 4);
+	count = count + 4;
+	// sample count
+	memcpy(data + count, htonl(sample_count), 4);
+	count = count + 4;
+	// offset
+	// TODO check
+	offset = (count - moof_pos) + 20 + (sample_count * nitems * 4) + 8;
+	memcpy(data + count, htonl(offset), 4);
+	count = count + 4;
+
+	for (i = 0; i < sample_count; i++, samples++)
+	{
+		// sample duration present
+		if((media_type = 1 || media_type = 2) && sample_duration > 0) {
+			memcpy(data + count, htonl(sample_duration), 4);
+			count = count + 4;
+		}
+		// sample size present
+		if((media_type = 1 || media_type = 2) && sample_size > 0) {
+			memcpy(data + count, htonl(sample_size), 4);
+			count = count + 4;
+		}
+		// sample flags presents
+		if((media_type = 1) && sample_key == 1){
+			memcpy(data + count, htonl(sample_key ? 0x00000000 : 0x00010000), 4);
+			count = count + 4;
+		}
+		// sample composition time offsets present
+		if((media_type = 1) && sample_delay > 0) {
+			memcpy(data + count, htonl(sample_delay), 4);
+			count = count + 4;
+		}
+	}
+
+	return count;
 }
 
 uint32_t write_mdat(byte *data, uint32_t media_type, i2ctx *context) {
