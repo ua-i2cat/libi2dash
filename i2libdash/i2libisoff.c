@@ -47,19 +47,19 @@ uint32_t write_stbl(byte *data, uint32_t media_type, i2ctx *context);
 uint32_t write_stsd(byte *data, uint32_t media_type, i2ctx *context);
 
 //only video
-uint32_t write_avc1(byte *data, i2ctx_video ctxVideo);
+uint32_t write_avc1(byte *data, i2ctx_video *ctxVideo);
 
 //only video
-uint32_t write_avc3(byte *data, i2ctx_video ctxVideo);
+uint32_t write_avc3(byte *data, i2ctx_video *ctxVideo);
 
 //only video
-uint32_t write_avcc(byte *data, i2ctx_video ctxVideo);
+uint32_t write_avcc(byte *data, i2ctx_video *ctxVideo);
 
 //only audio
-uint32_t write_mp4a(byte *data, i2ctx_audio ctxAudio);
+uint32_t write_mp4a(byte *data, i2ctx_audio *ctxAudio);
 
 //only audio
-uint32_t write_esds(byte *data, i2ctx_audio ctxAudio);
+uint32_t write_esds(byte *data, i2ctx_audio *ctxAudio);
 
 //stts for audio and video files is the same
 uint32_t write_stts(byte *data, uint32_t media_type, i2ctx *context);
@@ -92,7 +92,7 @@ uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context);
 
 uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context);
 
-uint32_t write_mdat(byte* source_data, byte *data, uint32_t media_type, i2ctx *context);
+uint32_t write_mdat(byte* source_data, uint32_t size_source_data, byte *data, uint32_t media_type, i2ctx *context);
 
 uint32_t initVideoGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, i2ctx *context) {
 	uint32_t count, size_ftyp, size_moov;
@@ -101,7 +101,7 @@ uint32_t initVideoGenerator(byte *source_data, uint32_t size_source_data, byte *
 	context->ctxvideo->pps_sps_data = (byte*) malloc(size_source_data);
 	memcpy(context->ctxvideo->pps_sps_data, source_data, size_source_data);
 	context->ctxvideo->pps_sps_data_length = size_source_data;
-	size_ftyp = write_ftyp(destintation_data, VIDEO_TYPE, context);
+	size_ftyp = write_ftyp(destintation_data + count, VIDEO_TYPE, context);
 
 	if (size_ftyp < 8)
 		return I2ERROR;
@@ -124,7 +124,7 @@ uint32_t initAudioGenerator(byte *source_data, uint32_t size_source_data, byte *
 	context->ctxaudio->aac_data = (byte*) malloc(size_source_data);
 	memcpy(context->ctxaudio->aac_data, source_data, size_source_data);
 	context->ctxaudio->aac_data_length = size_source_data;
-	size_ftyp = write_ftyp(destintation_data, AUDIO_TYPE, context);
+	size_ftyp = write_ftyp(destintation_data + count, AUDIO_TYPE, context);
 	
 	if (size_ftyp < 8)
 		return I2ERROR;
@@ -141,8 +141,37 @@ uint32_t initAudioGenerator(byte *source_data, uint32_t size_source_data, byte *
 }
 
 uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, size_styp, size_sidx, size_moof, size_mdat;
 
+	//TODO AUDIOVIDEO_TYPE
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
+	
+	count = 0;
+	size_styp = write_styp(destintation_data + count, media_type, context);
+	
+	if (size_ftyp < 8)
+		return I2ERROR;
 
+	count = count + size_styp;
+	size_sidx = write_sidx(destintation_data + count, media_type, context);
+	
+	if (size_sidx < 8)
+		return I2ERROR;
+
+	count = count + size_sidx;
+	size_moof = write_moof(destintation_data + count, media_type, context);
+
+	if (size_moof < 8)
+		return I2ERROR;
+
+	count = count + size_moof;
+	size_mdat = write_mdat(source_data , size_source_data, destintation_data + count, media_type, context);
+
+	if (size_mdat < 8)
+		return I2ERROR;
+
+	count = count + size_mdat;
 }
 
 uint32_t write_matrix(byte *data, uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t tx, uint32_t ty);
@@ -731,10 +760,12 @@ uint32_t write_vmhd(byte *data) {
 }
 
 uint32_t write_smhd(byte *data) {
-	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
-		return I2ERROR;
 	uint32_t count, size;
 	uint64_t zero;
+
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
+
 	// smhd size is always 16, apparently
 	size = 16;
 	count = 0;
@@ -753,9 +784,11 @@ uint32_t write_smhd(byte *data) {
 }
 
 uint32_t write_dinf(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, zero, dref;
+
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-	uint32_t count, zero, dref;
+
 	count = 0;
 	zero = 0;
 	memcpy(data + count, zero, 4);
@@ -772,9 +805,11 @@ uint32_t write_dinf(byte *data, uint32_t media_type, i2ctx *context) {
 
 //mdhd for audio and video files is the same
 uint32_t write_dref(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, zero, one, url;
+
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-	uint32_t count, zero, one, url;
+
 	count = 0;
 	zero = 0;
 	one = 1;
@@ -799,9 +834,11 @@ uint32_t write_dref(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_url(byte * data) {
+	uint32_t count, size, flags;
+
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-	uint32_t count, size, flags;
+
 	count = 0;
 	size = 0xc;
 	flags = 0x00000001;
@@ -819,9 +856,11 @@ uint32_t write_url(byte * data) {
 }
 
 uint32_t write_stbl(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, stsd, stts, stsc, stsz, stco;
+
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-	uint32_t count, stsd, stts, stsc, stsz, stco;
+
 	count = 0;
 	
 	// size
@@ -861,11 +900,13 @@ uint32_t write_stbl(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_stsd(byte *data, uint32_t media_type, i2ctx *context) {
-	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
-		return I2ERROR;
 	uint32_t count, zero, one, avc1, mp4a;
 	i2ctx_audio *ctxaudio;
 	i2ctx_video *ctxvideo;
+
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
+
 	count = 0;
 	zero = 0;
 	one = 1;
@@ -910,20 +951,22 @@ uint32_t write_stsd(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 
-uint32_t write_avc1(byte *data, i2ctx_video ctxVideo) {
-	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
-		return I2ERROR;
+uint32_t write_avc1(byte *data, i2ctx_video *ctxVideo) {
 	uint32_t count, zero_32, one, hv_resolution, avcc;
 	uint64_t zero_64;
 	uint16_t zero_16, width, height;
+
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
+
 	count = 0;
 	zero_16 = 0;
 	zero_32 = 0;
 	zero_64 = 0;
 	one = 1;
 	hv_resolution = 0x00480000;
-	width = ctxVideo.width;
-	height = ctxVideo.height;
+	width = ctxVideo->width;
+	height = ctxVideo->height;
 	// size
 	memcpy(data + count, zero_32, 4);
 	count = count + 4;
@@ -985,20 +1028,19 @@ uint32_t write_avc1(byte *data, i2ctx_video ctxVideo) {
 	return count;
 }
 
-uint32_t write_avc3(byte *data, i2ctx_video ctxVideo) {
+uint32_t write_avc3(byte *data, i2ctx_video *ctxVideo) {
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
 	// TODO
 }
 
-uint32_t write_avcc(byte *data, i2ctx_video ctxVideo) {
-	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
-		return I2ERROR;
+uint32_t write_avcc(byte *data, i2ctx_video *ctxVideo) {
 	uint32_t count, zero, size;
-	u_char avc_header;
+	
+	byte *avc_header;
 	count = 0;
 	zero = 0;
-	avc_header = i2ctx_video.avc_header;
+	avc_header = i2ctx_video->pps_sps_data;
 	// size
 	memcpy(data + count, zero, 4);
 	count = count + 4;
@@ -1006,19 +1048,18 @@ uint32_t write_avcc(byte *data, i2ctx_video ctxVideo) {
 	memcpy(data + count, "avcC", 4);
 	count = count + 4;
 	// avc header, includes version, profile, level, sps and pps
-	size = sizeof(avc_header);
-	memcpy(data + count, htonl(avc_header), size);
+	size = i2ctx_video->pps_sps_data_length;
+	memcpy(data + count, htonl(size), size);
 	count = count + size;
 
 	return count;
 }
 
 uint32_t write_mp4a(byte *data, i2ctx_audio ctxAudio) {
-	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
-		return I2ERROR;
 	uint32_t count, zero_32, esds;
 	uint16_t zero_16, audio_channels, sample_size, sample_rate;
 	uint64_t zero_64;
+
 	count = 0;
 	zero_16 = 0;
 	zero_32 = 0;
@@ -1065,9 +1106,8 @@ uint32_t write_esds(byte *data, i2ctx_audio ctxAudio) {
 	uint32_t count, zero_32;
 	uint16_t one, zero_16;
 	uint8_t zero_8;
-	u_char *descriptor;
-	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
-		return I2ERROR;
+	byte *descriptor;
+
 	count = 0;
 	zero_32 = 0;
 	zero_16 = 0;
@@ -1103,9 +1143,11 @@ uint32_t write_esds(byte *data, i2ctx_audio ctxAudio) {
 }
 
 uint32_t write_stts(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, zero;
+
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-	uint32_t count, zero;
+
 	count = 0;
 	zero = 0;
 	// size
@@ -1125,9 +1167,11 @@ uint32_t write_stts(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_stsc(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, zero;
+
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-	uint32_t count, zero;
+
 	count = 0;
 	zero = 0;
 	// size
@@ -1147,9 +1191,11 @@ uint32_t write_stsc(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_stsz(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, zero;
+
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-	uint32_t count, zero;
+
 	count = 0;
 	zero = 0;
 	// size
@@ -1172,9 +1218,11 @@ uint32_t write_stsz(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_stco(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, zero;
+
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-	uint32_t count, zero;
+
 	count = 0;
 	zero = 0;
 	// size
@@ -1194,9 +1242,11 @@ uint32_t write_stco(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_styp(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, zero;
+
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-	uint32_t count, zero;
+
 	count = 0;
 	zero = 0;
 	// size
@@ -1220,11 +1270,13 @@ uint32_t write_styp(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
-	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
-		return I2ERROR;
 	uint32_t count, zero_32, duration_ms, decode_time_ms, one_32, reference_size, subseg_duration_ms;
 	uint8_t zero_8;
 	uint16_t zero_16, one_16;
+
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
+
 	count = 0;
 	zero_8 = 0;
 	zero_16 = 0;
@@ -1281,10 +1333,12 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
-	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
-		return I2ERROR;
 	uint32_t count, zero;
 	i2ctx_sample *samples; 
+
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
+
 	count = 0;
 	zero = 0;
 	
@@ -1302,7 +1356,7 @@ uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
 	// box type
 	memcpy(data + count, "moof", 4);
 	count = count + 4;
-	samples.moof_pos = count;
+	samples->moof_pos = count;
 
 	// write mfhd
 	mfhd = write_mfhd(data + count, media_type, context);
@@ -1319,9 +1373,11 @@ uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_mfhd(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, zero, seqnum;
+
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-	uint32_t count, zero, seqnum;
+
 	count = 0;
 	zero = 0;
 	seqnum = context->ctxsample.index;
@@ -1342,9 +1398,11 @@ uint32_t write_mfhd(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t zero, count, tfhd, tfdt, trun;
+
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-	uint32_t zero, count, tfhd, tfdt, trun;
+
 	count = 0;
 	zero = 0;
 	// size
@@ -1373,9 +1431,11 @@ uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_tfhd(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, size, zero, one, flags;
+
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-	uint32_t count, size, zero, one, flags;
+
 	count = 0;
 	zero = 0;
 	one = 1;
@@ -1397,9 +1457,11 @@ uint32_t write_tfhd(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, zero, decode_time_ms;
+
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-	uint32_t count, zero, decode_time_ms;
+
 	count = 0;
 	zero = 0;
 	decode_time_ms = context->i2ctx_sample.decode_time_ms;
@@ -1420,14 +1482,16 @@ uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
-	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
-		return I2ERROR;
 	uint32_t count, zero, nitems, flags, sample_size, sample_duration;
 	uint32_t sample_delay, sample_num, offset, moof_pos;
 	
 	i2ctx_sample *samples;
 	unsigned sample_key;
 	int i  = 0;
+
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
+
 	count = 0;
 	zero = 0;
 	nitems = 0;
@@ -1442,9 +1506,9 @@ uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
 		return I2ERROR;
 	}
 
-	flags = samples.box_flags;
-	sample_num = samples.mdat_length;
-	moof_pos = samples.moof_pos;
+	flags = samples->box_flags;
+	sample_num = samples->mdat_length;
+	moof_pos = samples->moof_pos;
 
 	// size
 	memcpy(data + count, zero, 4);
@@ -1462,23 +1526,23 @@ uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
 	// offset
 	memcpy(data + count, htonl(offset), 4);
 	count = count + 4;
-	samples.moof_pos = 0;
+	samples->moof_pos = 0;
 
 	for (i = 0; i < sample_count; i++)
 	{
 		// sample duration
-		memcpy(data + count, htonl(samples.mdat[i].duration_ms), 4);
+		memcpy(data + count, htonl(samples->mdat[i].duration_ms), 4);
 		count = count + 4;
 		// sample size
-		memcpy(data + count, htonl(samples.mdat[i].size), 4);
+		memcpy(data + count, htonl(samples->mdat[i].size), 4);
 		count = count + 4;
 		// video exclusive
 		if(media_type == VIDEO_TYPE) {
 			// sample flags
-			memcpy(data + count, htonl(samples.mdat[i].key ? 0x00000000 : 0x00010000), 4);
+			memcpy(data + count, htonl(samples->mdat[i].key ? 0x00000000 : 0x00010000), 4);
 			count = count + 4;
 			// sample composition time offsets
-			memcpy(data + count, htonl(samples.mdat[i].delay), 4);
+			memcpy(data + count, htonl(samples->mdat[i].delay), 4);
 			count = count + 4;
 		}
 	}
@@ -1486,7 +1550,7 @@ uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
 	return count;
 }
 
-uint32_t write_mdat(byte* source_data, byte *data, uint32_t media_type, i2ctx *context) {
+uint32_t write_mdat(byte* source_data, uint32_t size_source_data, byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, mdat_size;
 	i2ctx_sample *samples;
 
@@ -1494,20 +1558,13 @@ uint32_t write_mdat(byte* source_data, byte *data, uint32_t media_type, i2ctx *c
 		return I2ERROR;
 
 	count = 0;
-	if(media_type == VIDEO_TYPE)
-		samples = context->ctxvideo->ctxsample;
-	else if (media_type == AUDIO_TYPE)
-		samples = context->ctxaudio->ctxsample;
-	else if (media_type == AUDIOVIDEO_TYPE)
-		return I2ERROR;
-
-	mdat_size = samples->mdat_size + 8;
+	mdat_size = size_source_data + 8;
 	memcpy(data + count, htonl(mdat_size), 4);
 	count = count + 4;
 	memcpy(data + count, "mdat", 4);
 	count = count + 4;
-	memcpy(data + count, source_data, samples->mdat_size);
-	count = count + samples->mdat_size;
+	memcpy(data + count, source_data, size_source_data);
+	count = count + size_source_data;
 
 	return count;
 }

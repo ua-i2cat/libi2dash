@@ -46,7 +46,6 @@ typedef struct {
 	uint32_t 		box_flags;
 	mdat_sample 	mdat[];
 	uint32_t 		mdat_length;
-    uint32_t		mdat_size;
     uint32_t		moof_pos;
 } i2ctx_sample;
 
