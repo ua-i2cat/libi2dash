@@ -105,6 +105,9 @@ uint32_t write_matrix(byte *data, uint32_t a, uint32_t b, uint32_t c, uint32_t d
 
 uint32_t write_ftyp(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, size, hton_size, version, hton_version, zero;
+	
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 
 	count = 4;
 	version = 1;
@@ -140,6 +143,10 @@ uint32_t write_ftyp(byte *data, uint32_t media_type, i2ctx *context) {
 
 uint32_t write_moov(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, size, size_mvhd, size_mvex, size_trak, hton_size;
+
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
+
 	count = 4;
 	
 	//Box type
@@ -147,10 +154,16 @@ uint32_t write_moov(byte *data, uint32_t media_type, i2ctx *context) {
 	count = count + 4;
 
     size_mvhd = write_mvhd(data + count, media_type, context);
+	if (size_mvhd < 8)
+		return I2ERROR;
 	count = count + size_mvhd;
 	size_mvex = write_mvex(data + count, media_type, context);
+	if (size_mvex < 8)
+		return I2ERROR;
 	count = count + size_mvex;
 	size_trak = write_trak(data + count, media_type, context);
+	if (size_trak < 8)
+		return I2ERROR;
 	count = count + size_trak;
 
 	//Box size
@@ -163,6 +176,9 @@ uint32_t write_moov(byte *data, uint32_t media_type, i2ctx *context) {
 uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, size, hton_size, size_matrix, flag32, hton_flag32;
 	uint16_t flag16, hton_flag16;
+
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 
 	count = 4;	
 	//Box type
@@ -248,13 +264,18 @@ uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 
 uint32_t write_mvex(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, size, hton_size, size_trex;
-	
+
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
+
 	count = 4;
 	//Box type
 	memcpy(data + count, "mvex", 4);
 	count = count + 4;
 
 	size_trex = write_trex(data + count, media_type, context);
+	if (size_trex < 8)
+		return I2ERROR;
 	count = count + size_trex;
 
 	//Box size
@@ -267,6 +288,9 @@ uint32_t write_mvex(byte *data, uint32_t media_type, i2ctx *context) {
 uint32_t write_trex(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, size, hton_size, flag32, hton_flag32;
 	
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
+
 	count = 0;
 	//Size is always 32, apparently	
 	//Box size
@@ -317,14 +341,21 @@ uint32_t write_trex(byte *data, uint32_t media_type, i2ctx *context) {
 uint32_t write_trak(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, size, hton_size, size_trex, size_mdia;
 
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
+
 	count = 4;
 	//Box type
 	memcpy(data + count, "trak", 4);
 	count = count + 4;
 
 	size_tkhd = write_tkhd(data + count, media_type, context);
+	if (size_tkhd < 8)
+		return I2ERROR;
 	count = count + size_tkhd;
 	size_mdia = write_mdia(data + count, media_type, context);
+	if (size_mdia < 8)
+		return I2ERROR;
 	count = count + size_tkhd;
 
 	//Box size
@@ -339,6 +370,9 @@ uint32_t write_tkhd(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, size, hton_size, size_matrix, flag32, hton_flag32;
 	uint16_t flag16, hton_flag16;
 	uint8_t flag8;
+
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 
 	count = 4;	
 	//Box type
@@ -438,17 +472,27 @@ uint32_t write_tkhd(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_mdia(byte *data, uint32_t media_type, i2ctx *context) {
-	uint32_t count, size, hton_size, size_trex, size_;
+	uint32_t count, size, hton_size, size_mdhd, size_hdlr, size_minf;
+
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
+
 	count = 4;
 	//Box type
 	memcpy(data + count, "mdia", 4);
 	count = count + 4;
 
 	size_mdhd = write_mdhd(data + count, media_type, context);
+	if (size_mdhd < 8)
+		return I2ERROR;
 	count = count + size_mdhd;
 	size_hdlr = write_hdlr(data + count, media_type, context);
+	if (size_hdlr < 8)
+		return I2ERROR;
 	count = count + size_hdlr;
 	size_minf = write_minf(data + count, media_type, context);
+	if (size_minf < 8)
+		return I2ERROR;
 	count = count + size_minf;
 
 	//Box size
@@ -462,6 +506,9 @@ uint32_t write_mdia(byte *data, uint32_t media_type, i2ctx *context) {
 uint32_t write_mdhd(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, size, hton_size, flag32, hton_flag32;
 	uint16_t flag16, hton_flag16;
+
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 
 	count = 4;
 	//Box type
@@ -515,6 +562,9 @@ uint32_t write_mdhd(byte *data, uint32_t media_type, i2ctx *context) {
 uint32_t write_hdlr(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, size, hton_size, flag32, hton_flag32;
 
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
+
 	count = 4;
 	//Box type
 	memcpy(data + count, "hdlr", 4);
@@ -566,6 +616,9 @@ uint32_t write_hdlr(byte *data, uint32_t media_type, i2ctx *context) {
 uint32_t write_minf(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, size, hton_size, size_vmhd, size_smhd, size_stbl, flag32, hton_flag32;
 
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
+
 	count = 4;
 	//Box type
 	memcpy(data + count, "minf", 4);
@@ -573,15 +626,23 @@ uint32_t write_minf(byte *data, uint32_t media_type, i2ctx *context) {
 
 	if (media_type == VIDEO_TYPE) {
 		size_vmhd = write_vmhd(data + count, media_type, context);
+		if (size_vmhd < 8)
+			return I2ERROR;
 		count = count + size_vmhd;
 	} else {
 		size_smhd = write_smhd(data + count, media_type, context);
+		if (size_smhd < 8)
+			return I2ERROR;
 		count = count + size_smhd;
 	}
 	
 	size_dinf = write_dinf(data + count, media_type, context);
+	if (size_dinf < 8)
+		return I2ERROR;
 	count = count + size_dinf;
 	size_stbl = write_stbl(data + count, media_type, context);
+	if (size_stbl < 8)
+		return I2ERROR;
 	count = count + size_stbl;
 
 	//Box size
@@ -592,8 +653,11 @@ uint32_t write_minf(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_vmhd(byte *data) {
-
 	uint32_t count, size, hton_size, flag32, hton_flag32, zero;
+
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
+
 	//Size is always 20, apparently
 	size = 20;
 	count = 0;
