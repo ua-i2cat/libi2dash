@@ -687,6 +687,8 @@ uint32_t write_vmhd(byte *data) {
 }
 
 uint32_t write_smhd(byte *data) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, size;
 	uint64_t zero;
 	// smhd size is always 16, apparently
@@ -707,6 +709,8 @@ uint32_t write_smhd(byte *data) {
 }
 
 uint32_t write_dinf(byte *data, uint32_t media_type, i2ctx *context) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, zero, dref;
 	count = 0;
 	zero = 0;
@@ -715,7 +719,7 @@ uint32_t write_dinf(byte *data, uint32_t media_type, i2ctx *context) {
 	memcpy(data + count, "dinf", 4);
 	count = count + 4;
 	dref = write_dref(data + count, media_type, context);
-	if !(dref > 0)
+	if (dref < 8)
 		return I2ERROR
 	count = count + dref;
 
@@ -724,7 +728,9 @@ uint32_t write_dinf(byte *data, uint32_t media_type, i2ctx *context) {
 
 //mdhd for audio and video files is the same
 uint32_t write_dref(byte *data, uint32_t media_type, i2ctx *context) {
-	uint32_t count, zero, one, url_size;
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
+	uint32_t count, zero, one, url;
 	count = 0;
 	zero = 0;
 	one = 1;
@@ -740,11 +746,17 @@ uint32_t write_dref(byte *data, uint32_t media_type, i2ctx *context) {
 	// entries
 	memcpy(data + count, one, 4);
 	count = count + 4;
+	url = write_url(data + count);
+	if(url < 8)
+		return I2ERROR;
+	count = count + url;
 
 	return count;
 }
 
 uint32_t write_url(byte * data) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, size, flags;
 	count = 0;
 	size = 0xc;
@@ -763,6 +775,8 @@ uint32_t write_url(byte * data) {
 }
 
 uint32_t write_stbl(byte *data, uint32_t media_type, i2ctx *context) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, stsd, stts, stsc, stsz, stco;
 	count = 0;
 	
@@ -775,27 +789,27 @@ uint32_t write_stbl(byte *data, uint32_t media_type, i2ctx *context) {
 
 	// write subBoxes and update count value
 	stsd = write_stsd(data + count, media_type, context);
-	if !(stsd > 0 && stsd == I2ERROR)
+	if (stsd < 8)
 		return I2ERROR
 	count = count + stsd;
 	
 	stts = write_stts(data + count, media_type, context);	
-	if !(stts > 0 && stts == I2ERROR)
+	if (stts < 8)
 		return I2ERROR
 	count = count + stts;
 
 	stsc = write_stsc(data + count, media_type, context);
-	if !(stsc > 0 && stsc == I2ERROR)
+	if (stsc < 8)
 		return I2ERROR
 	count = count + stsc;
 
 	stsz = write_stsz(data + count, media_type, context);
-	if !(stsz > 0 && stsz == I2ERROR)
+	if (stsz < 8)
 		return I2ERROR
 	count = count + stsz;
 	
 	stco = write_stco(data + count, media_type, context);
-	if !(stco > 0 && stco == I2ERROR)
+	if (stco < 8)
 		return I2ERROR
 	count = count + stco;
 	
@@ -803,6 +817,8 @@ uint32_t write_stbl(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_stsd(byte *data, uint32_t media_type, i2ctx *context) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, zero, one, avc1, mp4a;
 	i2ctx_audio *ctxaudio;
 	i2ctx_video *ctxvideo;
@@ -833,18 +849,15 @@ uint32_t write_stsd(byte *data, uint32_t media_type, i2ctx *context) {
 	if(media_type == VIDEO_TYPE) {
 		// write avc1
 		avc1 = write_avc1(data + count, ctxvideo);
-		if !(avc1 > 0)
+		if (avc1 < 8))
 			return I2ERROR
 		count = count + avc1;
 	} else if(media_type == AUDIO_TYPE) {
 		// write mp4a
 		mp4a = write_mp4a(data + count, ctxaudio);
-		if !(mp4a > 0)
+		if (mp4a < 8)
 			return I2ERROR
 		count = count + mp4a;
-	} else if(media_type == AUDIOVIDEO_TYPE) {
-		// TODO
-		return I2ERROR;
 	} else {
 		return I2ERROR;
 	}
@@ -854,6 +867,8 @@ uint32_t write_stsd(byte *data, uint32_t media_type, i2ctx *context) {
 
 
 uint32_t write_avc1(byte *data, i2ctx_video ctxVideo) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, zero_32, one, hv_resolution, avcc;
 	uint64_t zero_64;
 	uint16_t zero_16, width, height;
@@ -919,7 +934,7 @@ uint32_t write_avc1(byte *data, i2ctx_video ctxVideo) {
 	count = count + 2;
 	// write avcC
 	avcc = write_avcc(data + count, ctxVideo);
-	if !(avcc > 0)
+	if (avcc < 8)
 		return I2ERROR
 	count = count + avcc;
 
@@ -927,10 +942,14 @@ uint32_t write_avc1(byte *data, i2ctx_video ctxVideo) {
 }
 
 uint32_t write_avc3(byte *data, i2ctx_video ctxVideo) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	// TODO
 }
 
 uint32_t write_avcc(byte *data, i2ctx_video ctxVideo) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, zero, size;
 	u_char avc_header;
 	count = 0;
@@ -951,6 +970,8 @@ uint32_t write_avcc(byte *data, i2ctx_video ctxVideo) {
 }
 
 uint32_t write_mp4a(byte *data, i2ctx_audio ctxAudio) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, zero_32, esds;
 	uint16_t zero_16, audio_channels, sample_size, sample_rate;
 	uint64_t zero_64;
@@ -989,7 +1010,7 @@ uint32_t write_mp4a(byte *data, i2ctx_audio ctxAudio) {
 	count = count + 2;
 	// write esds
 	esds = write_esds(data + count, ctxAudio);
-	if !(esds > 0)
+	if (esds < 8)
 		return I2ERROR
 	count = count + esds;
 
@@ -997,10 +1018,14 @@ uint32_t write_mp4a(byte *data, i2ctx_audio ctxAudio) {
 }
 
 uint32_t write_esds(byte *data, i2ctx_audio ctxAudio) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	// TODO
 }
 
 uint32_t write_stts(byte *data, uint32_t media_type, i2ctx *context) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, zero;
 	count = 0;
 	zero = 0;
@@ -1021,6 +1046,8 @@ uint32_t write_stts(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_stsc(byte *data, uint32_t media_type, i2ctx *context) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, zero;
 	count = 0;
 	zero = 0;
@@ -1041,6 +1068,8 @@ uint32_t write_stsc(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_stsz(byte *data, uint32_t media_type, i2ctx *context) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, zero;
 	count = 0;
 	zero = 0;
@@ -1064,6 +1093,8 @@ uint32_t write_stsz(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_stco(byte *data, uint32_t media_type, i2ctx *context) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, zero;
 	count = 0;
 	zero = 0;
@@ -1084,6 +1115,8 @@ uint32_t write_stco(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_styp(byte *data, uint32_t media_type, i2ctx *context) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, zero;
 	count = 0;
 	zero = 0;
@@ -1108,6 +1141,8 @@ uint32_t write_styp(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, zero_32, duration_ms, decode_time_ms, one_32, reference_size, subseg_duration_ms;
 	uint8_t zero_8;
 	uint16_t zero_16, one_16;
@@ -1167,6 +1202,8 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, zero;
 	i2ctx_sample *samples; 
 	count = 0;
@@ -1176,9 +1213,6 @@ uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
 		samples = context->ctxvideo->ctxsample;
 	} else if (media_type == AUDIO_TYPE) {
 		samples = context->ctxaudio->ctxsample;
-	} else if (media_type == AUDIOVIDEO_TYPE) {
-		// TODO
-		return I2ERROR;
 	} else {
 		return I2ERROR;
 	}
@@ -1193,20 +1227,21 @@ uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
 
 	// write mfhd
 	mfhd = write_mfhd(data + count, media_type, context);
-	if !(mfhd > 0)
+	if (mfhd < 8)
 		return I2ERROR
 	count = count + mfhd;
 	// write traf
 	traf = write_traf(data + count, media_type, context);
-	if !(traf > 0)
+	if (traf < 8)
 		return I2ERROR
 	count = count + traf;
 
 	return count;
 }
 
-// Esta función precisa ctxsample. TODO check que respeta desde arriba
 uint32_t write_mfhd(byte *data, uint32_t media_type, i2ctx *context) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, zero, seqnum;
 	count = 0;
 	zero = 0;
@@ -1228,6 +1263,8 @@ uint32_t write_mfhd(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t zero, count, tfhd, tfdt, trun;
 	count = 0;
 	zero = 0;
@@ -1239,17 +1276,17 @@ uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context) {
 	count = count + 4;
 	// write tfhd
 	tfhd = write_tfhd(data + count, media_type, context);
-	if !(tfhd > 0)
+	if (tfhd < 8)
 		return I2ERROR
 	count = count + tfhd;
 	// write tfdt
 	tfdt = write_tfdt(data + count, media_type, context);
-	if !(tfdt > 0)
+	if (tfdt < 8)
 		return I2ERROR
 	count = count + tfdt;
 	// write trun
 	trun = write_trun(data + count, media_type, context);
-	if !(trun > 0 && trun == I2ERROR)
+	if (trun < 8)
 		return I2ERROR
 	count = count + trun;
 
@@ -1257,6 +1294,8 @@ uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_tfhd(byte *data, uint32_t media_type, i2ctx *context) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, size, zero, one, flags;
 	count = 0;
 	zero = 0;
@@ -1279,6 +1318,8 @@ uint32_t write_tfhd(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, zero, decode_time_ms;
 	count = 0;
 	zero = 0;
@@ -1300,6 +1341,8 @@ uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, zero, nitems, flags, sample_size, sample_duration;
 	uint32_t sample_delay, sample_num, offset, moof_pos;
 	
@@ -1316,9 +1359,6 @@ uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
 	} else if (media_type == AUDIO_TYPE) {
 		samples = context->ctxaudio->ctxsample;
 		nitems = 2;
-	} else if (media_type == AUDIOVIDEO_TYPE) {
-		// TODO
-		return I2ERROR;
 	} else {
 		return I2ERROR;
 	}
@@ -1368,6 +1408,8 @@ uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_mdat(byte *data, uint32_t media_type, i2ctx *context) {
+	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		return I2ERROR;
 	uint32_t count, mdat_size;
 	count = 0;
 	mdat_size = context->i2ctx_sample.mdat_size;
