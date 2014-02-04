@@ -92,7 +92,7 @@ uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context);
 
 uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context);
 
-uint32_t write_mdat(byte *data, uint32_t media_type, i2ctx *context);
+uint32_t write_mdat(byte* source_data, byte *data, uint32_t media_type, i2ctx *context);
 
 i2Err initVideoGenerator(byte *sps, byte *pps, i2ctx *context){}
 
@@ -1407,16 +1407,28 @@ uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
 	return count;
 }
 
-uint32_t write_mdat(byte *data, uint32_t media_type, i2ctx *context) {
+uint32_t write_mdat(byte* source_data, byte *data, uint32_t media_type, i2ctx *context) {
+	uint32_t count, mdat_size;
+	i2ctx_sample *samples;
+
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-	uint32_t count, mdat_size;
+
 	count = 0;
-	mdat_size = context->i2ctx_sample.mdat_size;
+	if(media_type == VIDEO_TYPE)
+		samples = context->ctxvideo->ctxsample;
+	else if (media_type == AUDIO_TYPE)
+		samples = context->ctxaudio->ctxsample;
+	else if (media_type == AUDIOVIDEO_TYPE)
+		return I2ERROR;
+
+	mdat_size = samples->mdat_size + 8;
 	memcpy(data + count, htonl(mdat_size), 4);
 	count = count + 4;
 	memcpy(data + count, "mdat", 4);
 	count = count + 4;
+	memcpy(data + count, source_data, samples->mdat_size);
+	count = count + samples->mdat_size;
 
 	return count;
 }

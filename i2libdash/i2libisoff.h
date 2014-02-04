@@ -13,6 +13,6 @@ i2Err initVideoGenerator(byte *sps, byte *pps, i2ctx *context);
 i2Err initAudioGenerator(byte *aac_data, i2ctx *context);
 //TODO mirar que es lo que nos importa de aac
 
-i2Err segmentGenerator(byte *data, uint32_t video_audio, i2ctx *context);
+i2Err segmentGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, uint32_t video_audio, i2ctx *context);
 
 #endif
