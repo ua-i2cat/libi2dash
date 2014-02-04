@@ -711,27 +711,27 @@ uint32_t write_stbl(byte *data, uint32_t media_type, i2ctx *context) {
 
 	// write subBoxes and update count value
 	stsd = write_stsd(data + count, media_type, context);
-	if !(stsd > 0 && stsd != I2ERROR)
+	if !(stsd > 0 && stsd == I2ERROR)
 		return I2ERROR
 	count = count + stsd;
 	
 	stts = write_stts(data + count, media_type, context);	
-	if !(stts > 0 && stts != I2ERROR)
+	if !(stts > 0 && stts == I2ERROR)
 		return I2ERROR
 	count = count + stts;
 
 	stsc = write_stsc(data + count, media_type, context);
-	if !(stsc > 0 && stsc != I2ERROR)
+	if !(stsc > 0 && stsc == I2ERROR)
 		return I2ERROR
 	count = count + stsc;
 
 	stsz = write_stsz(data + count, media_type, context);
-	if !(stsz > 0 && stsz != I2ERROR)
+	if !(stsz > 0 && stsz == I2ERROR)
 		return I2ERROR
 	count = count + stsz;
 	
 	stco = write_stco(data + count, media_type, context);
-	if !(stco > 0 && stco != I2ERROR)
+	if !(stco > 0 && stco == I2ERROR)
 		return I2ERROR
 	count = count + stco;
 	
@@ -766,19 +766,19 @@ uint32_t write_stsd(byte *data, uint32_t media_type, i2ctx *context) {
 	* media_type = 3 video_audio
 	*/
 	// write avcX or AAC boxes
-	if(media_type == 1) {
+	if(media_type == VIDEO_TYPE) {
 		// write avc1
 		avc1 = write_avc1(data + count, ctxvideo);
 		if !(avc1 > 0)
 			return I2ERROR
 		count = count + avc1;
-	} else if(media_type == 2) {
+	} else if(media_type == AUDIO_TYPE) {
 		// write mp4a
 		mp4a = write_mp4a(data + count, ctxaudio);
 		if !(mp4a > 0)
 			return I2ERROR
 		count = count + mp4a;
-	} else if(media_type == 3) {
+	} else if(media_type == AUDIOVIDEO_TYPE) {
 		// TODO
 		return I2ERROR;
 	} else {
@@ -1104,14 +1104,29 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 
 uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, zero;
+	i2ctx_sample *samples; 
 	count = 0;
 	zero = 0;
+	
+	if(media_type == VIDEO_TYPE) {
+		samples = context->ctxvideo->ctxsample;
+	} else if (media_type == AUDIO_TYPE) {
+		samples = context->ctxaudio->ctxsample;
+	} else if (media_type == AUDIOVIDEO_TYPE) {
+		// TODO
+		return I2ERROR;
+	} else {
+		return I2ERROR;
+	}
+
 	// size
 	memcpy(data + count, zero, 4);
 	count = count + 4;
 	// box type
 	memcpy(data + count, "moof", 4);
 	count = count + 4;
+	samples.moof_pos = count;
+
 	// write mfhd
 	mfhd = write_mfhd(data + count, media_type, context);
 	if !(mfhd > 0)
@@ -1170,7 +1185,7 @@ uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context) {
 	count = count + tfdt;
 	// write trun
 	trun = write_trun(data + count, media_type, context);
-	if !(trun > 0)
+	if !(trun > 0 && trun == I2ERROR)
 		return I2ERROR
 	count = count + trun;
 
@@ -1221,87 +1236,66 @@ uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
-	uint32_t count, zero, nitems, flags, sample_size, sample_duration, sample_delay, sample_count, offset, moof_pos;
-	i2ctx_sample *samples = context->i2ctx_sample; //TODO revisar correcto
+	uint32_t count, zero, nitems, flags, sample_size, sample_duration;
+	uint32_t sample_delay, sample_num, offset, moof_pos;
+	
+	i2ctx_sample *samples;
 	unsigned sample_key;
 	int i  = 0;
-
-	sample_size = context->i2ctx_sample.size;
-	sample_duration = context->i2ctx_sample.duration_ms;
-	sample_delay = context->i2ctx_sample.delay;
-	sample_key = context->i2ctx_sample.key:1;
-	sample_count = context->i2ctx_sample.sample_count;
-	moof_pos = context->i2ctx_sample.moof_pos;
 	count = 0;
 	zero = 0;
 	nitems = 0;
 
-	// data offset present
-	flags = 0x01;
+	if(media_type == VIDEO_TYPE) {
+		samples = context->ctxvideo->ctxsample;
+		nitems = 4;
+	} else if (media_type == AUDIO_TYPE) {
+		samples = context->ctxaudio->ctxsample;
+		nitems = 2;
+	} else if (media_type == AUDIOVIDEO_TYPE) {
+		// TODO
+		return I2ERROR;
+	} else {
+		return I2ERROR;
+	}
+
+	flags = samples.box_flags;
+	sample_num = samples.mdat_length;
+	moof_pos = samples.moof_pos;
+
 	// size
 	memcpy(data + count, zero, 4);
 	count = count + 4;
 	// box type
 	memcpy(data + count, "trun", 4);
 	count = count + 4;
-	/*
-	* media_type = 0 none
-	* media_type = 1 video
-	* media_type = 2 audio
-	* media_type = 3 video_audio
-	*/
-	// sample duration present
-	if((media_type = 1 || media_type = 2) && sample_duration > 0) {
-		nitems++;
-		flags |= 0x000100;
-	}
-	// sample size present
-	if((media_type = 1 || media_type = 2) && sample_size > 0) {
-		nitems++;
-		flags |= 0x000200;
-	}
-	// sample composition time offsets present
-	if((media_type = 1) && sample_delay > 0) {
-		nitems++;
-		flags |= 0x000800;
-	}
-	// sample flags presents
-	if((media_type = 1) && sample_key == 1){
-		nitems++;
-		flags |= 0x000400;
-	}
+	offset = (count - moof_pos) + 20 + (sample_num * nitems * 4) + 8;
 	// flags
 	memcpy(data + count, htonl(flags), 4);
 	count = count + 4;
 	// sample count
-	memcpy(data + count, htonl(sample_count), 4);
+	memcpy(data + count, htonl(sample_num), 4);
 	count = count + 4;
 	// offset
-	// TODO check
-	offset = (count - moof_pos) + 20 + (sample_count * nitems * 4) + 8;
 	memcpy(data + count, htonl(offset), 4);
 	count = count + 4;
+	samples.moof_pos = 0;
 
-	for (i = 0; i < sample_count; i++, samples++)
+	for (i = 0; i < sample_count; i++)
 	{
-		// sample duration present
-		if((media_type = 1 || media_type = 2) && sample_duration > 0) {
-			memcpy(data + count, htonl(sample_duration), 4);
+		// sample duration
+		memcpy(data + count, htonl(samples.mdat[i].duration_ms), 4);
+		count = count + 4;
+		// sample size
+		memcpy(data + count, htonl(samples.mdat[i].size), 4);
+		count = count + 4;
+		// video exclusive
+		if(media_type == VIDEO_TYPE) {
+			// sample flags
+			memcpy(data + count, htonl(samples.mdat[i].key ? 0x00000000 : 0x00010000), 4);
 			count = count + 4;
-		}
-		// sample size present
-		if((media_type = 1 || media_type = 2) && sample_size > 0) {
-			memcpy(data + count, htonl(sample_size), 4);
-			count = count + 4;
-		}
-		// sample flags presents
-		if((media_type = 1) && sample_key == 1){
-			memcpy(data + count, htonl(sample_key ? 0x00000000 : 0x00010000), 4);
-			count = count + 4;
-		}
-		// sample composition time offsets present
-		if((media_type = 1) && sample_delay > 0) {
-			memcpy(data + count, htonl(sample_delay), 4);
+			// sample composition time offsets
+			memcpy(data + count, htonl(samples.mdat[i].delay), 4);
 			count = count + 4;
 		}
 	}
