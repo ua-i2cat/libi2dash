@@ -1116,43 +1116,98 @@ uint32_t write_mp4a(byte *data, i2ctx_audio *ctxAudio) {
 }
 
 uint32_t write_esds(byte *data, i2ctx_audio *ctxAudio) {
-	uint32_t count, zero_32;
-	uint16_t one, zero_16;
-	uint8_t zero_8;
+	uint32_t count, zero_32, aac_data_length, max_bitrate, avg_bitrate, size;
+	uint16_t one_16, zero_16;
+	uint8_t zero_8, tag_esd, tag_dcd, flag_oti, flag_st, tag_dsid, tag_sld, size_sld, flag_sld;
+	byte *dsi, *aac_data;
+	size_t dsi_len, size_esd, size_dcd;
+
 	byte *descriptor;
 
-	count = 0;
+	count = 4;
 	zero_32 = 0;
 	zero_16 = 0;
 	zero_8 = 0;
-	one = 1;
-	//size
-	memcpy(data + count, zero, 4);
-	count = count + 4;
+	one_16 = 1;
+	audio_channels = ctxAudio->channels;
+	sample_size = ctxAudio->sample_size;
+	aac_data = ctxAudio->aac_data;
+	aac_data_length = ctxAudio->aac_data_length;
+	dsi = aac_data + 2; //TODO check
+	dsi_len = aac_data_length -2; // TODO check
+	tag_esd = 0x03;
+	size_esd = 23 + dsi_len;
+	tag_dcd = 0x04;
+	size_dcd = 15 + dsi_len;
+	flag_oti = 0x40;
+	flag_st = 0x15;
+	max_bitrate = 0x0001F151;
+	avg_bitrate = 0x0001F14D;
+	tag_dsid = 0x05;
+	tag_sld = 0x06;
+	size_sld = 1;
+	flag_sld = 0x02;
+
 	// box type
 	memcpy(data + count, "esds", 4);
 	count = count + 4;
 	// box version
 	memcpy(data + count, zero_32, 4);
 	count = count + 4;
-	
+	// ES descriptor
+	memcpy(data + count, tag_esd, 1);
+	count = count + 1;
+	memcpy(data + count, size_esd & 0x7F);
+	count = count + 1;
+	// Es id
+	memcpy(data + count, htons(one_16), 2);
+	count = count + 2;
+	// flags
+	memcpy(data + count, zero_8, 1);
+	count = count + 1;
+	// decoder config descriptor
+	memcpy(data + count, tag_dcd, 1);
+	count = count + 1;
+	memcpy(data + count, size_dcd & 0x7F);
+	count = count + 1;
+	// objectTypeIndication: Audio ISO/IEC 14496-3 (AAC)
+	memcpy(data + count, flag_oti, 1);
+	count = count + 1;
+	// streamType: AudioStream
+	memcpy(data + count, flag_st, 1);
+	count = count + 1;
+	// bufferSizeDB
+	memcpy(data + count, zero_16, 2);
+	count = count + 2;
+	memcpy(data + count, zero_8, 1);
+	count = count + 1;
+	// maxBitrate
+	memcpy(data + count, htonl(max_bitrate), 4);
+	count = count + 4;
+	// avgBitrate
+	memcpy(data + count, htonl(avg_bitrate), 4);
+	count = count + 4;
+	// DecoderSpecificInfo Descriptor
+	memcpy(data + count, tag_dsid, 1);
+	count = count + 1;
+	memcpy(data + count, dsi_len & 0x7F);
+	count = count + 1;
+	memcpy(data + count, dsi, dsi_len);
+	count = count + dsi_len;
+	// SL Descriptor
+	memcpy(data + count, tag_sld, 1);
+	count = count + 1;
+	memcpy(data + count, size_sld & 0x7F);
+	count = count + 1;
+	memcpy(data + count, flag_sld, 1);
+	count = count + 1;
 
+	//Box size
+	size = count;
+	hton_size = htonl(size);
+	memcpy(data, hton_size, 4);
 
-
-/*
-	static ngx_int_t
-	ngx_rtmp_mp4_put_descr(ngx_buf_t *b, int tag, size_t size)
-	{
-	    ngx_rtmp_mp4_field_8(b, (uint8_t) tag);
-	    ngx_rtmp_mp4_field_8(b, size & 0x7F);
-
-	    return NGX_OK;
-	}
-*/
-
-
-
-
+	return count;
 }
 
 uint32_t write_stts(byte *data, uint32_t media_type, i2ctx *context) {
