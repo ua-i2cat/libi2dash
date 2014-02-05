@@ -1119,7 +1119,7 @@ uint32_t write_esds(byte *data, i2ctx_audio *ctxAudio) {
 	uint32_t count, zero_32, aac_data_length, max_bitrate, avg_bitrate, size;
 	uint16_t one_16, zero_16;
 	uint8_t zero_8, tag_esd, tag_dcd, flag_oti, flag_st, tag_dsid, tag_sld, size_sld, flag_sld;
-	byte *dsi, *aac_data;
+	byte *dsi, *aac_data, flag8;
 	size_t dsi_len, size_esd, size_dcd;
 
 	byte *descriptor;
@@ -1151,53 +1151,69 @@ uint32_t write_esds(byte *data, i2ctx_audio *ctxAudio) {
 	// box type
 	memcpy(data + count, "esds", 4);
 	count = count + 4;
+	
 	// box version
 	memcpy(data + count, zero_32, 4);
 	count = count + 4;
+
 	// ES descriptor
 	memcpy(data + count, tag_esd, 1);
 	count = count + 1;
-	memcpy(data + count, size_esd & 0x7F);
+	flag8 = size_esd & 0x7F;
+	memcpy(data + count, flag8, 1);
 	count = count + 1;
+
 	// Es id
 	memcpy(data + count, htons(one_16), 2);
 	count = count + 2;
+
 	// flags
 	memcpy(data + count, zero_8, 1);
 	count = count + 1;
+
 	// decoder config descriptor
 	memcpy(data + count, tag_dcd, 1);
 	count = count + 1;
-	memcpy(data + count, size_dcd & 0x7F);
+	flag8 = size_dcd & 0x7F;
+	memcpy(data + count, flag8, 1);
 	count = count + 1;
+
 	// objectTypeIndication: Audio ISO/IEC 14496-3 (AAC)
 	memcpy(data + count, flag_oti, 1);
 	count = count + 1;
+
 	// streamType: AudioStream
 	memcpy(data + count, flag_st, 1);
 	count = count + 1;
+
 	// bufferSizeDB
 	memcpy(data + count, zero_16, 2);
 	count = count + 2;
 	memcpy(data + count, zero_8, 1);
 	count = count + 1;
+
 	// maxBitrate
 	memcpy(data + count, htonl(max_bitrate), 4);
 	count = count + 4;
+
 	// avgBitrate
 	memcpy(data + count, htonl(avg_bitrate), 4);
 	count = count + 4;
+
 	// DecoderSpecificInfo Descriptor
 	memcpy(data + count, tag_dsid, 1);
 	count = count + 1;
-	memcpy(data + count, dsi_len & 0x7F);
+	flag8 = dsi_len & 0x7F;
+	memcpy(data + count, flag8, 1);
 	count = count + 1;
 	memcpy(data + count, dsi, dsi_len);
 	count = count + dsi_len;
+
 	// SL Descriptor
 	memcpy(data + count, tag_sld, 1);
 	count = count + 1;
-	memcpy(data + count, size_sld & 0x7F);
+	flag8 = size_sld & 0x7F;
+	memcpy(data + count, flag8, 1);
 	count = count + 1;
 	memcpy(data + count, flag_sld, 1);
 	count = count + 1;
