@@ -7,6 +7,27 @@ typedef unsigned char byte;
 #define AUDIO_TYPE 2
 #define AUDIOVIDEO_TYPE 3
 #define MAX_MDAT_SAMPLE 65536
+#define I2ERROR 1
+
+#include <netinet/in.h>
+
+typedef struct {
+    uint32_t        size; // sample_size
+    uint32_t        duration_ms; // sample_duration
+    uint32_t        delay; // sample_delay
+    uint32_t        timestamp;
+    unsigned        key:1; // sample_key_frame
+    uint32_t		index;
+    uint32_t 		decode_time_ms;
+
+} mdat_sample;
+
+typedef struct {
+	uint32_t 		box_flags;
+	mdat_sample 	mdat[MAX_MDAT_SAMPLE];
+	uint32_t 		mdat_length;
+    uint32_t		moof_pos;
+} i2ctx_sample;
 
 //CONTEXT
 typedef struct {
@@ -42,23 +63,8 @@ typedef struct {
 	uint32_t 		reference_size;
 } i2ctx; //TODO
 
-typedef struct {
-	uint32_t 		box_flags;
-	mdat_sample 	mdat[];
-	uint32_t 		mdat_length;
-    uint32_t		moof_pos;
-} i2ctx_sample;
 
-typedef struct {
-    uint32_t        size; // sample_size
-    uint32_t        duration_ms; // sample_duration
-    uint32_t        delay; // sample_delay
-    uint32_t        timestamp;
-    unsigned        key:1; // sample_key_frame
-    uint32_t		index;
-    uint32_t 		decode_time_ms;
 
-} mdat_sample;
 
  /* assume config fits one chunk (highly probable) */
 
@@ -71,6 +77,6 @@ typedef struct {
      * - 0
      */
 
-i2Err createContext(i2ctx *context); //TODO
+int createContext(i2ctx *context); //TODO
 
 #endif

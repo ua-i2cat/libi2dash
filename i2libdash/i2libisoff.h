@@ -1,10 +1,11 @@
 #ifndef __ISOFF_LIB__
 #define __ISOFF_LIB__
 
-#define I2ERROR 1
 
 #include "i2context.h"
-#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 //ISOMEDIA LIBRARY
 
 
