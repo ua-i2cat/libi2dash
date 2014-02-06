@@ -40,6 +40,9 @@ typedef struct {
 	uint32_t 		avc_profile;
 	uint32_t 		avc_compat;
 	uint32_t 		avc_level;
+	uint32_t		earliest_presentation_time;
+	uint32_t		latest_presentation_time;
+	uint32_t		sequence_number;
 	i2ctx_sample 	*ctxsample;
 } i2ctx_video; //TODO
 
@@ -51,6 +54,9 @@ typedef struct {
 	uint16_t 		sample_size;
 	uint32_t 		aac_profile;
 	uint32_t 		data_rate;
+	uint32_t		earliest_presentation_time; // en dash_append si el sample count == 0 --> timestamp. sino es 0.
+	uint32_t		latest_presentation_time; // Se refresca en cada dash_append con el timestamp.
+	uint32_t		sequence_number; // Actualiza con cada segmento en el close_fragments
 	i2ctx_sample 	*ctxsample;
 } i2ctx_audio; //TODO
 
@@ -60,7 +66,7 @@ typedef struct {
 	uint32_t 		duration_ms; // Optimum duration
 	int 			threshold_ms; // Segment duration threshold
 	char 			*path;
-	uint32_t 		reference_size;
+	uint32_t 		reference_size; // Se calcula en close fragments en llamada a sidx
 } i2ctx; //TODO
 
 

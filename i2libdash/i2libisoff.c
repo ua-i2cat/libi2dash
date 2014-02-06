@@ -1386,15 +1386,26 @@ uint32_t write_styp(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
-	uint32_t count, zero_32, duration_ms, hton_duration_ms, one_32, hton_one_32, reference_size, hton_reference_size;
-	uint32_t size, hton_size, hton_timescale; //subseg_duration_ms, decode_time_ms, hton_decode_time_ms,
+	uint32_t count, zero_32, duration_ms, hton_duration_ms, one_32, hton_one_32;
+	uint32_t reference_size, hton_reference_size, size, hton_size, hton_timescale;
+	uint32_t earliest_presentation_time, latest_presentation_time, hton_earliest_presentation_time;
 	uint8_t zero_8;
 	uint16_t zero_16, one_16, hton_one_16;
 	byte flag8;
-	//i2ctx_sample *sample;
+	i2ctx_video ctxVideo = context->ctxvideo;
+	i2ctx_audio ctxAudio = context->ctxaudio;
 
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
+
+	if (media_type == VIDEO_TYPE) {
+		earliest_presentation_time = ctxVideo.earliest_presentation_time;
+		latest_presentation_time = ctxVideo.latest_presentation_time;
+	}
+	else if (media_type == AUDIO_TYPE) {
+		earliest_presentation_time = ctxAudio.earliest_presentation_time;
+		latest_presentation_time = ctxAudio.latest_presentation_time;
+	}
 
 	count = 4;
 	zero_8 = 0;
@@ -1402,16 +1413,8 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 	zero_32 = 0;
 	one_16 = 1;
 	one_32 = 1;
-
-//	if (media_type == VIDEO_TYPE)
-//		sample = context->ctxvideo->ctxsample;
-//	else if (media_type == AUDIO_TYPE)
-//		sample = context->ctxaudio->ctxsample;
-
-//	subseg_duration_ms = context->i2ctx_sample.duration_ms; //mirar el codigo de referencia
-//	decode_time_ms = context->i2ctx_sample.decode_time_ms; //mirar el codigo de referencia
+	duration_ms = latest_presentation_time - earliest_presentation_time;
 	reference_size = context->reference_size;
-	duration_ms = context->duration_ms;
 
 	// box type
 	memcpy(data + count, "sidx", 4);
@@ -1427,12 +1430,12 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 	hton_timescale = htonl(1000);
 	memcpy(data + count, &hton_timescale, 4);
 	count = count + 4;
-	// decode time
-	//hton_decode_time_ms = htonl(decode_time_ms);
-	//memcpy(data + count, &hton_decode_time_ms, 4);
-	//count = count + 4;
-	// duration
-	hton_duration_ms = htonl(duration_ms);
+	// earliest_presentation_time
+	hton_earliest_presentation_time = htonl(earliest_presentation_time);
+	memcpy(data + count, &hton_earliest_presentation_time, 4);
+	count = count + 4;
+	// first offset
+	hton_duration_ms = htonl(duration_ms); //TODO
 	memcpy(data + count, &hton_duration_ms, 4);
 	count = count + 4;
 	// reserved
@@ -1447,9 +1450,9 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 	memcpy(data + count, &hton_reference_size, 4);
 	count = count + 4;
 	// subsegment_duration
-	//hton_subseg_duration_ms =  htonl(subseg_duration_ms);
-	//memcpy(data + count, &hton_subseg_duration_ms, 4);
-	//count = count + 4;
+	hton_duration_ms =  htonl(duration_ms);
+	memcpy(data + count, &hton_duration_ms, 4);
+	count = count + 4;
 	// 1st bit is reference type, the rest is reference size
 	flag8 = 0x90;
 	memcpy(data + count, &flag8, 1);
