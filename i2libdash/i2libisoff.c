@@ -1511,21 +1511,26 @@ uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
 
 uint32_t write_mfhd(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, zero, seqnum, hton_seqnum, size, hton_size;
-
+	i2ctx_video ctxVideo = context->ctxvideo;
+	i2ctx_audio ctxAudio = context->ctxaudio;
+	
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-
+	
+	if (media_type == VIDEO_TYPE) {
+		seqnum = ctxVideo.sequence_number;
+	}
+	else if (media_type == AUDIO_TYPE) {
+		seqnum = ctxAudio.sequence_number;
+	}
 	count = 0;
 	zero = 0;
-	seqnum = 0;
-	//seqnum = context->ctxsample.index;
 
 	//Size is always 16, apparently
 	size = 16;
 	hton_size = htonl(size);
 	memcpy(data + count, &hton_size, 4);
 	count = count + 4;
-
 	// box type
 	memcpy(data + count, "mfhd", 4);
 	count = count + 4;
