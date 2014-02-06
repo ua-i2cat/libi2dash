@@ -119,7 +119,8 @@ uint32_t initVideoGenerator(byte *source_data, uint32_t size_source_data, byte *
 
 uint32_t initAudioGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, i2ctx *context) {
 	uint32_t count, size_ftyp, size_moov;
-	
+	printf("INIT FTYP AUDIO\n");
+
 	count = 0;
 	context->ctxaudio->aac_data = (byte*) malloc(size_source_data);
 	memcpy(context->ctxaudio->aac_data, source_data, size_source_data);
@@ -128,6 +129,8 @@ uint32_t initAudioGenerator(byte *source_data, uint32_t size_source_data, byte *
 	
 	if (size_ftyp < 8)
 		return I2ERROR;
+
+	printf("FINISH FTYP AUDIO\n");
 
 	count = count + size_ftyp;
 	size_moov = write_moov(destination_data + count, AUDIO_TYPE, context);
@@ -230,14 +233,17 @@ uint32_t write_moov(byte *data, uint32_t media_type, i2ctx *context) {
     size_mvhd = write_mvhd(data + count, media_type, context);
 	if (size_mvhd < 8)
 		return I2ERROR;
+
 	count = count + size_mvhd;
 	size_mvex = write_mvex(data + count, media_type, context);
 	if (size_mvex < 8)
 		return I2ERROR;
+
 	count = count + size_mvex;
 	size_trak = write_trak(data + count, media_type, context);
 	if (size_trak < 8)
 		return I2ERROR;
+
 	count = count + size_trak;
 
 	//Box size
@@ -260,17 +266,17 @@ uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 	count = count + 4;
 
 	//Version
-	flag32 = 0x0;
+	flag32 = 0;
     memcpy(data + count, &flag32, 4);
 	count = count + 4;
 
     //Creation time
-	flag32 = 0x0;
+	flag32 = 0;
     memcpy(data + count, &flag32, 4);
 	count = count + 4;
 
     //Modification time
-	flag32 = 0x0;
+	flag32 = 0;
     memcpy(data + count, &flag32, 4);
 	count = count + 4;
 
@@ -281,7 +287,7 @@ uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 	count = count + 4;
 
     //Duration
-	flag32 = 0x0;
+	flag32 = 0;
     memcpy(data + count, &flag32, 4);
 	count = count + 4;
 
@@ -304,7 +310,7 @@ uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 	count = count + 4;
 	
 	//transformation matrix
-    size_matrix = write_matrix(data, 1, 0, 0, 1, 0, 0);
+    size_matrix = write_matrix(data + count, 1, 0, 0, 1, 0, 0);
 	count = count + size_matrix;
 
     //Reserved
@@ -323,13 +329,14 @@ uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 	count = count + 4;
 
     //Next track id
-	flag32 = 0x01;
+	flag32 = 1;
 	hton_flag32 = htonl(flag32);
-    memcpy(data + count, &flag32, 4);
+    memcpy(data + count, &hton_flag32, 4);
 	count = count + 4;
 
 	//Box size
 	size = count;
+
 	hton_size = htonl(size);
 	memcpy(data, &hton_size, 4);
 	return count;
@@ -430,7 +437,7 @@ uint32_t write_trak(byte *data, uint32_t media_type, i2ctx *context) {
 	size_mdia = write_mdia(data + count, media_type, context);
 	if (size_mdia < 8)
 		return I2ERROR;
-	count = count + size_tkhd;
+	count = count + size_mdia;
 
 	//Box size
 	size = count;
@@ -462,7 +469,7 @@ uint32_t write_tkhd(byte *data, uint32_t media_type, i2ctx *context) {
 	flag8 = 0;
 	memcpy(data + count, &flag8, 1);
 	count = count + 1;
-	flag16 = 0x0000f;
+	flag16 = 0x000f;
 	hton_flag16 = htons(flag16);
 	memcpy(data + count, &hton_flag16, 2);
 	count = count + 2;
@@ -479,7 +486,7 @@ uint32_t write_tkhd(byte *data, uint32_t media_type, i2ctx *context) {
 
     //Track id
 	flag32 = 1;
-	flag32 = htonl(flag32);
+	hton_flag32 = htonl(flag32);
 	memcpy(data + count, &hton_flag32, 4);
 	count = count + 4;
 
@@ -513,10 +520,10 @@ uint32_t write_tkhd(byte *data, uint32_t media_type, i2ctx *context) {
 
     //Reserved
 	flag16 = 0;
-	memcpy(data + count, &hton_flag16, 2);
+	memcpy(data + count, &flag16, 2);
 	count = count + 2;
 
-    size_matrix = write_matrix(data, 1, 0, 0, 1, 0, 0);
+    size_matrix = write_matrix(data + count, 1, 0, 0, 1, 0, 0);
 	count = count + size_matrix;
 
     if (media_type == VIDEO_TYPE) {
@@ -617,7 +624,7 @@ uint32_t write_mdhd(byte *data, uint32_t media_type, i2ctx *context) {
 
 	//Lanuguage
 	flag16 = 0x15C7;
-	hton_flag16 = htonl(flag16);
+	hton_flag16 = htons(flag16);
 	memcpy(data + count, &hton_flag16, 2);
 	count = count + 2;
 
@@ -697,7 +704,6 @@ uint32_t write_minf(byte *data, uint32_t media_type, i2ctx *context) {
 	//Box type
 	memcpy(data + count, "minf", 4);
 	count = count + 4;
-
 	if (media_type == VIDEO_TYPE) {
 		size_vmhd = write_vmhd(data + count);
 		if (size_vmhd < 8)
@@ -784,7 +790,7 @@ uint32_t write_dinf(byte *data, uint32_t media_type, i2ctx *context) {
 
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
-
+	count = 4;
 	memcpy(data + count, "dinf", 4);
 	count = count + 4;
 	size_dref = write_dref(data + count, media_type, context);
@@ -1066,11 +1072,13 @@ uint32_t write_avcc(byte *data, i2ctx_video *ctxVideo) {
 
 uint32_t write_mp4a(byte *data, i2ctx_audio *ctxAudio) {
 	uint32_t count, zero_32, size_esds, size, hton_size;
-	uint16_t zero_16, audio_channels, hton_audio_channels, sample_size, hton_sample_size, sample_rate, hton_sample_rate, hton_timescale;
+	uint16_t zero_16, audio_channels, hton_audio_channels, sample_size, one_16, hton_one_16;
+	uint16_t hton_sample_size, sample_rate, hton_sample_rate, hton_timescale;
 
 	count = 4;
 	zero_16 = 0;
 	zero_32 = 0;
+	one_16 = 1;
 	audio_channels = ctxAudio->channels;
 	sample_size = ctxAudio->sample_size;
 	sample_rate = ctxAudio->sample_rate;
@@ -1083,6 +1091,15 @@ uint32_t write_mp4a(byte *data, i2ctx_audio *ctxAudio) {
 	count = count + 4;
 	memcpy(data + count, &zero_16, 2);
 	count = count + 2;
+	// data referennce index
+	hton_one_16 = htons(one_16);
+	memcpy(data + count, &hton_one_16, 2);
+	count = count + 2;
+	// reserved
+	memcpy(data + count, &zero_32, 4);
+	count = count + 4;
+	memcpy(data + count, &zero_32, 4);
+	count = count + 4;	
 	// channel count
 	hton_audio_channels = htons(audio_channels); 
 	memcpy(data + count, &hton_audio_channels, 2);
@@ -1112,12 +1129,13 @@ uint32_t write_mp4a(byte *data, i2ctx_audio *ctxAudio) {
 	size = count;
 	hton_size = htonl(size);
 	memcpy(data, &hton_size, 4);
+
 	return count;
 }
 
 uint32_t write_esds(byte *data, i2ctx_audio *ctxAudio) {
 	uint32_t count, zero_32, aac_data_length, max_bitrate, hton_max_bitrate, avg_bitrate, hton_avg_bitrate, size, hton_size;
-	uint16_t one_16, zero_16, hton_one_16; //audio_channels, sample_size,
+	uint16_t one_16, zero_16, hton_one_16;
 	uint8_t zero_8, tag_esd, tag_dcd, flag_oti, flag_st, tag_dsid, tag_sld, size_sld, flag_sld;
 	byte *dsi, *aac_data, flag8;
 	size_t dsi_len, size_esd, size_dcd;
@@ -1127,8 +1145,6 @@ uint32_t write_esds(byte *data, i2ctx_audio *ctxAudio) {
 	zero_16 = 0;
 	zero_8 = 0;
 	one_16 = 1;
-	//audio_channels = ctxAudio->channels;
-	//sample_size = ctxAudio->sample_size;
 	aac_data = ctxAudio->aac_data;
 	aac_data_length = ctxAudio->aac_data_length;
 	dsi = aac_data + 2; //TODO check
@@ -1392,19 +1408,19 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 	uint8_t zero_8;
 	uint16_t zero_16, one_16, hton_one_16;
 	byte flag8;
-	i2ctx_video ctxVideo = context->ctxvideo;
-	i2ctx_audio ctxAudio = context->ctxaudio;
+	i2ctx_video *ctxVideo = context->ctxvideo;
+	i2ctx_audio *ctxAudio = context->ctxaudio;
 
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
 
 	if (media_type == VIDEO_TYPE) {
-		earliest_presentation_time = ctxVideo.earliest_presentation_time;
-		latest_presentation_time = ctxVideo.latest_presentation_time;
+		earliest_presentation_time = ctxVideo->earliest_presentation_time;
+		latest_presentation_time = ctxVideo->latest_presentation_time;
 	}
 	else if (media_type == AUDIO_TYPE) {
-		earliest_presentation_time = ctxAudio.earliest_presentation_time;
-		latest_presentation_time = ctxAudio.latest_presentation_time;
+		earliest_presentation_time = ctxAudio->earliest_presentation_time;
+		latest_presentation_time = ctxAudio->latest_presentation_time;
 	}
 
 	count = 4;
@@ -1511,17 +1527,17 @@ uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
 
 uint32_t write_mfhd(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, zero, seqnum, hton_seqnum, size, hton_size;
-	i2ctx_video ctxVideo = context->ctxvideo;
-	i2ctx_audio ctxAudio = context->ctxaudio;
+	i2ctx_video *ctxVideo = context->ctxvideo;
+	i2ctx_audio *ctxAudio = context->ctxaudio;
 	
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
 	
 	if (media_type == VIDEO_TYPE) {
-		seqnum = ctxVideo.sequence_number;
+		seqnum = ctxVideo->sequence_number;
 	}
 	else if (media_type == AUDIO_TYPE) {
-		seqnum = ctxAudio.sequence_number;
+		seqnum = ctxAudio->sequence_number;
 	}
 	count = 0;
 	zero = 0;
@@ -1618,17 +1634,17 @@ uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, zero, size, hton_size;
 	uint32_t earliest_presentation_time, hton_earliest_presentation_time;
 
-	i2ctx_video ctxVideo = context->ctxvideo;
-	i2ctx_audio ctxAudio = context->ctxaudio;
+	i2ctx_video *ctxVideo = context->ctxvideo;
+	i2ctx_audio *ctxAudio = context->ctxaudio;
 
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
 
 	if (media_type == VIDEO_TYPE) {
-		earliest_presentation_time = ctxVideo.earliest_presentation_time;
+		earliest_presentation_time = ctxVideo->earliest_presentation_time;
 	}
 	else if (media_type == AUDIO_TYPE) {
-		earliest_presentation_time = ctxAudio.earliest_presentation_time;
+		earliest_presentation_time = ctxAudio->earliest_presentation_time;
 	}
 
 	count = 0;
@@ -1679,7 +1695,7 @@ uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
 	}
 
 	flags = samples->box_flags;
-	sample_num = samples->mdat_length;
+	sample_num = samples->mdat_sample_length;
 	moof_pos = samples->moof_pos;
 
 
@@ -1757,7 +1773,7 @@ uint32_t write_mdat(byte* source_data, uint32_t size_source_data, byte *data, ui
 uint32_t write_matrix(byte *data, uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t tx, uint32_t ty) {
 	uint32_t count, value, hton_value;
 	count = 0;
-	value = 0x0;
+	value = 0;
 
 	// transformation matrix
 	// |a  b  u|
@@ -1803,7 +1819,7 @@ uint32_t write_matrix(byte *data, uint32_t a, uint32_t b, uint32_t c, uint32_t d
 	memcpy(data + count, &hton_value, 4);
 	count = count + 4;
 	//w in 2.30 format
-	value = 1;
+	value = 1 << 30;
 	hton_value = htonl(value);
 	memcpy(data + count, &hton_value, 4);
 	count = count + 4;
