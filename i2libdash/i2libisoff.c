@@ -1615,15 +1615,25 @@ uint32_t write_tfhd(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
-	uint32_t count, zero, decode_time_ms, hton_decode_time_ms, size, hton_size;
+	uint32_t count, zero, size, hton_size;
+	uint32_t earliest_presentation_time, hton_earliest_presentation_time;
+
+	i2ctx_video ctxVideo = context->ctxvideo;
+	i2ctx_audio ctxAudio = context->ctxaudio;
 
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
 
+	if (media_type == VIDEO_TYPE) {
+		earliest_presentation_time = ctxVideo.earliest_presentation_time;
+	}
+	else if (media_type == AUDIO_TYPE) {
+		earliest_presentation_time = ctxAudio.earliest_presentation_time;
+	}
+
 	count = 0;
 	zero = 0;
-	decode_time_ms = 0;
-	//decode_time_ms = context->i2ctx_sample.decode_time_ms;
+
 	//Size is always 16, apparently
 	size = 16;
 	hton_size = htonl(size);
@@ -1638,9 +1648,9 @@ uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
 	memcpy(data + count, &zero, 4);
 	count = count + 4;
 	
-	// decode time
-	hton_decode_time_ms = decode_time_ms;
-	memcpy(data + count, &hton_decode_time_ms, 4);
+	// baseMediaDecodeTime //TODO check standard
+	hton_earliest_presentation_time = earliest_presentation_time;
+	memcpy(data + count, &hton_earliest_presentation_time, 4);
 	count = count + 4;
 
 	return count;
