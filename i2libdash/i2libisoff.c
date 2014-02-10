@@ -1567,7 +1567,7 @@ uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context) {
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
 
-	count = 0;
+	count = 4;
 
 	// box type
 	memcpy(data + count, "traf", 4);
@@ -1606,7 +1606,7 @@ uint32_t write_tfhd(byte *data, uint32_t media_type, i2ctx *context) {
 
 	count = 0;
 	one = 1;
-	flags = 0x0002000;
+	flags = 0x00020000;
 	//Size is always 16, apparently
 	size = 16;
 	hton_size = htonl(size);
@@ -1665,7 +1665,7 @@ uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
 	count = count + 4;
 	
 	// baseMediaDecodeTime //TODO check standard
-	hton_earliest_presentation_time = earliest_presentation_time;
+	hton_earliest_presentation_time = htonl(earliest_presentation_time);
 	memcpy(data + count, &hton_earliest_presentation_time, 4);
 	count = count + 4;
 
