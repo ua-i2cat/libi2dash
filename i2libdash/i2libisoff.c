@@ -96,7 +96,9 @@ uint32_t write_mdat(byte* source_data, uint32_t size_source_data, byte *data, ui
 
 uint32_t initVideoGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, i2ctx *context) {
 	uint32_t count, size_ftyp, size_moov;
-	
+	if(size_source_data <= 0) {
+		return I2ERROR;
+	}
 	count = 0;
 	context->ctxvideo->pps_sps_data = (byte*) malloc (size_source_data);
 	memcpy(context->ctxvideo->pps_sps_data, source_data, size_source_data);
@@ -119,8 +121,9 @@ uint32_t initVideoGenerator(byte *source_data, uint32_t size_source_data, byte *
 
 uint32_t initAudioGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, i2ctx *context) {
 	uint32_t count, size_ftyp, size_moov;
-	printf("INIT FTYP AUDIO\n");
-
+	if(size_source_data <= 0) {
+		return I2ERROR;
+	}
 	count = 0;
 	context->ctxaudio->aac_data = (byte*) malloc(size_source_data);
 	memcpy(context->ctxaudio->aac_data, source_data, size_source_data);
@@ -129,8 +132,6 @@ uint32_t initAudioGenerator(byte *source_data, uint32_t size_source_data, byte *
 	
 	if (size_ftyp < 8)
 		return I2ERROR;
-
-	printf("FINISH FTYP AUDIO\n");
 
 	count = count + size_ftyp;
 	size_moov = write_moov(destination_data + count, AUDIO_TYPE, context);
@@ -145,7 +146,9 @@ uint32_t initAudioGenerator(byte *source_data, uint32_t size_source_data, byte *
 
 uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, size_styp, size_sidx, size_moof, size_mdat;
-
+	if(size_source_data <= 0) {
+		return I2ERROR;
+	}
 	//TODO AUDIOVIDEO_TYPE
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		return I2ERROR;
