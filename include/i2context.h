@@ -25,6 +25,7 @@ typedef struct {
 	uint32_t 		box_flags;
 	mdat_sample 	mdat[MAX_MDAT_SAMPLE];
 	uint32_t 		mdat_sample_length;
+	uint32_t		mdat_total_size;
     uint32_t		moof_pos; // setted in write_moof, used in write_trun
 } i2ctx_sample;
 
@@ -32,6 +33,8 @@ typedef struct {
 typedef struct {
 	byte			*pps_sps_data;
 	uint32_t 		pps_sps_data_length;
+	byte			segment_data[MAX_DAT];
+	uint32_t		segment_size;
 	uint16_t 		width;
 	uint16_t 		height;
 	uint32_t 		frame_rate;
@@ -44,6 +47,8 @@ typedef struct {
 typedef struct {
 	byte 			*aac_data;
 	uint32_t 		aac_data_length;
+	byte			segment_data[MAX_DAT];
+	uint32_t		segment_size;
 	uint16_t 		channels;
 	uint16_t 		sample_rate;
 	uint16_t 		sample_size;

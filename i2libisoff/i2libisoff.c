@@ -159,20 +159,21 @@ uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *de
 	
 	if (size_styp < 8)
 		return I2ERROR;
-
-	count = count + size_styp;
-	size_sidx = write_sidx(destination_data + count, media_type, context);
 	
-	if (size_sidx < 8)
-		return I2ERROR;
-
+	count = count + size_styp;
+	size_sidx = 44;
 	count = count + size_sidx;
 	size_moof = write_moof(destination_data + count, media_type, context);
 
 	if (size_moof < 8)
 		return I2ERROR;
-
+	
+	size_sidx = write_sidx(destination_data + count, media_type, context);
 	count = count + size_moof;
+
+	if (size_sidx < 8)
+		return I2ERROR;
+
 	size_mdat = write_mdat(source_data , size_source_data, destination_data + count, media_type, context);
 
 	if (size_mdat < 8)
