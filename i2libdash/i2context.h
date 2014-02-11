@@ -73,6 +73,4 @@ typedef struct {
      * - 0
      */
 
-int createContext(i2ctx *context); //TODO
-
 #endif
