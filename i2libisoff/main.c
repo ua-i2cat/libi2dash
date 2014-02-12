@@ -22,10 +22,10 @@ int main(){
 	ctxAudio->sample_size = 2; // write_mp4a --> sample_size * 8
 	ctxAudio->sample_rate = 48000;
 
-	//uint32_t initVideo, initAudio;
+	uint32_t initVideo, initAudio;
 
-	/*// En este caso es el SPS/PPS, etc
-	source_data = (byte *) calloc (100, sizeof(byte*));
+	// En este caso es el SPS/PPS, etc
+	source_data = (byte *) malloc (100 * sizeof(byte*));
 	source_data[0] = 0x01;
 	source_data[1] = 0x42;
 	source_data[2] = 0xC0;
@@ -69,13 +69,13 @@ int main(){
 
 	size_source_data = 40;
 
-	destination_data = (byte *) calloc (MAX_MDAT_SAMPLE, sizeof(byte*));
+	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE * sizeof(byte*));
 
 	initVideo = initVideoGenerator(source_data, size_source_data, destination_data, context);
 
 	if(initVideo != I2ERROR) {
 		printf("OK!\n");
-		output_video_i = fopen("/home/dovahkiin/dash_rtmp_segments/output_i2.m4v", "w");
+		output_video_i = fopen("/home/dovahkiin/dash_rtmp_segments/video_init.m4v", "w");
 		int i = 0;
 		// int fputc(int c, FILE *stream);
 		for(i = 0; i < initVideo; i++) {
@@ -87,7 +87,7 @@ int main(){
 	//free(source_data);
 	//free(destination_data);
 
-	source_data = (byte *) calloc (100, sizeof(byte*));
+	source_data = (byte *) malloc (100 * sizeof(byte*));
 	source_data[0] = 0xaf;
 	source_data[1] = 0x00;
 	source_data[2] = 0x11;
@@ -95,20 +95,20 @@ int main(){
 
 	size_source_data = 4;
 
-	destination_data = (byte *) calloc (MAX_MDAT_SAMPLE, sizeof(byte*));
+	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE * sizeof(byte*));
 
 	initAudio = initAudioGenerator(source_data, size_source_data, destination_data, context);
 
 	if(initAudio != I2ERROR) {
 		printf("OK!\n");
-		output_audio_i = fopen("/home/dovahkiin/dash_rtmp_segments/output_i2.m4a", "w");
+		output_audio_i = fopen("/home/dovahkiin/dash_rtmp_segments/audio_init.m4a", "w");
 		int i = 0;
 		// int fputc(int c, FILE *stream);
 		for(i = 0; i < initAudio; i++) {
 			fputc(destination_data[i], output_audio_i);
 		}
 		fclose(output_audio_i);
-	}*/
+	}
 
 	uint32_t seg_gen_video, seg_gen_audio;
 
@@ -142,7 +142,7 @@ int main(){
 		ctxVSample->mdat[i].delay = 0;
 	}
 	// mdat
-	source_data = (byte *) calloc (100, sizeof(byte*));
+	source_data = (byte *) malloc (100 * sizeof(byte*));
 	source_data[0] = 0x0;
 	source_data[1] = 0x0;
 	source_data[2] = 0x02;
@@ -186,7 +186,7 @@ int main(){
 
 	size_source_data = 40;
 
-	destination_data = (byte *) calloc (MAX_MDAT_SAMPLE, sizeof(byte*));
+	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE * sizeof(byte*));
 
 	seg_gen_video = segmentGenerator(source_data, size_source_data, destination_data, media_type, context);
 	if(seg_gen_video != I2ERROR) {
@@ -224,7 +224,7 @@ int main(){
 		ctxASample->mdat[i].size = 341; // 0x000c
 	}
 	// mdat
-	source_data = (byte *) calloc (100, sizeof(byte*));
+	source_data = (byte *) malloc (100 * sizeof(byte*));
 	source_data[0] = 0x21;
 	source_data[1] = 011;
 	source_data[2] = 0x45;
@@ -268,12 +268,12 @@ int main(){
 
 	size_source_data = 40;
 
-	destination_data = (byte *) calloc (MAX_MDAT_SAMPLE, sizeof(byte*));
+	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE * sizeof(byte*));
 
 	seg_gen_audio = segmentGenerator(source_data, size_source_data, destination_data, media_type, context);
 	if(seg_gen_audio != I2ERROR) {
 		printf("OK!\n");
-		output_segment_a = fopen("/home/dovahkiin/dash_rtmp_segments/video_segment.m4a", "w");
+		output_segment_a = fopen("/home/dovahkiin/dash_rtmp_segments/audio_segment.m4a", "w");
 		int i = 0;
 		// int fputc(int c, FILE *stream);
 		for(i = 0; i < seg_gen_audio; i++) {
