@@ -1,5 +1,5 @@
 #include "i2libdash.h"
-#include "../i2libisoff/i2libisoff.h"
+
 
 // Privada. Función te dice si un sample es intra o no.
 uint8_t is_key_frame(byte *input_data, uint32_t size_input);
@@ -97,5 +97,32 @@ void context_initializer(i2ctx *context){
 
 	audio_context_initializer(context);
 	video_context_initializer(context);
+}
+
+// Similar al de i2libisoff pero obteniendo datos al context, input sps/pps
+uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *sps_data, uint32_t sps_size, byte *pps_data, uint32_t pps_size, byte *output_data, i2ctx *context) {
+
+	uint32_t initVideo, count, sps_pps_data_length;
+	byte *sps_pps_data;
+
+	count = 0;
+
+	sps_pps_data = (byte *) malloc (sizeof(byte));
+
+	memcpy(sps_pps_data + count, metadata, metadata_size);
+	count = count + metadata_size;
+
+	memcpy(sps_pps_data + count, sps_data, sps_size);
+	count = count + pps_size;
+
+	memcpy(sps_pps_data + count, pps_data, pps_size);
+	count = count + sps_size;
+
+	sps_pps_data_length = count;
+
+	//TODO Obtain width and height
+
+	initVideo = initVideoGenerator(sps_pps_data, sps_pps_data_length, output_data, context);
+
 }
 
