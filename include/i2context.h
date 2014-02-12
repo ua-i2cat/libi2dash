@@ -52,7 +52,7 @@ typedef struct {
 	uint32_t		segment_size;
 	uint16_t 		channels;
 	uint16_t 		sample_rate;
-	uint16_t 		sample_size;
+	uint16_t 		sample_size; // bits quantizer
 	uint32_t		earliest_presentation_time; // en dash_append si el sample count == 0 --> timestamp. sino es 0.
 	uint32_t		latest_presentation_time; // Se refresca en cada dash_append con el timestamp.
 	uint32_t		sequence_number; // Actualiza con cada segmento en el close_fragments
@@ -64,7 +64,6 @@ typedef struct {
 	i2ctx_video 	*ctxvideo;
 	uint32_t 		duration_ms; // Optimum duration
 	int 			threshold_ms; // Segment duration threshold
-	char 			*path;
 	uint32_t 		reference_size; // Se calcula en close fragments en llamada a sidx
 } i2ctx; //TODO
 
