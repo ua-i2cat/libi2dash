@@ -146,7 +146,7 @@ uint32_t initAudioGenerator(byte *source_data, uint32_t size_source_data, byte *
 }
 
 uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, uint32_t media_type, i2ctx *context) {
-	uint32_t count, size_styp, size_sidx, size_moof, size_mdat;
+	uint32_t count, size_styp, size_sidx, size_moof, size_mdat, mdat_length;
 	if(size_source_data <= 0) {
 		return I2ERROR;
 	}
@@ -161,19 +161,23 @@ uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *de
 		return I2ERROR;
 	
 	count = count + size_styp;
+	
 	size_sidx = 44;
-	count = count + size_sidx;
-	size_moof = write_moof(destination_data + count, media_type, context);
+
+	size_moof = write_moof(destination_data + count + size_sidx, media_type, context);
 
 	if (size_moof < 8)
 		return I2ERROR;
-	
-	size_sidx = write_sidx(destination_data + count, media_type, context);
-	count = count + size_moof;
 
+	context->reference_size = size_moof + 8 + size_source_data;
+	size_sidx = write_sidx(destination_data + count, media_type, context);
+	
 	if (size_sidx < 8)
 		return I2ERROR;
 
+	printf("SIZE_SIDX: %u\n", size_sidx);
+
+	count = count + size_moof + size_sidx;
 	size_mdat = write_mdat(source_data , size_source_data, destination_data + count, media_type, context);
 
 	if (size_mdat < 8)

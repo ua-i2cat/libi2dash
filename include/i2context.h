@@ -7,6 +7,7 @@ typedef unsigned char byte;
 #define AUDIO_TYPE 2
 #define AUDIOVIDEO_TYPE 3
 #define MAX_MDAT_SAMPLE 65536
+#define MAX_DAT 10*1024*1024
 #define I2ERROR 1
 
 #include <netinet/in.h>
