@@ -3,7 +3,7 @@ INSTALL_PATH = /usr/local/bin
 CC:=gcc
 
 CFLAGS:=-g -Wall
-PROG = i2libdash
+PROG = i2libisoff
 
 all: main.o i2libisoff.o
 	@mkdir -p bin
