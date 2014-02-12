@@ -14,12 +14,12 @@ int main(){
 
 	i2ctx_audio *ctxAudio = context->ctxaudio; 
 	i2ctx_video *ctxVideo = context->ctxvideo;
-	//i2ctx_sample *ctxASample = ctxAudio->ctxsample;
+	
 	ctxVideo->width = 854;
 	ctxVideo->height = 480;
 
 	ctxAudio->channels = 2;
-	ctxAudio->sample_size = 2; // write_mp4a --> sample_size * 8
+	ctxAudio->sample_size = 16; // quantizer bits
 	ctxAudio->sample_rate = 48000;
 
 	uint32_t initVideo, initAudio;

@@ -1114,7 +1114,7 @@ uint32_t write_mp4a(byte *data, i2ctx_audio *ctxAudio) {
 	memcpy(data + count, &hton_audio_channels, 2);
 	count = count + 2;
 	// sample size
-	hton_sample_size = htons((sample_size) * 8);
+	hton_sample_size = htons(sample_size);
 	memcpy(data + count, &hton_sample_size, 2);
 	count = count + 2;
 	// reserved
