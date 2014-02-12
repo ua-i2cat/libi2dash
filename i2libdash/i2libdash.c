@@ -1,10 +1,16 @@
 #include "i2libdash.h"
 #include "../i2libisoff/i2libisoff.h"
 
-// Función recoge h264 y obtiene sps y pps, rellena el context con width y height.
-uint32_t h264_handler(byte *input_data, uint32_t size_input, i2ctx *context);
 // Privada. Función te dice si un sample es intra o no.
 uint8_t is_key_frame(byte *input_data, uint32_t size_input);
+//
+void audio_context_initializer(i2ctx *context);
+
+void audio_sample_context_initializer(i2ctx_audio *ctxAudio);
+
+void video_context_initializer(i2ctx *context);
+
+void video_sample_context_initializer(i2ctx_video *ctxVideo);
 
 void set_segment_duration(uint32_t segment_duration, i2ctx *context){
 	context->duration_ms = segment_duration;
@@ -29,3 +35,67 @@ void set_sample_rate(uint32_t sample_rate, i2ctx_audio *ctxAudio){
 uint32_t get_sample_rate(i2ctx_audio *ctxAudio){
 	return ctxAudio->sample_rate;
 }
+
+void audio_context_initializer(i2ctx *context) {
+	context->ctxaudio = (i2ctx_audio *) malloc(sizeof(i2ctx_audio));
+	i2ctx_audio *ctxAudio = context->ctxaudio;
+
+	ctxAudio->aac_data_length = 0;
+	ctxAudio->segment_size = 0;
+	ctxAudio->channels = 2;
+	ctxAudio->sample_rate = 44100;
+	ctxAudio->sample_size = 16;
+	ctxAudio->sequence_number = 0;
+	ctxAudio->earliest_presentation_time = 0;
+	ctxAudio->latest_presentation_time = 0;
+
+	audio_sample_context_initializer(ctxAudio);
+}
+
+void audio_sample_context_initializer(i2ctx_audio *ctxAudio) {
+	ctxAudio->ctxsample = (i2ctx_sample *) malloc(sizeof(i2ctx_sample));
+	i2ctx_sample *ctxASample = ctxAudio->ctxsample;
+
+	ctxASample->box_flags = 0;
+	ctxASample->mdat_sample_length = 0;
+	ctxASample->mdat_total_size = 0;
+	ctxASample->moof_pos = 0;
+}
+
+void video_context_initializer(i2ctx *context) {
+	context->ctxvideo = (i2ctx_video *) malloc(sizeof(i2ctx_video));
+	i2ctx_video *ctxVideo = context->ctxvideo;
+
+	ctxVideo->pps_sps_data_length = 0;
+	ctxVideo->segment_size = 0;
+	ctxVideo->width = 0;
+	ctxVideo->height = 0;
+	ctxVideo->frame_rate = 25;
+	ctxVideo->earliest_presentation_time = 0;
+	ctxVideo->latest_presentation_time = 0;
+	ctxVideo->sequence_number = 0;
+
+	video_sample_context_initializer(ctxVideo);
+}
+
+void video_sample_context_initializer(i2ctx_video *ctxVideo) {
+	ctxVideo->ctxsample = (i2ctx_sample *) malloc(sizeof(i2ctx_sample));	
+	i2ctx_sample *ctxVSample = ctxVideo->ctxsample;
+
+	ctxVSample->box_flags = 0;
+	ctxVSample->mdat_sample_length = 0;
+	ctxVSample->mdat_total_size = 0;
+	ctxVSample->moof_pos = 0;
+}
+
+void context_initializer(i2ctx *context){
+	context = (i2ctx *) malloc(sizeof(i2ctx));
+
+	context->duration_ms = 5;
+	context->threshold_ms = (2/25); // 1/fps * 2
+	context->reference_size = 0;
+
+	audio_context_initializer(context);
+	video_context_initializer(context);
+}
+
