@@ -43,7 +43,7 @@ typedef struct {
 	uint32_t		latest_presentation_time;
 	uint32_t		sequence_number;
 	i2ctx_sample 	*ctxsample;
-} i2ctx_video; //TODO
+} i2ctx_video;
 
 typedef struct {
 	byte 			*aac_data;
@@ -57,15 +57,15 @@ typedef struct {
 	uint32_t		latest_presentation_time; // Se refresca en cada dash_append con el timestamp.
 	uint32_t		sequence_number; // Actualiza con cada segmento en el close_fragments
 	i2ctx_sample 	*ctxsample;
-} i2ctx_audio; //TODO
+} i2ctx_audio;
 
 typedef struct {
 	i2ctx_audio 	*ctxaudio;
 	i2ctx_video 	*ctxvideo;
 	uint32_t 		duration_ms; // Optimum duration
-	int 			threshold_ms; // Segment duration threshold
+	double 			threshold_ms; // Segment duration threshold
 	uint32_t 		reference_size; // Se calcula en close fragments en llamada a sidx
-} i2ctx; //TODO
+} i2ctx;
 
  /* assume config fits one chunk (highly probable) */
 

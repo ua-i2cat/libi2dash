@@ -4,13 +4,15 @@
 // Privada. Función te dice si un sample es intra o no.
 uint8_t is_key_frame(byte *input_data, uint32_t size_input);
 //
-void audio_context_initializer(i2ctx *context);
+void audio_context_initializer(i2ctx **context);
 
-void audio_sample_context_initializer(i2ctx_audio *ctxAudio);
+void audio_sample_context_initializer(i2ctx_audio **ctxAudio);
 
-void video_context_initializer(i2ctx *context);
+void video_context_initializer(i2ctx **context);
 
-void video_sample_context_initializer(i2ctx_video *ctxVideo);
+void video_sample_context_initializer(i2ctx_video **ctxVideo);
+
+uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video *ctxVideo);
 
 void set_segment_duration(uint32_t segment_duration, i2ctx *context){
 	context->duration_ms = segment_duration;
@@ -36,9 +38,9 @@ uint32_t get_sample_rate(i2ctx_audio *ctxAudio){
 	return ctxAudio->sample_rate;
 }
 
-void audio_context_initializer(i2ctx *context) {
-	context->ctxaudio = (i2ctx_audio *) malloc(sizeof(i2ctx_audio));
-	i2ctx_audio *ctxAudio = context->ctxaudio;
+void audio_context_initializer(i2ctx **context) {
+	(*context)->ctxaudio = (i2ctx_audio *) malloc(sizeof(i2ctx_audio));
+	i2ctx_audio *ctxAudio = (*context)->ctxaudio;
 
 	ctxAudio->aac_data_length = 0;
 	ctxAudio->segment_size = 0;
@@ -49,12 +51,12 @@ void audio_context_initializer(i2ctx *context) {
 	ctxAudio->earliest_presentation_time = 0;
 	ctxAudio->latest_presentation_time = 0;
 
-	audio_sample_context_initializer(ctxAudio);
+	audio_sample_context_initializer(&ctxAudio);
 }
 
-void audio_sample_context_initializer(i2ctx_audio *ctxAudio) {
-	ctxAudio->ctxsample = (i2ctx_sample *) malloc(sizeof(i2ctx_sample));
-	i2ctx_sample *ctxASample = ctxAudio->ctxsample;
+void audio_sample_context_initializer(i2ctx_audio **ctxAudio) {
+	(*ctxAudio)->ctxsample = (i2ctx_sample *) malloc(sizeof(i2ctx_sample));
+	i2ctx_sample *ctxASample = (*ctxAudio)->ctxsample;
 
 	ctxASample->box_flags = 0;
 	ctxASample->mdat_sample_length = 0;
@@ -62,9 +64,9 @@ void audio_sample_context_initializer(i2ctx_audio *ctxAudio) {
 	ctxASample->moof_pos = 0;
 }
 
-void video_context_initializer(i2ctx *context) {
-	context->ctxvideo = (i2ctx_video *) malloc(sizeof(i2ctx_video));
-	i2ctx_video *ctxVideo = context->ctxvideo;
+void video_context_initializer(i2ctx **context) {
+	(*context)->ctxvideo = (i2ctx_video *) malloc(sizeof(i2ctx_video));
+	i2ctx_video *ctxVideo = (*context)->ctxvideo;
 
 	ctxVideo->pps_sps_data_length = 0;
 	ctxVideo->segment_size = 0;
@@ -75,12 +77,12 @@ void video_context_initializer(i2ctx *context) {
 	ctxVideo->latest_presentation_time = 0;
 	ctxVideo->sequence_number = 0;
 
-	video_sample_context_initializer(ctxVideo);
+	video_sample_context_initializer(&ctxVideo);
 }
 
-void video_sample_context_initializer(i2ctx_video *ctxVideo) {
-	ctxVideo->ctxsample = (i2ctx_sample *) malloc(sizeof(i2ctx_sample));	
-	i2ctx_sample *ctxVSample = ctxVideo->ctxsample;
+void video_sample_context_initializer(i2ctx_video **ctxVideo) {
+	(*ctxVideo)->ctxsample = (i2ctx_sample *) malloc(sizeof(i2ctx_sample));	
+	i2ctx_sample *ctxVSample = (*ctxVideo)->ctxsample;
 
 	ctxVSample->box_flags = 0;
 	ctxVSample->mdat_sample_length = 0;
@@ -88,15 +90,52 @@ void video_sample_context_initializer(i2ctx_video *ctxVideo) {
 	ctxVSample->moof_pos = 0;
 }
 
-void context_initializer(i2ctx *context){
-	context = (i2ctx *) malloc(sizeof(i2ctx));
+void context_initializer(i2ctx **context){
+	*context = (i2ctx *) malloc(sizeof(i2ctx));
 
-	context->duration_ms = 5;
-	context->threshold_ms = (2/25); // 1/fps * 2
-	context->reference_size = 0;
+	(*context)->duration_ms = 5;
+	(*context)->reference_size = 0;
 
 	audio_context_initializer(context);
 	video_context_initializer(context);
+
+	(*context)->threshold_ms = 2/((double)((*context)->ctxvideo->frame_rate)); // 1/fps * 2 (*context)->ctxvideo->frame_rate)
+}
+
+uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video *ctxVideo) {
+
+	uint32_t width, height;
+    sps_t* sps = (sps_t*)malloc(sizeof(sps_t));
+    uint8_t* rbsp_buf = (uint8_t*)malloc(*size_nal_sps);
+    if (nal_to_rbsp(nal_sps, (int*)size_nal_sps, rbsp_buf, (int*)size_nal_sps) < 0){
+        free(rbsp_buf);
+        free(sps);
+        return -1;
+    }
+    bs_t* b = bs_new(rbsp_buf, *size_nal_sps);
+    if(read_seq_parameter_set_rbsp(sps,b) < 0){
+        bs_free(b);
+        free(rbsp_buf);
+        free(sps);
+        return -1;
+    }
+    width = (sps->pic_width_in_mbs_minus1 + 1) * 16;
+    height = (2 - sps->frame_mbs_only_flag) * (sps->pic_height_in_map_units_minus1 + 1) * 16;
+    //NOTE: frame_mbs_only_flag = 1 --> only progressive frames
+    //      frame_mbs_only_flag = 0 --> some type of interlacing (there are 3 types contemplated in the standard)
+    if (sps->frame_cropping_flag){
+        width -= (sps->frame_crop_left_offset*2 + sps->frame_crop_right_offset*2);
+        height -= (sps->frame_crop_top_offset*2 + sps->frame_crop_bottom_offset*2);
+    }
+
+    ctxVideo->width = width;
+    ctxVideo->height = height;
+
+    bs_free(b);
+    free(rbsp_buf);
+    free(sps);
+
+    return 0;
 }
 
 // Similar al de i2libisoff pero obteniendo datos al context, input sps/pps
@@ -123,6 +162,8 @@ uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *sps_da
 	//TODO Obtain width and height
 
 	initVideo = initVideoGenerator(sps_pps_data, sps_pps_data_length, output_data, context);
+
+	return initVideo; //TODO
 
 }
 

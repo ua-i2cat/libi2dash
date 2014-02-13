@@ -2,6 +2,7 @@
 #define __DASH_LIB__
 
 #include "../include/i2context.h"
+#include "../include/h264_stream.h"
 #include "../i2libisoff/i2libisoff.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,7 +15,7 @@ uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *sps_da
 // Similar al de i2libisoff pero obteniendo datos al context, input 
 uint32_t init_audio_handler(byte *input_data, uint32_t size_input, byte *output_data, i2ctx *context);
 // Función que reserva memoria para el context
-void context_initializer(i2ctx *context);
+void context_initializer(i2ctx **context);
 // Setter de duración de segmento
 void set_segment_duration(uint32_t segment_duration, i2ctx *context);
 // Getter de duración de segmento
