@@ -168,6 +168,12 @@ uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *de
 
 	if (size_moof < 8)
 		return I2ERROR;
+	/*
+	*referenced_size: the distance in bytes from the first byte
+	* of the referenced item to the first byte of the next
+	* referenced item, or in the case of the last entry,
+	* the end of the referenced material;
+	*/
 
 	context->reference_size = size_moof + 8 + size_source_data;
 	size_sidx = write_sidx(destination_data + count, media_type, context);
