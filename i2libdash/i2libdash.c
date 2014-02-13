@@ -12,7 +12,7 @@ void video_context_initializer(i2ctx **context);
 
 void video_sample_context_initializer(i2ctx_video **ctxVideo);
 
-uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video *ctxVideo);
+uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video **ctxVideo);
 
 void set_segment_duration(uint32_t segment_duration, i2ctx *context){
 	context->duration_ms = segment_duration;
@@ -102,7 +102,7 @@ void context_initializer(i2ctx **context){
 	(*context)->threshold_ms = 2/((double)((*context)->ctxvideo->frame_rate)); // 1/fps * 2 (*context)->ctxvideo->frame_rate)
 }
 
-uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video *ctxVideo) {
+uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video **ctxVideo) {
 
 	uint32_t width, height;
     sps_t* sps = (sps_t*)malloc(sizeof(sps_t));
@@ -110,14 +110,14 @@ uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video *ctx
     if (nal_to_rbsp(nal_sps, (int*)size_nal_sps, rbsp_buf, (int*)size_nal_sps) < 0){
         free(rbsp_buf);
         free(sps);
-        return -1;
+        return 1;
     }
     bs_t* b = bs_new(rbsp_buf, *size_nal_sps);
     if(read_seq_parameter_set_rbsp(sps,b) < 0){
         bs_free(b);
         free(rbsp_buf);
         free(sps);
-        return -1;
+        return 1;
     }
     width = (sps->pic_width_in_mbs_minus1 + 1) * 16;
     height = (2 - sps->frame_mbs_only_flag) * (sps->pic_height_in_map_units_minus1 + 1) * 16;
@@ -128,8 +128,8 @@ uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video *ctx
         height -= (sps->frame_crop_top_offset*2 + sps->frame_crop_bottom_offset*2);
     }
 
-    ctxVideo->width = width;
-    ctxVideo->height = height;
+    (*ctxVideo)->width = width;
+    (*ctxVideo)->height = height;
 
     bs_free(b);
     free(rbsp_buf);
