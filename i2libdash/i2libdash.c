@@ -100,7 +100,7 @@ void context_initializer(i2ctx **context){
 
 	audio_context_initializer(context);
 	video_context_initializer(context);
-	
+
 	// Threshold: 1/fps * 2
 	(*context)->threshold_ms = 2/((double)((*context)->ctxvideo->frame_rate)); 
 }
@@ -144,7 +144,7 @@ uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *metada
 
 	uint32_t initVideo, count, sps_pps_data_length;
 	uint16_t hton_sps_size, hton_pps_size;
-	byte *sps_pps_data, *sps_data_size, *pps_data_size;
+	byte *sps_pps_data;
 
 	count = 0;
 
@@ -157,7 +157,7 @@ uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *metada
 	memcpy(sps_pps_data + count, metadata2, metadata2_size);
 	count = count + metadata2_size;
 	// Size SPS
-	hton_sps_size = htos(sps_size);
+	hton_sps_size = htons(sps_size);
 	memcpy(sps_pps_data + count, &hton_sps_size, 2);
 	count = count + 2;
 	// SPS
@@ -167,7 +167,7 @@ uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *metada
 	memcpy(sps_pps_data + count, metadata3, metadata3_size);
 	count = count + metadata3_size;
 	// Size PPS
-	hton_pps_size = htos(pps_size);
+	hton_pps_size = htons(pps_size);
 	memcpy(sps_pps_data + count, &hton_pps_size, 2);
 	count = count + 2;
 	// PPS
@@ -176,9 +176,7 @@ uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *metada
 
 	sps_pps_data_length = count;
 
-	width_height = get_width_height(source_data, &size_sps_data, &(context->ctxvideo));
-
-	if(width_height == I2ERROR)
+	if(get_width_height(sps_data, &sps_size, &(context->ctxvideo)) == I2ERROR)
 		return I2ERROR;
 
 	initVideo = initVideoGenerator(sps_pps_data, sps_pps_data_length, output_data, context);
