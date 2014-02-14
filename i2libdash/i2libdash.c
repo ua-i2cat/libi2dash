@@ -140,15 +140,24 @@ uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video **ct
     return 0;
 }
 
-uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *metadata2, uint32_t metadata2_size, byte *sps_data, uint32_t sps_size, byte *metadata3, uint32_t metadata3_size, byte *pps_data, uint32_t pps_size, byte *output_data, i2ctx *context) {
+uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *metadata2, uint32_t metadata2_size, byte *sps_data, uint32_t *sps_size, byte *metadata3, uint32_t metadata3_size, byte *pps_data, uint32_t pps_size, byte *output_data, i2ctx **context) {
 
 	uint32_t initVideo, count, sps_pps_data_length;
-	uint16_t hton_sps_size, hton_pps_size;
+	uint16_t pps16, sps16, hton_sps_size, hton_pps_size;
 	byte *sps_pps_data;
+	uint32_t sps_s = *sps_size, total_size;
+
+	total_size = metadata_size + metadata2_size + 2 + sps_s + metadata3_size + 2 + pps_size;
+	printf("TOTAL metadata_size %u\n", metadata_size); 
+	printf("TOTAL metadata_size2 %u\n", metadata2_size); 
+	printf("TOTAL sps_s %u\n", sps_s); 
+	printf("TOTAL metadata3_size %u\n", metadata3_size); 
+	printf("TOTAL pps_size %u\n", pps_size); 
+	printf("TOTAL SIZE %u\n", total_size); 
 
 	count = 0;
 
-	sps_pps_data = (byte *) malloc (sizeof(byte));
+	sps_pps_data = (byte *) malloc(metadata_size + metadata2_size + 2 + sps_s + metadata3_size + 2 + pps_size);
 
 	// Metadata
 	memcpy(sps_pps_data + count, metadata, metadata_size);
@@ -157,28 +166,30 @@ uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *metada
 	memcpy(sps_pps_data + count, metadata2, metadata2_size);
 	count = count + metadata2_size;
 	// Size SPS
-	hton_sps_size = htons(sps_size);
+	sps16 = sps_s;
+	hton_sps_size = htons(sps16);
 	memcpy(sps_pps_data + count, &hton_sps_size, 2);
 	count = count + 2;
 	// SPS
-	memcpy(sps_pps_data + count, sps_data, sps_size);
-	count = count + pps_size;
+	memcpy(sps_pps_data + count, sps_data, sps_s);
+	count = count + sps_s;
 	// Metadata3
 	memcpy(sps_pps_data + count, metadata3, metadata3_size);
 	count = count + metadata3_size;
 	// Size PPS
-	hton_pps_size = htons(pps_size);
+	pps16 = pps_size;
+	hton_pps_size = htons(pps16);
 	memcpy(sps_pps_data + count, &hton_pps_size, 2);
 	count = count + 2;
 	// PPS
 	memcpy(sps_pps_data + count, pps_data, pps_size);
-	count = count + sps_size;
+	count = count + pps_size;
 
 	sps_pps_data_length = count;
 
-	if(get_width_height(sps_data, &sps_size, &(context->ctxvideo)) == I2ERROR)
+	if(get_width_height(sps_data, sps_size, &((*context)->ctxvideo)) == I2ERROR)
 		return I2ERROR;
-
+	printf("WIDTH %u, HEIGHT %u\n", (*context)->ctxvideo->width, (*context)->ctxvideo->height);
 	initVideo = initVideoGenerator(sps_pps_data, sps_pps_data_length, output_data, context);
 
 	return initVideo;

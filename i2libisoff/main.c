@@ -71,7 +71,7 @@ int main(){
 
 	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE * sizeof(byte*));
 
-	initVideo = initVideoGenerator(source_data, size_source_data, destination_data, context);
+	initVideo = initVideoGenerator(source_data, size_source_data, destination_data, &context);
 
 	if(initVideo != I2ERROR) {
 		printf("OK!\n");
@@ -97,7 +97,7 @@ int main(){
 
 	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE * sizeof(byte*));
 
-	initAudio = initAudioGenerator(source_data, size_source_data, destination_data, context);
+	initAudio = initAudioGenerator(source_data, size_source_data, destination_data, &context);
 
 	if(initAudio != I2ERROR) {
 		printf("OK!\n");
@@ -188,7 +188,7 @@ int main(){
 
 	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE * sizeof(byte*));
 
-	seg_gen_video = segmentGenerator(source_data, size_source_data, destination_data, media_type, context);
+	seg_gen_video = segmentGenerator(source_data, size_source_data, destination_data, media_type, &context);
 	if(seg_gen_video != I2ERROR) {
 		printf("OK!\n");
 		output_segment_v = fopen("/home/dovahkiin/dash_rtmp_segments/video_segment.m4v", "w");
@@ -270,7 +270,7 @@ int main(){
 
 	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE * sizeof(byte*));
 
-	seg_gen_audio = segmentGenerator(source_data, size_source_data, destination_data, media_type, context);
+	seg_gen_audio = segmentGenerator(source_data, size_source_data, destination_data, media_type, &context);
 	if(seg_gen_audio != I2ERROR) {
 		printf("OK!\n");
 		output_segment_a = fopen("/home/dovahkiin/dash_rtmp_segments/audio_segment.m4a", "w");

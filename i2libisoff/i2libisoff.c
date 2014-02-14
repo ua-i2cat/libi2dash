@@ -78,7 +78,7 @@ uint32_t write_styp(byte *data, uint32_t media_type, i2ctx *context);
 
 uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context);
 
-uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context);
+uint32_t write_moof(byte *data, uint32_t media_type, i2ctx **context);
 
 //mfhd for audio and video files is the same
 uint32_t write_mfhd(byte *data, uint32_t media_type, i2ctx *context);
@@ -95,22 +95,22 @@ uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context);
 uint32_t write_mdat(byte* source_data, uint32_t size_source_data, byte *data, uint32_t media_type, i2ctx *context);
 
 // source_data equals to pps_sps_data
-uint32_t initVideoGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, i2ctx *context) {
+uint32_t initVideoGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, i2ctx **context) {
 	uint32_t count, size_ftyp, size_moov;
 	if(size_source_data <= 0) {
 		return I2ERROR;
 	}
 	count = 0;
-	context->ctxvideo->pps_sps_data = (byte*) malloc (size_source_data);
-	memcpy(context->ctxvideo->pps_sps_data, source_data, size_source_data);
-	context->ctxvideo->pps_sps_data_length = size_source_data;
-	size_ftyp = write_ftyp(destination_data + count, VIDEO_TYPE, context);
+	(*context)->ctxvideo->pps_sps_data = (byte*) malloc (size_source_data);
+	memcpy((*context)->ctxvideo->pps_sps_data, source_data, size_source_data);
+	(*context)->ctxvideo->pps_sps_data_length = size_source_data;
+	size_ftyp = write_ftyp(destination_data + count, VIDEO_TYPE, (*context));
 
 	if (size_ftyp < 8)
 		return I2ERROR;
 
 	count = count + size_ftyp;
-	size_moov = write_moov(destination_data + count, VIDEO_TYPE, context);
+	size_moov = write_moov(destination_data + count, VIDEO_TYPE, (*context));
 
 	if (size_moov < 8)
 		return I2ERROR;
@@ -120,22 +120,22 @@ uint32_t initVideoGenerator(byte *source_data, uint32_t size_source_data, byte *
 	return count;
 }
 // source_data equals to aac_data
-uint32_t initAudioGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, i2ctx *context) {
+uint32_t initAudioGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, i2ctx **context) {
 	uint32_t count, size_ftyp, size_moov;
 	if(size_source_data <= 0) {
 		return I2ERROR;
 	}
 	count = 0;
-	context->ctxaudio->aac_data = (byte*) malloc(size_source_data);
-	memcpy(context->ctxaudio->aac_data, source_data, size_source_data);
-	context->ctxaudio->aac_data_length = size_source_data;
-	size_ftyp = write_ftyp(destination_data + count, AUDIO_TYPE, context);
+	(*context)->ctxaudio->aac_data = (byte*) malloc(size_source_data);
+	memcpy((*context)->ctxaudio->aac_data, source_data, size_source_data);
+	(*context)->ctxaudio->aac_data_length = size_source_data;
+	size_ftyp = write_ftyp(destination_data + count, AUDIO_TYPE, (*context));
 	
 	if (size_ftyp < 8)
 		return I2ERROR;
 
 	count = count + size_ftyp;
-	size_moov = write_moov(destination_data + count, AUDIO_TYPE, context);
+	size_moov = write_moov(destination_data + count, AUDIO_TYPE, (*context));
 
 	if (size_moov < 8)
 		return I2ERROR;
@@ -145,7 +145,7 @@ uint32_t initAudioGenerator(byte *source_data, uint32_t size_source_data, byte *
 	return count;
 }
 
-uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, uint32_t media_type, i2ctx *context) {
+uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *destination_data, uint32_t media_type, i2ctx **context) {
 	uint32_t count, size_styp, size_sidx, size_moof, size_mdat, mdat_length;
 	if(size_source_data <= 0) {
 		return I2ERROR;
@@ -155,7 +155,7 @@ uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *de
 		return I2ERROR;
 	
 	count = 0;
-	size_styp = write_styp(destination_data + count, media_type, context);
+	size_styp = write_styp(destination_data + count, media_type, (*context));
 	
 	if (size_styp < 8)
 		return I2ERROR;
@@ -175,8 +175,8 @@ uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *de
 	* the end of the referenced material;
 	*/
 
-	context->reference_size = size_moof + 8 + size_source_data;
-	size_sidx = write_sidx(destination_data + count, media_type, context);
+	(*context)->reference_size = size_moof + 8 + size_source_data;
+	size_sidx = write_sidx(destination_data + count, media_type, (*context));
 	
 	if (size_sidx < 8)
 		return I2ERROR;
@@ -184,7 +184,7 @@ uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *de
 	printf("SIZE_SIDX: %u\n", size_sidx);
 
 	count = count + size_moof + size_sidx;
-	size_mdat = write_mdat(source_data , size_source_data, destination_data + count, media_type, context);
+	size_mdat = write_mdat(source_data , size_source_data, destination_data + count, media_type, (*context));
 
 	if (size_mdat < 8)
 		return I2ERROR;
@@ -1501,7 +1501,7 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 	return count;
 }
 
-uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
+uint32_t write_moof(byte *data, uint32_t media_type, i2ctx **context) {
 	uint32_t count, size, hton_size, size_traf, size_mfhd;
 	i2ctx_sample *samples; 
 
@@ -1511,9 +1511,9 @@ uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
 	count = 4;
 	
 	if(media_type == VIDEO_TYPE)
-		samples = context->ctxvideo->ctxsample;
+		samples = (*context)->ctxvideo->ctxsample;
 	else if (media_type == AUDIO_TYPE)
-		samples = context->ctxaudio->ctxsample;
+		samples = (*context)->ctxaudio->ctxsample;
 
 	// box type
 	memcpy(data + count, "moof", 4);
@@ -1521,13 +1521,13 @@ uint32_t write_moof(byte *data, uint32_t media_type, i2ctx *context) {
 	samples->moof_pos = count;
 
 	// write mfhd
-	size_mfhd = write_mfhd(data + count, media_type, context);
+	size_mfhd = write_mfhd(data + count, media_type, (*context));
 	if (size_mfhd < 8)
 		return I2ERROR;
 
 	count = count +size_mfhd;
 	// write traf
-	size_traf = write_traf(data + count, media_type, context);
+	size_traf = write_traf(data + count, media_type, (*context));
 	if (size_traf < 8)
 		return I2ERROR;
 
@@ -1688,6 +1688,7 @@ uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
+
 	uint32_t count, nitems, flags, hton_flags, hton_sample_size, hton_sample_duration;
 	uint32_t hton_sample_delay, sample_num, hton_sample_num, offset, hton_offset, moof_pos, size, hton_size;
 	

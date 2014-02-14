@@ -1,9 +1,11 @@
 #include "i2libdash.h"
 int main(){
 	i2ctx *context;
-	uint8_t width_height;
-	byte *source_data;
-	uint32_t size_sps_data;
+	byte *sps_data, *pps_data, *metadata, *metadata2, *metadata3, *destination_data;
+	uint32_t metadata_size, metadata2_size, metadata3_size, init_video;
+	uint32_t sps_size, pps_size;
+
+	FILE *output_video_i;
 
 	context_initializer(&context);
 
@@ -19,45 +21,89 @@ int main(){
 
 	printf("CONTEXT SAMPLE VIDEO\n FLAGS %u MDAT_SAMP_LENGTH %u MDAT_TOTAL_SIZE %u MDAT_MOOF_POS %u\n", context->ctxvideo->ctxsample->box_flags, context->ctxvideo->ctxsample->mdat_sample_length, context->ctxvideo->ctxsample->mdat_total_size, context->ctxvideo->ctxsample->moof_pos);
 
+	// SPS
+	sps_data = (byte *) malloc (100 * sizeof(byte*));
+	sps_data[0] = 0x67;
+	sps_data[1] = 0x42;
+	sps_data[2] = 0xC0;
+	sps_data[3] = 0x1E;
+	sps_data[4] = 0xD9;
+	sps_data[5] = 0x00;
+	sps_data[6] = 0xD8;
+	sps_data[7] = 0x3D;
+	sps_data[8] = 0xE6;
+	sps_data[9] = 0xE1;
+	sps_data[10] = 0x00;
+	sps_data[11] = 0x00;
+	sps_data[12] = 0x03;
+	sps_data[13] = 0x00;
+	sps_data[14] = 0x01;
+	sps_data[15] = 0x00;
+	sps_data[16] = 0x00;
+	sps_data[17] = 0x03;
+	sps_data[18] = 0x00;
+	sps_data[19] = 0x30;
+	sps_data[20] = 0x0F;
+	sps_data[21] = 0x16;
+	sps_data[22] = 0x2E;
+	sps_data[23] = 0x48;
+	sps_size = 24;
+
+	// PPS
+	pps_data = (byte *) malloc (100 * sizeof(byte*));
+	pps_data[0] = 0x68;
+	pps_data[1] = 0xCB;
+	pps_data[2] = 0x81;
+	pps_data[3] = 0x32;
+	pps_data[4] = 0xC8;
+	pps_size = 5;
+
+	// METADATA
+	metadata = (byte *) malloc (100 * sizeof(byte*));
+	metadata[0] = 0x01;
+	metadata[1] = 0x42;
+	metadata[2] = 0xC0;
+	metadata[3] = 0x1E;
+	metadata_size = 4;
+
+	// METADATA2
+	metadata2 = (byte *) malloc (100 * sizeof(byte*));
+	metadata2[0] = 0xFF;
+	metadata2[1] = 0xE1;
+	metadata2_size = 2;
+
+	// METADATA3
+	metadata3 = (byte *) malloc (100 * sizeof(byte*));
+	metadata3[0] = 0x01;
+	metadata3_size = 1;
+
+	// DESTINATION DATA
+	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE * sizeof(byte*));
+
 	// WIDTH AND HEIGHT TEST
-
-	// En este caso es el SPS/PPS, etc
-	source_data = (byte *) malloc (100 * sizeof(byte*));
-	source_data[0] = 0x67;
-	source_data[1] = 0x42;
-	source_data[2] = 0xC0;
-	source_data[3] = 0x1E;
-	source_data[4] = 0xD9;
-	source_data[5] = 0x00;
-	source_data[6] = 0xD8;
-	source_data[7] = 0x3D;
-	source_data[8] = 0xE6;
-	source_data[9] = 0xE1;
-	source_data[10] = 0x00;
-	source_data[11] = 0x00;
-	source_data[12] = 0x03;
-	source_data[13] = 0x00;
-	source_data[14] = 0x01;
-	source_data[15] = 0x00;
-	source_data[16] = 0x00;
-	source_data[17] = 0x03;
-	source_data[18] = 0x00;
-	source_data[19] = 0x30;
-	source_data[20] = 0x0F;
-	source_data[21] = 0x16;
-	source_data[22] = 0x2E;
-	source_data[23] = 0x48;
-
-	size_sps_data = 24;
-
-	width_height = get_width_height(source_data, &size_sps_data, &(context->ctxvideo));
-
-	if(width_height != 0){
+	printf("sps_size: %u\n", sps_size);
+	/*if(get_width_height(sps_data, &sps_size, &(context->ctxvideo)) != 0){
 		printf("KO! get_width_height\n");
 		return -1;
-	}
+	}*/
 
 	printf("WIDTH %u, HEIGHT %u\n", context->ctxvideo->width, context->ctxvideo->height);
+
+	// INIT VIDEO HANDLER TEST
+	
+	init_video = init_video_handler(metadata, metadata_size, metadata2, metadata2_size, sps_data, &sps_size, metadata3, metadata3_size, pps_data, pps_size, destination_data, &context);
+	if(init_video != I2ERROR) {
+		printf("OK!\n");
+		output_video_i = fopen("/home/dovahkiin/dash_rtmp_segments/video_init2.m4v", "w");
+		int i = 0;
+		// int fputc(int c, FILE *stream);
+		for(i = 0; i < init_video; i++) {
+			fputc(destination_data[i], output_video_i);
+		}
+		fclose(output_video_i);
+	}
+
+
 
 	return 0;
 }
