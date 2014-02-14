@@ -1,9 +1,7 @@
 #include "i2libdash.h"
 
+// PRIVATE FUNCTIONS DECLARATION
 
-// Privada. Función te dice si un sample es intra o no.
-uint8_t is_key_frame(byte *input_data, uint32_t size_input);
-//
 void audio_context_initializer(i2ctx **context);
 
 void audio_sample_context_initializer(i2ctx_audio **ctxAudio);
@@ -14,24 +12,28 @@ void video_sample_context_initializer(i2ctx_video **ctxVideo);
 
 uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video **ctxVideo);
 
-void set_segment_duration(uint32_t segment_duration, i2ctx *context){
-	context->duration_ms = segment_duration;
+uint8_t is_key_frame(byte *input_data, uint32_t size_input);
+
+// IMPLEMENTATION
+
+void set_segment_duration(uint32_t segment_duration, i2ctx **context){
+	(*context)->duration_ms = segment_duration;
 }
 
 uint32_t get_segment_duration(i2ctx *context){
 	return context->duration_ms;
 }
 
-void set_frame_rate(uint32_t frame_rate, i2ctx_video *ctxVideo){
-	ctxVideo->frame_rate = frame_rate;
+void set_frame_rate(uint32_t frame_rate, i2ctx_video **ctxVideo){
+	(*ctxVideo)->frame_rate = frame_rate;
 }
 
 uint32_t get_frame_rate(i2ctx_video *ctxVideo){
 	return ctxVideo->frame_rate;
 }
 
-void set_sample_rate(uint32_t sample_rate, i2ctx_audio *ctxAudio){
-	ctxAudio->sample_rate = sample_rate;
+void set_sample_rate(uint32_t sample_rate, i2ctx_audio **ctxAudio){
+	(*ctxAudio)->sample_rate = sample_rate;
 }
 
 uint32_t get_sample_rate(i2ctx_audio *ctxAudio){
@@ -98,8 +100,9 @@ void context_initializer(i2ctx **context){
 
 	audio_context_initializer(context);
 	video_context_initializer(context);
-
-	(*context)->threshold_ms = 2/((double)((*context)->ctxvideo->frame_rate)); // 1/fps * 2 (*context)->ctxvideo->frame_rate)
+	
+	// Threshold: 1/fps * 2
+	(*context)->threshold_ms = 2/((double)((*context)->ctxvideo->frame_rate)); 
 }
 
 uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video **ctxVideo) {
@@ -110,19 +113,18 @@ uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video **ct
     if (nal_to_rbsp(nal_sps, (int*)size_nal_sps, rbsp_buf, (int*)size_nal_sps) < 0){
         free(rbsp_buf);
         free(sps);
-        return 1;
+        return I2ERROR;
     }
     bs_t* b = bs_new(rbsp_buf, *size_nal_sps);
     if(read_seq_parameter_set_rbsp(sps,b) < 0){
         bs_free(b);
         free(rbsp_buf);
         free(sps);
-        return 1;
+        return I2ERROR;
     }
     width = (sps->pic_width_in_mbs_minus1 + 1) * 16;
     height = (2 - sps->frame_mbs_only_flag) * (sps->pic_height_in_map_units_minus1 + 1) * 16;
-    //NOTE: frame_mbs_only_flag = 1 --> only progressive frames
-    //      frame_mbs_only_flag = 0 --> some type of interlacing (there are 3 types contemplated in the standard)
+
     if (sps->frame_cropping_flag){
         width -= (sps->frame_crop_left_offset*2 + sps->frame_crop_right_offset*2);
         height -= (sps->frame_crop_top_offset*2 + sps->frame_crop_bottom_offset*2);
@@ -138,32 +140,50 @@ uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video **ct
     return 0;
 }
 
-// Similar al de i2libisoff pero obteniendo datos al context, input sps/pps
-uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *sps_data, uint32_t sps_size, byte *pps_data, uint32_t pps_size, byte *output_data, i2ctx *context) {
+uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *metadata2, uint32_t metadata2_size, byte *sps_data, uint32_t sps_size, byte *metadata3, uint32_t metadata3_size, byte *pps_data, uint32_t pps_size, byte *output_data, i2ctx *context) {
 
 	uint32_t initVideo, count, sps_pps_data_length;
-	byte *sps_pps_data;
+	uint16_t hton_sps_size, hton_pps_size;
+	byte *sps_pps_data, *sps_data_size, *pps_data_size;
 
 	count = 0;
 
 	sps_pps_data = (byte *) malloc (sizeof(byte));
 
+	// Metadata
 	memcpy(sps_pps_data + count, metadata, metadata_size);
 	count = count + metadata_size;
-
+	// Metadata2
+	memcpy(sps_pps_data + count, metadata2, metadata2_size);
+	count = count + metadata2_size;
+	// Size SPS
+	hton_sps_size = htos(sps_size);
+	memcpy(sps_pps_data + count, &hton_sps_size, 2);
+	count = count + 2;
+	// SPS
 	memcpy(sps_pps_data + count, sps_data, sps_size);
 	count = count + pps_size;
-
+	// Metadata3
+	memcpy(sps_pps_data + count, metadata3, metadata3_size);
+	count = count + metadata3_size;
+	// Size PPS
+	hton_pps_size = htos(pps_size);
+	memcpy(sps_pps_data + count, &hton_pps_size, 2);
+	count = count + 2;
+	// PPS
 	memcpy(sps_pps_data + count, pps_data, pps_size);
 	count = count + sps_size;
 
 	sps_pps_data_length = count;
 
-	//TODO Obtain width and height
+	width_height = get_width_height(source_data, &size_sps_data, &(context->ctxvideo));
+
+	if(width_height == I2ERROR)
+		return I2ERROR;
 
 	initVideo = initVideoGenerator(sps_pps_data, sps_pps_data_length, output_data, context);
 
-	return initVideo; //TODO
+	return initVideo;
 
 }
 
