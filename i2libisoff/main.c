@@ -24,6 +24,8 @@ int main(){
 
 	uint32_t initVideo, initAudio;
 
+	// VIDEO INIT GENERATOR TEST
+
 	// En este caso es el SPS/PPS, etc
 	source_data = (byte *) malloc (100 * sizeof(byte*));
 	source_data[0] = 0x01;
@@ -84,8 +86,10 @@ int main(){
 		fclose(output_video_i);
 	}
 	
-	//free(source_data);
-	//free(destination_data);
+	free(source_data);
+	free(destination_data);
+
+	// AUDIO INIT GENERATOR TEST
 
 	source_data = (byte *) malloc (100 * sizeof(byte*));
 	source_data[0] = 0xaf;
@@ -111,6 +115,8 @@ int main(){
 	}
 
 	uint32_t seg_gen_video, seg_gen_audio;
+
+	// VIDEO SEGMENT GENERATOR TEST
 
 	uint32_t media_type = VIDEO_TYPE;
 	// Segments params 1st segment
@@ -199,7 +205,9 @@ int main(){
 		}
 		fclose(output_segment_v);
 	}
-
+	
+	// AUDIO SEGMENT GENERATOR TEST
+	
 	media_type = AUDIO_TYPE;
 
 	// sidx
