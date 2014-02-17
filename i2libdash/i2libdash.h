@@ -13,7 +13,7 @@ uint32_t add_sample(byte *input_data, uint32_t size_input, uint32_t duration_sam
 // Similar al de i2libisoff pero obteniendo datos al context, input sps/pps
 uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *metadata2, uint32_t metadata2_size, byte *sps_data, uint32_t *sps_size, byte *metadata3, uint32_t metadata3_size, byte *pps_data, uint32_t pps_size, byte *output_data, i2ctx **context);
 // Similar al de i2libisoff pero obteniendo datos al context, input 
-uint32_t init_audio_handler(byte *input_data, uint32_t size_input, byte *output_data, i2ctx *context);
+uint32_t init_audio_handler(byte *input_data, uint32_t size_input, byte *output_data, i2ctx **context);
 // Función que reserva memoria para el context
 void context_initializer(i2ctx **context);
 // Setter de duración de segmento

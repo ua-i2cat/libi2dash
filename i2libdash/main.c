@@ -1,11 +1,11 @@
 #include "i2libdash.h"
 int main(){
 	i2ctx *context;
-	byte *sps_data, *pps_data, *metadata, *metadata2, *metadata3, *destination_data;
-	uint32_t metadata_size, metadata2_size, metadata3_size, init_video;
-	uint32_t sps_size, pps_size;
+	byte *sps_data, *pps_data, *metadata, *metadata2, *metadata3, *destination_data, *aac_data;
+	uint32_t metadata_size, metadata2_size, metadata3_size, init_video, init_audio;
+	uint32_t sps_size, pps_size, aac_data_size;
 
-	FILE *output_video_i;
+	FILE *output_video_i,*output_audio_i;
 
 	context_initializer(&context);
 
@@ -20,6 +20,8 @@ int main(){
 	printf("CONTEXT SAMPLE AUDIO\n FLAGS %u MDAT_SAMP_LENGTH %u MDAT_TOTAL_SIZE %u MDAT_MOOF_POS %u\n", context->ctxaudio->ctxsample->box_flags, context->ctxaudio->ctxsample->mdat_sample_length, context->ctxaudio->ctxsample->mdat_total_size, context->ctxaudio->ctxsample->moof_pos);
 
 	printf("CONTEXT SAMPLE VIDEO\n FLAGS %u MDAT_SAMP_LENGTH %u MDAT_TOTAL_SIZE %u MDAT_MOOF_POS %u\n", context->ctxvideo->ctxsample->box_flags, context->ctxvideo->ctxsample->mdat_sample_length, context->ctxvideo->ctxsample->mdat_total_size, context->ctxvideo->ctxsample->moof_pos);
+
+	// INIT VIDEO HANDLER TEST
 
 	// SPS
 	sps_data = (byte *) malloc (100 * sizeof(byte*));
@@ -89,8 +91,6 @@ int main(){
 
 	printf("WIDTH %u, HEIGHT %u\n", context->ctxvideo->width, context->ctxvideo->height);
 
-	// INIT VIDEO HANDLER TEST
-	
 	init_video = init_video_handler(metadata, metadata_size, metadata2, metadata2_size, sps_data, &sps_size, metadata3, metadata3_size, pps_data, pps_size, destination_data, &context);
 	if(init_video != I2ERROR) {
 		printf("OK!\n");
@@ -103,7 +103,31 @@ int main(){
 		fclose(output_video_i);
 	}
 
+	// INIT AUDIO HANDLER TEST
 
+	// AAC METADATA
+	aac_data = (byte *) malloc (100 * sizeof(byte*));
+	aac_data[0] = 0xaf;
+	aac_data[1] = 0x00;
+	aac_data[2] = 0x11;
+	aac_data[3] = 0x90;
+
+	aac_data_size = 4;
+
+	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE * sizeof(byte*));
+
+	init_audio = init_audio_handler(aac_data, aac_data_size, destination_data, &context);
+
+	if(init_audio != I2ERROR) {
+		printf("OK!\n");
+		output_audio_i = fopen("/home/dovahkiin/dash_rtmp_segments/audio_init2.m4a", "w");
+		int j = 0;
+		// int fputc(int c, FILE *stream);
+		for(j = 0; j < init_audio; j++) {
+			fputc(destination_data[j], output_audio_i);
+		}
+		fclose(output_audio_i);
+	}
 
 	return 0;
 }

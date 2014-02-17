@@ -193,6 +193,14 @@ uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *metada
 	initVideo = initVideoGenerator(sps_pps_data, sps_pps_data_length, output_data, context);
 
 	return initVideo;
-
 }
+
+uint32_t init_audio_handler(byte *input_data, uint32_t size_input, byte *output_data, i2ctx **context) {
+	uint32_t initAudio;
+
+	initAudio =  initAudioGenerator(input_data, size_input, output_data, context);
+
+	return initAudio;
+}
+
 
