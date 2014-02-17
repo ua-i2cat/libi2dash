@@ -123,7 +123,7 @@ int main(){
 	// sidx
 	ctxVideo->earliest_presentation_time = 42; // 0x002a
 	ctxVideo->latest_presentation_time = 8823; // 0x2257 + 0x002a
-	context->reference_size = 705284; //0x000ac304
+	//context->reference_size = 705284; //0x000ac304
 
 	// moof
 	// mfhd

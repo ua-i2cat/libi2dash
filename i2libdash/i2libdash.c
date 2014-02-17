@@ -52,6 +52,7 @@ void audio_context_initializer(i2ctx **context) {
 	ctxAudio->sequence_number = 0;
 	ctxAudio->earliest_presentation_time = 0;
 	ctxAudio->latest_presentation_time = 0;
+	ctxAudio->current_audio_duration = 0;
 
 	audio_sample_context_initializer(&ctxAudio);
 }
@@ -78,8 +79,13 @@ void video_context_initializer(i2ctx **context) {
 	ctxVideo->earliest_presentation_time = 0;
 	ctxVideo->latest_presentation_time = 0;
 	ctxVideo->sequence_number = 0;
+	ctxVideo->current_video_duration = 0;
 
 	video_sample_context_initializer(&ctxVideo);
+}
+
+void context_refresh(i2ctx **context, uint32_t media_type) {
+	// TODO, depende de lo que se precise en add_sample
 }
 
 void video_sample_context_initializer(i2ctx_video **ctxVideo) {
@@ -101,8 +107,8 @@ void context_initializer(i2ctx **context){
 	audio_context_initializer(context);
 	video_context_initializer(context);
 
-	// Threshold: 1/fps * 2
-	(*context)->threshold_ms = 2/((double)((*context)->ctxvideo->frame_rate)); 
+	// Threshold: 1/fps * 2 * 1000
+	(*context)->threshold_ms = 2*1000/((double)((*context)->ctxvideo->frame_rate)); 
 }
 
 uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video **ctxVideo) {
@@ -203,4 +209,58 @@ uint32_t init_audio_handler(byte *input_data, uint32_t size_input, byte *output_
 	return initAudio;
 }
 
+uint32_t add_sample(byte *input_data, uint32_t size_input, uint32_t duration_sample, uint32_t timestamp, uint32_t media_type, byte *output_data, uint8_t is_intra, i2ctx **context) {
+	uint32_t seg_gen_video, count;
+	uint32_t samp_len, mdat_size, total_seg_size;
+	byte *total_segment_data;
+	i2ctx_sample *ctxSample = (*context)->ctxvideo->ctxsample;
+	// s
+	samp_len = ctxSample->mdat_sample_length;
+	// Position of the last sample
+	mdat_total_size = ctxSample->mdat_total_size;
 
+
+	if (media_type == VIDEO_TYPE) {
+		// Close segmentation
+		seg_gen_video = I2OK;
+		total_seg_size = (*context)->ctxvideo->segment_data_size;
+		total_segment_data = (*context)->ctxvideo->segment_data_size;
+		if(is_intra == TRUE && (((*context)->duration_ms) - ((*context)->threshold_ms) <= ((*context)->ctxvideo->segment_datacurrent_video_duration_ms))) {
+			seg_gen_video = segmentGenerator((*context)->ctxvideo->segment_data, (*context)->ctxvideo->segment_data_size, output_data, VIDEO_TYPE, &context);
+			
+			if(seg_gen_video != I2ERROR) {
+				(*context)->ctxVideo->sequence_number++;
+				context_refresh(&context, VIDEO_TYPE); // TODO
+			} else {
+				seg_gen_video = I2ERROR;
+			}
+		}
+		// Add sample or Init new segmentation
+		if(seg_gen_video != I2ERROR) {
+			memcpy(total_segment_data + total_seg_size, input_data, size_input);
+			total_seg_size = total_seg_size + size_input;
+			(*context)->ctxvideo->segment_data_size = total_seg_size;
+			ctxSample->mdat_sample_length = samp_len + 1;
+			// Add segment data
+			if()
+				(*context)->ctxvideo->earliest_presentation_time = timestamp;
+			(*context)->ctxvideo->latest_presentation_time = ((*context)->ctxvideo->latest_presentation_time) + timestamp;
+
+			// Add metadata
+			ctxSample->mdat[samp_len].size = size_input;
+			ctxSample->mdat[samp_len].duration = duration_sample;
+			ctxSample->mdat[samp_len].timestamp = timestamp;
+			ctxSample->mdat[samp_len].key = is_intra;
+
+			
+
+		}
+
+	} else if(media_type == AUDIO_TYPE) {
+
+	} else if(media_type == AUDIOVIDEO_TYPE) {
+	} else {
+	}
+
+
+}
