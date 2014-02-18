@@ -77,7 +77,7 @@ int main(){
 
 	if(initVideo != I2ERROR) {
 		printf("OK!\n");
-		output_video_i = fopen("/home/dovahkiin/dash_rtmp_segments/video_init.m4v", "w");
+		output_video_i = fopen("/tmp/pruebas/isoff/video_init.m4v", "w");
 		int i = 0;
 		// int fputc(int c, FILE *stream);
 		for(i = 0; i < initVideo; i++) {
@@ -105,7 +105,7 @@ int main(){
 
 	if(initAudio != I2ERROR) {
 		printf("OK!\n");
-		output_audio_i = fopen("/home/dovahkiin/dash_rtmp_segments/audio_init.m4a", "w");
+		output_audio_i = fopen("/tmp/pruebas/isoff/audio_init.m4a", "w");
 		int i = 0;
 		// int fputc(int c, FILE *stream);
 		for(i = 0; i < initAudio; i++) {
@@ -197,7 +197,7 @@ int main(){
 	seg_gen_video = segmentGenerator(source_data, size_source_data, destination_data, media_type, &context);
 	if(seg_gen_video != I2ERROR) {
 		printf("OK!\n");
-		output_segment_v = fopen("/home/dovahkiin/dash_rtmp_segments/video_segment.m4v", "w");
+		output_segment_v = fopen("/tmp/pruebas/isoff/video_segment.m4v", "w");
 		int i = 0;
 		// int fputc(int c, FILE *stream);
 		for(i = 0; i < seg_gen_video; i++) {
@@ -281,7 +281,7 @@ int main(){
 	seg_gen_audio = segmentGenerator(source_data, size_source_data, destination_data, media_type, &context);
 	if(seg_gen_audio != I2ERROR) {
 		printf("OK!\n");
-		output_segment_a = fopen("/home/dovahkiin/dash_rtmp_segments/audio_segment.m4a", "w");
+		output_segment_a = fopen("/tmp/pruebas/isoff/audio_segment.m4a", "w");
 		int i = 0;
 		// int fputc(int c, FILE *stream);
 		for(i = 0; i < seg_gen_audio; i++) {

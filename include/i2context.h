@@ -60,7 +60,7 @@ typedef struct {
 	uint32_t		earliest_presentation_time; // en dash_append si el sample count == 0 --> timestamp. sino es 0.
 	uint32_t		latest_presentation_time; // Se refresca en cada dash_append con el timestamp.
 	uint32_t		sequence_number; // Actualiza con cada segmento en el close_fragments
-	uint32_t		current_audio_duration_ms; // Current sample duration, increases by sample duration
+	uint32_t		current_audio_duration_ms; // Current segment duration, increases by sample duration
 	i2ctx_sample 	*ctxsample;
 } i2ctx_audio;
 

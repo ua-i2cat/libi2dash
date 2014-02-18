@@ -13,9 +13,9 @@ int main(){
 
 	printf("CONTEXT:\n DURATION %u, REFERENCE SIZE %u, TRESHH %f\n", context->duration_ms, context->reference_size, context->threshold_ms);
 
-	printf("CONTEXT AUDIO:\n AAC_DATA_LENGTH %u, SEG_SIZE %u, CHANNELS %u SAMPLE_RATE %u SAMPLE_SIZE %u SEQNUM %u EPT %u LPT %u\n", context->ctxaudio->aac_data_length, context->ctxaudio->segment_size, context->ctxaudio->channels, context->ctxaudio->sample_rate, context->ctxaudio->sample_size, context->ctxaudio->sequence_number, context->ctxaudio->earliest_presentation_time, context->ctxaudio->latest_presentation_time);
+	printf("CONTEXT AUDIO:\n AAC_DATA_LENGTH %u, SEG_SIZE %u, CHANNELS %u SAMPLE_RATE %u SAMPLE_SIZE %u SEQNUM %u EPT %u LPT %u\n", context->ctxaudio->aac_data_length, context->ctxaudio->segment_data_size, context->ctxaudio->channels, context->ctxaudio->sample_rate, context->ctxaudio->sample_size, context->ctxaudio->sequence_number, context->ctxaudio->earliest_presentation_time, context->ctxaudio->latest_presentation_time);
 
-	printf("CONTEXT VIDEO:\n PPS_SPS_DATA_LENGTH %u, SEG_SIZE %u WIDTH %u HEIGHT %u FPS %u EPT %u LPT %u SEQNUM %u\n", context->ctxvideo->pps_sps_data_length, context->ctxvideo->segment_size, context->ctxvideo->width, context->ctxvideo->height, context->ctxvideo->frame_rate, context->ctxvideo->earliest_presentation_time, context->ctxvideo->latest_presentation_time, context->ctxvideo->sequence_number);
+	printf("CONTEXT VIDEO:\n PPS_SPS_DATA_LENGTH %u, SEG_SIZE %u WIDTH %u HEIGHT %u FPS %u EPT %u LPT %u SEQNUM %u\n", context->ctxvideo->pps_sps_data_length, context->ctxvideo->segment_data_size, context->ctxvideo->width, context->ctxvideo->height, context->ctxvideo->frame_rate, context->ctxvideo->earliest_presentation_time, context->ctxvideo->latest_presentation_time, context->ctxvideo->sequence_number);
 
 	printf("CONTEXT SAMPLE AUDIO\n FLAGS %u MDAT_SAMP_LENGTH %u MDAT_TOTAL_SIZE %u MDAT_MOOF_POS %u\n", context->ctxaudio->ctxsample->box_flags, context->ctxaudio->ctxsample->mdat_sample_length, context->ctxaudio->ctxsample->mdat_total_size, context->ctxaudio->ctxsample->moof_pos);
 

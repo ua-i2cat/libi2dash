@@ -109,13 +109,13 @@ uint32_t initVideoGenerator(byte *source_data, uint32_t size_source_data, byte *
 	if (size_ftyp < 8)
 		return I2ERROR;
 
-	count = count + size_ftyp;
+	count+= size_ftyp;
 	size_moov = write_moov(destination_data + count, VIDEO_TYPE, (*context));
 
 	if (size_moov < 8)
 		return I2ERROR;
 
-	count = count + size_moov;
+	count+= size_moov;
 
 	return count;
 }
@@ -134,13 +134,13 @@ uint32_t initAudioGenerator(byte *source_data, uint32_t size_source_data, byte *
 	if (size_ftyp < 8)
 		return I2ERROR;
 
-	count = count + size_ftyp;
+	count+= size_ftyp;
 	size_moov = write_moov(destination_data + count, AUDIO_TYPE, (*context));
 
 	if (size_moov < 8)
 		return I2ERROR;
 
-	count = count + size_moov;
+	count+= size_moov;
 
 	return count;
 }
@@ -160,7 +160,7 @@ uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *de
 	if (size_styp < 8)
 		return I2ERROR;
 	
-	count = count + size_styp;
+	count+= size_styp;
 	
 	size_sidx = 44;
 
@@ -183,13 +183,13 @@ uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *de
 
 	printf("SIZE_SIDX: %u\n", size_sidx);
 
-	count = count + size_moof + size_sidx;
+	count+= size_moof + size_sidx;
 	size_mdat = write_mdat(source_data , size_source_data, destination_data + count, media_type, (*context));
 
 	if (size_mdat < 8)
 		return I2ERROR;
 
-	count = count + size_mdat;
+	count+= size_mdat;
 
 	return count;
 }
@@ -207,24 +207,24 @@ uint32_t write_ftyp(byte *data, uint32_t media_type, i2ctx *context) {
 	
 	//Box type
 	memcpy(data + count, "ftyp", 4);
-	count = count + 4;
+	count+= 4;
 
 	//Major brand
     memcpy(data + count, "iso6", 4);
-	count = count + 4;
+	count+= 4;
 
     //Version
 	hton_version = htonl(version);
     memcpy(data + count, &hton_version, 4);
-	count = count + 4;
+	count+= 4;
 
     //Compatible brands
     memcpy(data + count, "isom", 4);
-	count = count + 4;
+	count+= 4;
     memcpy(data + count, "iso6", 4);
-	count = count + 4;
+	count+= 4;
     memcpy(data + count, "dash", 4);
-	count = count + 4;
+	count+= 4;
 	
 	//Box size
 	size = count;
@@ -243,23 +243,23 @@ uint32_t write_moov(byte *data, uint32_t media_type, i2ctx *context) {
 	
 	//Box type
 	memcpy(data + count, "moov", 4);
-	count = count + 4;
+	count+= 4;
 
     size_mvhd = write_mvhd(data + count, media_type, context);
 	if (size_mvhd < 8)
 		return I2ERROR;
 
-	count = count + size_mvhd;
+	count+= size_mvhd;
 	size_mvex = write_mvex(data + count, media_type, context);
 	if (size_mvex < 8)
 		return I2ERROR;
 
-	count = count + size_mvex;
+	count+= size_mvex;
 	size_trak = write_trak(data + count, media_type, context);
 	if (size_trak < 8)
 		return I2ERROR;
 
-	count = count + size_trak;
+	count+= size_trak;
 
 	//Box size
 	size = count;
@@ -278,76 +278,76 @@ uint32_t write_mvhd(byte *data, uint32_t media_type, i2ctx *context) {
 	count = 4;	
 	//Box type
 	memcpy(data + count, "mvhd", 4);
-	count = count + 4;
+	count+= 4;
 
 	//Version
 	flag32 = 0;
     memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Creation time
 	flag32 = 0;
     memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Modification time
 	flag32 = 0;
     memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Timescale
 	flag32 = 1000;
 	hton_flag32 = htonl(flag32);
     memcpy(data + count, &hton_flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Duration
 	flag32 = 0;
     memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Reserved
 	flag32 = 0x00010000;
 	hton_flag32 = htonl(flag32);
     memcpy(data + count, &hton_flag32, 4);
-	count = count + 4;
+	count+= 4;
 	flag16 = 0x0100;
 	hton_flag16 = htons(flag16);
     memcpy(data + count, &hton_flag16, 2);
-	count = count + 2;
+	count+= 2;
 	flag16 = 0;
     memcpy(data + count, &flag16, 2);
-	count = count + 2;
+	count+= 2;
 	flag32 = 0;
     memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
     memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 	
 	//transformation matrix
     size_matrix = write_matrix(data + count, 1, 0, 0, 1, 0, 0);
-	count = count + size_matrix;
+	count+= size_matrix;
 
     //Reserved
 	flag32 = 0;
     memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
     memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
     memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
     memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
     memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
     memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Next track id
 	flag32 = 1;
 	hton_flag32 = htonl(flag32);
     memcpy(data + count, &hton_flag32, 4);
-	count = count + 4;
+	count+= 4;
 
 	//Box size
 	size = count;
@@ -367,12 +367,12 @@ uint32_t write_mvex(byte *data, uint32_t media_type, i2ctx *context) {
 	count = 4;
 	//Box type
 	memcpy(data + count, "mvex", 4);
-	count = count + 4;
+	count+= 4;
 
 	size_trex = write_trex(data + count, media_type, context);
 	if (size_trex < 8)
 		return I2ERROR;
-	count = count + size_trex;
+	count+= size_trex;
 
 	//Box size
 	size = count;
@@ -393,43 +393,43 @@ uint32_t write_trex(byte *data, uint32_t media_type, i2ctx *context) {
 	size = 32; //0x20
 	hton_size = htonl(size);
 	memcpy(data, &hton_size, 4);
-	count = count + 4;
+	count+= 4;
 
 	//Box type
 	memcpy(data + count, "trex", 4);
-	count = count + 4;
+	count+= 4;
 
     //Version & flags
 	flag32 = 0x0;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Track id
 	flag32 = 1;
 	hton_flag32 = htonl(flag32);
 	memcpy(data + count, &hton_flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Default sample description index
 	flag32 = 1;
 	hton_flag32 = htonl(flag32);
 	memcpy(data + count, &hton_flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Default sample duration
 	flag32 = 0;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Default sample size, 1024 for AAC
 	flag32 = 0;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Default sample flags, key on
 	flag32 = 0;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
 	return count;
 }
@@ -443,16 +443,16 @@ uint32_t write_trak(byte *data, uint32_t media_type, i2ctx *context) {
 	count = 4;
 	//Box type
 	memcpy(data + count, "trak", 4);
-	count = count + 4;
+	count+= 4;
 
 	size_tkhd = write_tkhd(data + count, media_type, context);
 	if (size_tkhd < 8)
 		return I2ERROR;
-	count = count + size_tkhd;
+	count+= size_tkhd;
 	size_mdia = write_mdia(data + count, media_type, context);
 	if (size_mdia < 8)
 		return I2ERROR;
-	count = count + size_mdia;
+	count+= size_mdia;
 
 	//Box size
 	size = count;
@@ -473,56 +473,56 @@ uint32_t write_tkhd(byte *data, uint32_t media_type, i2ctx *context) {
 	count = 4;	
 	//Box type
 	memcpy(data + count, "tkhd", 4);
-	count = count + 4;
+	count+= 4;
 
     /* version */
 	flag8 = 0;
 	memcpy(data + count, &flag8, 1);
-	count = count + 1;
+	count+= 1;
 
     //Flags: TrackEnabled
 	flag8 = 0;
 	memcpy(data + count, &flag8, 1);
-	count = count + 1;
+	count+= 1;
 	flag16 = 0x000f;
 	hton_flag16 = htons(flag16);
 	memcpy(data + count, &hton_flag16, 2);
-	count = count + 2;
+	count+= 2;
 
     //Creation time
 	flag32 = 0;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Modification time
 	flag32 = 0;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Track id
 	flag32 = 1;
 	hton_flag32 = htonl(flag32);
 	memcpy(data + count, &hton_flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Reserved
 	flag32 = 0;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Duration
 	flag32 = 0;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Reserved
 	flag32 = 0;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
     //Reserved
 	if (media_type == VIDEO_TYPE)
@@ -531,33 +531,33 @@ uint32_t write_tkhd(byte *data, uint32_t media_type, i2ctx *context) {
 		flag16 = 0x0100;
 	hton_flag16 = htons(flag16);
 	memcpy(data + count, &hton_flag16, 2);
-	count = count + 2;
+	count+= 2;
 
     //Reserved
 	flag16 = 0;
 	memcpy(data + count, &flag16, 2);
-	count = count + 2;
+	count+= 2;
 
     size_matrix = write_matrix(data + count, 1, 0, 0, 1, 0, 0);
-	count = count + size_matrix;
+	count+= size_matrix;
 
     if (media_type == VIDEO_TYPE) {
 		flag32 = 0;
 		flag32 = context->ctxvideo->width << 16;
 		hton_flag32 = htonl(flag32);
 		memcpy(data + count, &hton_flag32, 4);
-		count = count + 4;
+		count+= 4;
 		flag32 = 0;
 		flag32 = context->ctxvideo->height << 16;
 		hton_flag32 = htonl(flag32);
 		memcpy(data + count, &hton_flag32, 4);
-		count = count + 4;	
+		count+= 4;	
     } else {
 		flag32 = 0;
 		memcpy(data + count, &flag32, 4);
-		count = count + 4;	
+		count+= 4;	
 		memcpy(data + count, &flag32, 4);
-		count = count + 4;	
+		count+= 4;	
     }
 
 	//Box size
@@ -576,20 +576,20 @@ uint32_t write_mdia(byte *data, uint32_t media_type, i2ctx *context) {
 	count = 4;
 	//Box type
 	memcpy(data + count, "mdia", 4);
-	count = count + 4;
+	count+= 4;
 
 	size_mdhd = write_mdhd(data + count, media_type, context);
 	if (size_mdhd < 8)
 		return I2ERROR;
-	count = count + size_mdhd;
+	count+= size_mdhd;
 	size_hdlr = write_hdlr(data + count, media_type, context);
 	if (size_hdlr < 8)
 		return I2ERROR;
-	count = count + size_hdlr;
+	count+= size_hdlr;
 	size_minf = write_minf(data + count, media_type, context);
 	if (size_minf < 8)
 		return I2ERROR;
-	count = count + size_minf;
+	count+= size_minf;
 
 	//Box size
 	size = count;
@@ -609,44 +609,44 @@ uint32_t write_mdhd(byte *data, uint32_t media_type, i2ctx *context) {
 	count = 4;
 	//Box type
 	memcpy(data + count, "mdhd", 4);
-	count = count + 4;
+	count+= 4;
 
 	//Version
 	flag32 = 0;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
 	//Creation time
 	flag32 = 0;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
 	//Modification time
 	flag32 = 0;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
 	//Time scale
 	flag32 = 1000;
 	hton_flag32 = htonl(flag32);
 	memcpy(data + count, &hton_flag32, 4);
-	count = count + 4;
+	count+= 4;
 
 	//Duration
 	flag32 = 0;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
 	//Lanuguage
 	flag16 = 0x15C7;
 	hton_flag16 = htons(flag16);
 	memcpy(data + count, &hton_flag16, 2);
-	count = count + 2;
+	count+= 2;
 
 	//Reserved
 	flag16 = 0;
 	memcpy(data + count, &flag16, 2);
-	count = count + 2;
+	count+= 2;
 
 	//Box size
 	size = count;
@@ -664,42 +664,42 @@ uint32_t write_hdlr(byte *data, uint32_t media_type, i2ctx *context) {
 	count = 4;
 	//Box type
 	memcpy(data + count, "hdlr", 4);
-	count = count + 4;
+	count+= 4;
 	//Version and flags
 	flag32 = 0;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
 	//Pre defined
 	flag32 = 0;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
 	if (media_type == VIDEO_TYPE) {
 		memcpy(data + count, "vide", 4);
-		count = count + 4;
+		count+= 4;
 	} else {
 		memcpy(data + count, "soun", 4);
-		count = count + 4;
+		count+= 4;
 	}
 
 	//Reserved
 	flag32 = 0;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 	memcpy(data + count, &flag32, 4);
-	count = count + 4;
+	count+= 4;
 
 	if (media_type == VIDEO_TYPE) {
 		//Video handler string, NULL-terminated
 		memcpy(data + count, "VideoHandler", sizeof("VideoHandler"));
-		count = count + sizeof("VideoHandler");
+		count+= sizeof("VideoHandler");
     } else {
 		//Sound handler string, NULL-terminated
 		memcpy(data + count, "SoundHandler", sizeof("SoundHandler"));
-		count = count + sizeof("SoundHandler");
+		count+= sizeof("SoundHandler");
 	}
 
 	//Box size
@@ -718,27 +718,27 @@ uint32_t write_minf(byte *data, uint32_t media_type, i2ctx *context) {
 	count = 4;
 	//Box type
 	memcpy(data + count, "minf", 4);
-	count = count + 4;
+	count+= 4;
 	if (media_type == VIDEO_TYPE) {
 		size_vmhd = write_vmhd(data + count);
 		if (size_vmhd < 8)
 			return I2ERROR;
-		count = count + size_vmhd;
+		count+= size_vmhd;
 	} else {
 		size_smhd = write_smhd(data + count);
 		if (size_smhd < 8)
 			return I2ERROR;
-		count = count + size_smhd;
+		count+= size_smhd;
 	}
 	
 	size_dinf = write_dinf(data + count, media_type, context);
 	if (size_dinf < 8)
 		return I2ERROR;
-	count = count + size_dinf;
+	count+= size_dinf;
 	size_stbl = write_stbl(data + count, media_type, context);
 	if (size_stbl < 8)
 		return I2ERROR;
-	count = count + size_stbl;
+	count+= size_stbl;
 
 	//Box size
 	size = count;
@@ -758,22 +758,22 @@ uint32_t write_vmhd(byte *data) {
 	//Box size
 	hton_size = htonl(size);
 	memcpy(data + count, &hton_size, 4);
-	count = count + 4;
+	count+= 4;
 	//Box type
 	memcpy(data + count, "vmhd", 4);
-	count = count + 4;
+	count+= 4;
 
     //Version and flags
 	hton_flag32 = htonl(flag32);
     memcpy(data + count, &hton_flag32, 4);
 
-	count = count + 4;
+	count+= 4;
 
     //reserved (graphics mode=copy)
     memcpy(data + count, &zero, 4);
-	count = count + 4;
+	count+= 4;
 	memcpy(data + count, &zero, 4);
-	count = count + 4;
+	count+= 4;
 	
 	return count;
 }
@@ -789,13 +789,13 @@ uint32_t write_smhd(byte *data) {
 	// Box size
 	hton_size = htonl(size);
 	memcpy(data + count, &hton_size, 4);
-	count = count + 4;
+	count+= 4;
 	// Box type
 	memcpy(data + count, "smhd", 4);
-	count = count + 4;
+	count+= 4;
 	// Version and flags and reserved (balance normally = 0)
 	memcpy(data + count, &zero, 8);
-	count = count + 8;
+	count+= 8;
 
 	return count;
 }
@@ -807,11 +807,11 @@ uint32_t write_dinf(byte *data, uint32_t media_type, i2ctx *context) {
 		return I2ERROR;
 	count = 4;
 	memcpy(data + count, "dinf", 4);
-	count = count + 4;
+	count+= 4;
 	size_dref = write_dref(data + count, media_type, context);
 	if (size_dref < 8)
 		return I2ERROR;
-	count = count + size_dref;
+	count+= size_dref;
 
 	// box size
 	size = count;
@@ -833,18 +833,18 @@ uint32_t write_dref(byte *data, uint32_t media_type, i2ctx *context) {
 
 	// box type
 	memcpy(data + count, "dref", 4);
-	count = count + 4;
+	count+= 4;
 	// version and flags
 	memcpy(data + count, &zero, 4);
-	count = count + 4;
+	count+= 4;
 	// entries
 	hton_one = htonl(one);
 	memcpy(data + count, &hton_one, 4);
-	count = count + 4;
+	count+= 4;
 	size_url = write_url(data + count);
 	if(size_url < 8)
 		return I2ERROR;
-	count = count + size_url;
+	count+= size_url;
 
 	// box size
 	size = count;
@@ -862,14 +862,14 @@ uint32_t write_url(byte * data) {
 	// size
 	hton_size = htonl(size);
 	memcpy(data + count, &hton_size, 4);
-	count = count + 4;
+	count+= 4;
 	// box type
 	memcpy(data + count, "url ", 4);
-	count = count + 4;
+	count+= 4;
 	// version and flags
 	hton_flags = htonl(flags);
 	memcpy(data + count, &hton_flags, 4);
-	count = count + 4;
+	count+= 4;
 
 	return count;
 }
@@ -884,33 +884,33 @@ uint32_t write_stbl(byte *data, uint32_t media_type, i2ctx *context) {
 	
 	// box type
 	memcpy(data + count, "stbl", 4);
-	count = count + 4;
+	count+= 4;
 
 	// write subBoxes and update count value
 	size_stsd = write_stsd(data + count, media_type, context);
 	if (size_stsd < 8)
 		return I2ERROR;
-	count = count + size_stsd;
+	count+= size_stsd;
 	
 	size_stts = write_stts(data + count, media_type, context);	
 	if (size_stts < 8)
 		return I2ERROR;
-	count = count + size_stts;
+	count+= size_stts;
 
 	size_stsc = write_stsc(data + count, media_type, context);
 	if (size_stsc < 8)
 		return I2ERROR;
-	count = count + size_stsc;
+	count+= size_stsc;
 
 	size_stsz = write_stsz(data + count, media_type, context);
 	if (size_stsz < 8)
 		return I2ERROR;
-	count = count + size_stsz;
+	count+= size_stsz;
 	
 	size_stco = write_stco(data + count, media_type, context);
 	if (size_stco < 8)
 		return I2ERROR;
-	count = count + size_stco;
+	count+= size_stco;
 	
 	// box size
 	size = count;
@@ -935,14 +935,14 @@ uint32_t write_stsd(byte *data, uint32_t media_type, i2ctx *context) {
 
 	// box type
 	memcpy(data + count, "stsd", 4);
-	count = count + 4;
+	count+= 4;
 	// version and flags
 	memcpy(data + count, &zero, 4);
-	count = count + 4;
+	count+= 4;
 	// entries
 	hton_one = htonl(one);
 	memcpy(data + count, &hton_one, 4);
-	count = count + 4;
+	count+= 4;
 	/*
 	* media_type = 0 none
 	* media_type = 1 video
@@ -955,13 +955,13 @@ uint32_t write_stsd(byte *data, uint32_t media_type, i2ctx *context) {
 		size_avc1 = write_avc1(data + count, ctxvideo);
 		if (size_avc1 < 8)
 			return I2ERROR;
-		count = count + size_avc1;
+		count+= size_avc1;
 	} else if(media_type == AUDIO_TYPE) {
 		// write mp4a
 		size_mp4a = write_mp4a(data + count, ctxaudio);
 		if (size_mp4a < 8)
 			return I2ERROR;
-		count = count + size_mp4a;
+		count+= size_mp4a;
 	} else {
 		return I2ERROR;
 	}
@@ -991,66 +991,66 @@ uint32_t write_avc1(byte *data, i2ctx_video *ctxVideo) {
 
 	// box type
 	memcpy(data + count, "avc1", 4);
-	count = count + 4;
+	count+= 4;
 	// reserved
 	memcpy(data + count, &zero_32, 4);
-	count = count + 4;
+	count+= 4;
 	memcpy(data + count, &zero_16, 2);
-	count = count + 2;
+	count+= 2;
 	// data reference index
 	hton_flag_one = htons(flag_one);
 	memcpy(data + count, &hton_flag_one, 2);
-	count = count + 2;
+	count+= 2;
 	// codec stream version + revision + reserved
 	memcpy(data + count, &zero_64, 8);
-	count = count + 8;
+	count+= 8;
 	memcpy(data + count, &zero_64, 8);
-	count = count + 8;
+	count+= 8;
 	// width
 	hton_width = htons(width);
 	memcpy(data + count, &hton_width, 2);
-	count = count + 2;
+	count+= 2;
 	// height
 	hton_height = htons(height);
 	memcpy(data + count, &hton_height, 2);
-	count = count + 2;
+	count+= 2;
 	// horitzonal and vertical resolution 72dpi
 	hton_hv_resolution = htonl(hv_resolution);
 	memcpy(data + count, &hton_hv_resolution, 4);
-	count = count + 4;
+	count+= 4;
 	memcpy(data + count, &hton_hv_resolution, 4);
-	count = count + 4;
+	count+= 4;
 	// data size
 	memcpy(data + count, &zero_32, 4);
-	count = count + 4;
+	count+= 4;
 	// frame count
 	memcpy(data + count, &hton_flag_one, 2);
-	count = count + 2;
+	count+= 2;
 	// compressor name
 	memcpy(data + count, &zero_64, 8);
-	count = count + 8;
+	count+= 8;
 	memcpy(data + count, &zero_32, 4);
-	count = count + 4;
+	count+= 4;
 	// reserved
 	memcpy(data + count, &zero_64, 8);
-	count = count + 8;
+	count+= 8;
 	memcpy(data + count, &zero_64, 8);
-	count = count + 8;
+	count+= 8;
 	memcpy(data + count, &zero_32, 4);
-	count = count + 4;
+	count+= 4;
 	flag16 = 0x18;
 	hton_flag16 = htons(flag16);
 	memcpy(data + count, &hton_flag16, 2);
-	count = count + 2;
+	count+= 2;
 	flag16 = 0xffff;
 	hton_flag16 = htons(flag16);
 	memcpy(data + count, &hton_flag16, 2);
-	count = count + 2;
+	count+= 2;
 	// write avcC
 	size_avcc = write_avcc(data + count, ctxVideo);
 	if (size_avcc < 8)
 		return I2ERROR;
-	count = count + size_avcc;
+	count+= size_avcc;
 	
 	// box size
 	size = count;
@@ -1073,14 +1073,14 @@ uint32_t write_avcc(byte *data, i2ctx_video *ctxVideo) {
 	hton_size = htonl(size);
 	// box size
 	memcpy(data + count, &hton_size, 4);
-	count = count + 4;
+	count+= 4;
 	// box type
 	memcpy(data + count, "avcC", 4);
-	count = count + 4;
+	count+= 4;
 	// avc header, includes version, profile, level, sps and pps
 	memcpy(data + count, ctxVideo->pps_sps_data, ctxVideo->pps_sps_data_length);
 	
-	count = count + ctxVideo->pps_sps_data_length;
+	count+= ctxVideo->pps_sps_data_length;
 
 	return count;
 }
@@ -1100,45 +1100,45 @@ uint32_t write_mp4a(byte *data, i2ctx_audio *ctxAudio) {
 
 	// box type
 	memcpy(data + count, "mp4a", 4);
-	count = count + 4;
+	count+= 4;
 	// reserved
 	memcpy(data + count, &zero_32, 4);
-	count = count + 4;
+	count+= 4;
 	memcpy(data + count, &zero_16, 2);
-	count = count + 2;
+	count+= 2;
 	// data referennce index
 	hton_one_16 = htons(one_16);
 	memcpy(data + count, &hton_one_16, 2);
-	count = count + 2;
+	count+= 2;
 	// reserved
 	memcpy(data + count, &zero_32, 4);
-	count = count + 4;
+	count+= 4;
 	memcpy(data + count, &zero_32, 4);
-	count = count + 4;	
+	count+= 4;	
 	// channel count
 	hton_audio_channels = htons(audio_channels); 
 	memcpy(data + count, &hton_audio_channels, 2);
-	count = count + 2;
+	count+= 2;
 	// sample size
 	hton_sample_size = htons(sample_size);
 	memcpy(data + count, &hton_sample_size, 2);
-	count = count + 2;
+	count+= 2;
 	// reserved
 	memcpy(data + count, &zero_32, 4);
-	count = count + 4;
+	count+= 4;
 	// timescale
 	hton_timescale = htons(1000);
 	memcpy(data + count, &hton_timescale, 2);
-	count = count + 2;
+	count+= 2;
 	// sample rate
 	hton_sample_rate = htons(sample_rate);
 	memcpy(data + count, &hton_sample_rate, 2);
-	count = count + 2;
+	count+= 2;
 	// write esds
 	size_esds = write_esds(data + count, ctxAudio);
 	if (size_esds < 8)
 		return I2ERROR;
-	count = count + size_esds;
+	count+= size_esds;
 
 	// box size
 	size = count;
@@ -1179,76 +1179,76 @@ uint32_t write_esds(byte *data, i2ctx_audio *ctxAudio) {
 
 	// box type
 	memcpy(data + count, "esds", 4);
-	count = count + 4;
+	count+= 4;
 	
 	// box version
 	memcpy(data + count, &zero_32, 4);
-	count = count + 4;
+	count+= 4;
 
 	// ES descriptor
 	memcpy(data + count, &tag_esd, 1);
-	count = count + 1;
+	count+= 1;
 	flag8 = size_esd & 0x7F;
 	memcpy(data + count, &flag8, 1);
-	count = count + 1;
+	count+= 1;
 
 	// Es id
 	hton_one_16 = htons(one_16);
 	memcpy(data + count, &hton_one_16, 2);
-	count = count + 2;
+	count+= 2;
 
 	// flags
 	memcpy(data + count, &zero_8, 1);
-	count = count + 1;
+	count+= 1;
 
 	// decoder config descriptor
 	memcpy(data + count, &tag_dcd, 1);
-	count = count + 1;
+	count+= 1;
 	flag8 = size_dcd & 0x7F;
 	memcpy(data + count, &flag8, 1);
-	count = count + 1;
+	count+= 1;
 
 	// objectTypeIndication: Audio ISO/IEC 14496-3 (AAC)
 	memcpy(data + count, &flag_oti, 1);
-	count = count + 1;
+	count+= 1;
 
 	// streamType: AudioStream
 	memcpy(data + count, &flag_st, 1);
-	count = count + 1;
+	count+= 1;
 
 	// bufferSizeDB
 	memcpy(data + count, &zero_16, 2);
-	count = count + 2;
+	count+= 2;
 	memcpy(data + count, &zero_8, 1);
-	count = count + 1;
+	count+= 1;
 
 	// maxBitrate
 	hton_max_bitrate = htonl(max_bitrate);
 	memcpy(data + count, &hton_max_bitrate, 4);
-	count = count + 4;
+	count+= 4;
 
 	// avgBitrate
 	hton_avg_bitrate = htonl(avg_bitrate);
 	memcpy(data + count, &hton_avg_bitrate, 4);
-	count = count + 4;
+	count+= 4;
 
 	// DecoderSpecificInfo Descriptor
 	memcpy(data + count, &tag_dsid, 1);
-	count = count + 1;
+	count+= 1;
 	flag8 = dsi_len & 0x7F;
 	memcpy(data + count, &flag8, 1);
-	count = count + 1;
+	count+= 1;
 	memcpy(data + count, dsi, dsi_len);
-	count = count + dsi_len;
+	count+= dsi_len;
 
 	// SL Descriptor
 	memcpy(data + count, &tag_sld, 1);
-	count = count + 1;
+	count+= 1;
 	flag8 = size_sld & 0x7F;
 	memcpy(data + count, &flag8, 1);
-	count = count + 1;
+	count+= 1;
 	memcpy(data + count, &flag_sld, 1);
-	count = count + 1;
+	count+= 1;
 
 	//Box size
 	size = count;
@@ -1270,19 +1270,19 @@ uint32_t write_stts(byte *data, uint32_t media_type, i2ctx *context) {
 	size = 16;
 	hton_size = htonl(size);
 	memcpy(data + count, &hton_size, 4);
-	count = count + 4;
+	count+= 4;
 
 	// box type
 	memcpy(data + count, "stts", 4);
-	count = count + 4;
+	count+= 4;
 
 	// version
 	memcpy(data + count, &zero, 4);
-	count = count + 4;
+	count+= 4;
 
 	// entries
 	memcpy(data + count, &zero, 4);
-	count = count + 4;
+	count+= 4;
 
 	return count;
 }
@@ -1299,19 +1299,19 @@ uint32_t write_stsc(byte *data, uint32_t media_type, i2ctx *context) {
 	size = 16;
 	hton_size = htonl(size);
 	memcpy(data + count, &hton_size, 4);
-	count = count + 4;
+	count+= 4;
 
 	// box type
 	memcpy(data + count, "stsc", 4);
-	count = count + 4;
+	count+= 4;
 
 	// version
 	memcpy(data + count, &zero, 4);
-	count = count + 4;
+	count+= 4;
 
 	// entries
 	memcpy(data + count, &zero, 4);
-	count = count + 4;
+	count+= 4;
 
 	return count;
 }
@@ -1328,23 +1328,23 @@ uint32_t write_stsz(byte *data, uint32_t media_type, i2ctx *context) {
 	size = 20;
 	hton_size = htonl(size);
 	memcpy(data + count, &hton_size, 4);
-	count = count + 4;
+	count+= 4;
 
 	// Box type
 	memcpy(data + count, "stsz", 4);
-	count = count + 4;
+	count+= 4;
 
 	// Version
 	memcpy(data + count, &zero, 4);
-	count = count + 4;
+	count+= 4;
 
 	// Flags
 	memcpy(data + count, &zero, 4);
-	count = count + 4;
+	count+= 4;
 
 	// Entries
 	memcpy(data + count, &zero, 4);
-	count = count + 4;
+	count+= 4;
 
 	return count;
 }
@@ -1361,19 +1361,19 @@ uint32_t write_stco(byte *data, uint32_t media_type, i2ctx *context) {
 	size = 16;
 	hton_size = htonl(size);
 	memcpy(data + count, &hton_size, 4);
-	count = count + 4;
+	count+= 4;
 
 	// box type
 	memcpy(data + count, "stco", 4);
-	count = count + 4;
+	count+= 4;
 
 	// version
 	memcpy(data + count, &zero, 4);
-	count = count + 4;
+	count+= 4;
 
 	// entries
 	memcpy(data + count, &zero, 4);
-	count = count + 4;
+	count+= 4;
 
 	return count;
 }
@@ -1390,28 +1390,28 @@ uint32_t write_styp(byte *data, uint32_t media_type, i2ctx *context) {
 	size = 28;
 	hton_size = htonl(size);
 	memcpy(data + count, &hton_size, 4);
-	count = count + 4;
+	count+= 4;
 
 	// box type
 	memcpy(data + count, "styp", 4);
-	count = count + 4;
+	count+= 4;
 
 	// major brand
 	memcpy(data + count, "iso6", 4);
-	count = count + 4;
+	count+= 4;
 
     //Version
 	hton_version = htonl(version);
     memcpy(data + count, &hton_version, 4);
-	count = count + 4;
+	count+= 4;
 
 	// compatible brands
 	memcpy(data + count, "isom", 4);
-	count = count + 4;
+	count+= 4;
 	memcpy(data + count, "iso6", 4);
-	count = count + 4;
+	count+= 4;
 	memcpy(data + count, "dash", 4);
-	count = count + 4;
+	count+= 4;
 
 	return count;
 }
@@ -1449,50 +1449,50 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 
 	// box type
 	memcpy(data + count, "sidx", 4);
-	count = count + 4;
+	count+= 4;
 	// version
 	memcpy(data + count, &zero_32, 4);
-	count = count + 4;
+	count+= 4;
 	// reference id
 	hton_one_32 = htonl(one_32);
 	memcpy(data + count, &hton_one_32, 4);
-	count = count + 4;
+	count+= 4;
 	// timescale
 	hton_timescale = htonl(1000);
 	memcpy(data + count, &hton_timescale, 4);
-	count = count + 4;
+	count+= 4;
 	// earliest_presentation_time
 	hton_earliest_presentation_time = htonl(earliest_presentation_time);
 	memcpy(data + count, &hton_earliest_presentation_time, 4);
-	count = count + 4;
+	count+= 4;
 	// first offset
 	hton_duration_ms = htonl(duration_ms); //TODO
 	memcpy(data + count, &hton_duration_ms, 4);
-	count = count + 4;
+	count+= 4;
 	// reserved
 	memcpy(data + count, &zero_16, 2);
-	count = count + 2;	
+	count+= 2;	
 	// reference count = 1
 	hton_one_16 = htons(one_16);
 	memcpy(data + count, &hton_one_16, 2);
-	count = count + 2;
+	count+= 2;
 	// reference size
 	hton_reference_size = htonl(reference_size);
 	memcpy(data + count, &hton_reference_size, 4);
-	count = count + 4;
+	count+= 4;
 	// subsegment_duration
 	hton_duration_ms =  htonl(duration_ms);
 	memcpy(data + count, &hton_duration_ms, 4);
-	count = count + 4;
+	count+= 4;
 	// 1st bit is reference type, the rest is reference size
 	flag8 = 0x90;
 	memcpy(data + count, &flag8, 1);
-	count = count + 1;
+	count+= 1;
 	// SAP delta time
 	memcpy(data + count, &zero_16, 2);
-	count = count + 2;
+	count+= 2;
 	memcpy(data + count, &zero_8, 1);
-	count = count + 1;
+	count+= 1;
 
 	// box size
 	size = count;
@@ -1517,7 +1517,7 @@ uint32_t write_moof(byte *data, uint32_t media_type, i2ctx **context) {
 
 	// box type
 	memcpy(data + count, "moof", 4);
-	count = count + 4;
+	count+= 4;
 	samples->moof_pos = count;
 
 	// write mfhd
@@ -1525,13 +1525,13 @@ uint32_t write_moof(byte *data, uint32_t media_type, i2ctx **context) {
 	if (size_mfhd < 8)
 		return I2ERROR;
 
-	count = count +size_mfhd;
+	count+=size_mfhd;
 	// write traf
 	size_traf = write_traf(data + count, media_type, (*context));
 	if (size_traf < 8)
 		return I2ERROR;
 
-	count = count + size_traf;
+	count+= size_traf;
 
 	// box size
 	size = count;
@@ -1561,17 +1561,17 @@ uint32_t write_mfhd(byte *data, uint32_t media_type, i2ctx *context) {
 	size = 16;
 	hton_size = htonl(size);
 	memcpy(data + count, &hton_size, 4);
-	count = count + 4;
+	count+= 4;
 	// box type
 	memcpy(data + count, "mfhd", 4);
-	count = count + 4;
+	count+= 4;
 	// version and flags
 	memcpy(data + count, &zero, 4);
-	count = count + 4;
+	count+= 4;
 	// sequence number
 	hton_seqnum = htonl(seqnum);
 	memcpy(data + count, &hton_seqnum, 4);
-	count = count + 4;
+	count+= 4;
 
 	return count;
 }
@@ -1586,25 +1586,25 @@ uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context) {
 
 	// box type
 	memcpy(data + count, "traf", 4);
-	count = count + 4;
+	count+= 4;
 	
 	// write tfhd
 	size_tfhd = write_tfhd(data + count, media_type, context);
 	if (size_tfhd < 8)
 		return I2ERROR;
-	count = count + size_tfhd;
+	count+= size_tfhd;
 	
 	// write tfdt
 	size_tfdt = write_tfdt(data + count, media_type, context);
 	if (size_tfdt < 8)
 		return I2ERROR;
-	count = count + size_tfdt;
+	count+= size_tfdt;
 	
 	// write trun
 	size_trun = write_trun(data + count, media_type, context);
 	if (size_trun < 8)
 		return I2ERROR;
-	count = count + size_trun;
+	count+= size_trun;
 
 	// box size
 	size = count;
@@ -1626,21 +1626,21 @@ uint32_t write_tfhd(byte *data, uint32_t media_type, i2ctx *context) {
 	size = 16;
 	hton_size = htonl(size);
 	memcpy(data + count,&hton_size, 4);
-	count = count + 4;
+	count+= 4;
 
 	// box type
 	memcpy(data + count, "tfhd", 4);
-	count = count + 4;
+	count+= 4;
 
 	// version and flags
 	hton_flags = htonl(flags);
 	memcpy(data + count, &hton_flags, 4);
-	count = count + 4;
+	count+= 4;
 
 	// track id
 	hton_one = htonl(one);
 	memcpy(data + count, &hton_one, 4);
-	count = count + 4;
+	count+= 4;
 
 	return count;
 }
@@ -1669,20 +1669,20 @@ uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
 	size = 16;
 	hton_size = htonl(size);
 	memcpy(data + count, &hton_size, 4);
-	count = count + 4;
+	count+= 4;
 
 	// box type
 	memcpy(data + count, "tfdt", 4);
-	count = count + 4;
+	count+= 4;
 	
 	// flags
 	memcpy(data + count, &zero, 4);
-	count = count + 4;
+	count+= 4;
 	
 	// baseMediaDecodeTime //TODO check standard
 	hton_earliest_presentation_time = htonl(earliest_presentation_time);
 	memcpy(data + count, &hton_earliest_presentation_time, 4);
-	count = count + 4;
+	count+= 4;
 
 	return count;
 }
@@ -1717,23 +1717,23 @@ uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
 
 	// box type
 	memcpy(data + count, "trun", 4);
-	count = count + 4;
+	count+= 4;
 	offset = (count - moof_pos) + 20 + (sample_num * nitems * 4) + 8;
 
 	// flags
 	hton_flags = htonl(flags);
 	memcpy(data + count, &hton_flags, 4);
-	count = count + 4;
+	count+= 4;
 
 	// sample count
 	hton_sample_num = htonl(sample_num);
 	memcpy(data + count, &hton_sample_num, 4);
-	count = count + 4;
+	count+= 4;
 
 	// offset
 	hton_offset = htonl(offset);
 	memcpy(data + count, &hton_offset, 4);
-	count = count + 4;
+	count+= 4;
 	samples->moof_pos = 0;
 
 	for (i = 0; i < sample_num; i++)
@@ -1741,22 +1741,22 @@ uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
 		// sample duration
 		hton_sample_duration = htonl(samples->mdat[i].duration_ms);
 		memcpy(data + count, &hton_sample_duration, 4);
-		count = count + 4;
+		count+= 4;
 		// sample size
 		hton_sample_size = htonl(samples->mdat[i].size);
 		memcpy(data + count, &hton_sample_size, 4);
-		count = count + 4;
+		count+= 4;
 		// video exclusive
 		if(media_type == VIDEO_TYPE) {
 			// sample flags
 			flags = samples->mdat[i].key ? 0x00000000 : 0x00010000;
 			hton_flags = htonl(flags);
 			memcpy(data + count, &hton_flags, 4);
-			count = count + 4;
+			count+= 4;
 			// sample composition time offsets
 			hton_sample_delay = htonl(samples->mdat[i].delay);
 			memcpy(data + count, &hton_sample_delay, 4);
-			count = count + 4;
+			count+= 4;
 		}
 	}
 
@@ -1777,11 +1777,11 @@ uint32_t write_mdat(byte* source_data, uint32_t size_source_data, byte *data, ui
 	mdat_size = size_source_data + 8;
 	hton_mdat_size = htonl(mdat_size);
 	memcpy(data + count, &hton_mdat_size, 4);
-	count = count + 4;
+	count+= 4;
 	memcpy(data + count, "mdat", 4);
-	count = count + 4;
+	count+= 4;
 	memcpy(data + count, source_data, size_source_data);
-	count = count + size_source_data;
+	count+= size_source_data;
 
 	return count;
 }
@@ -1800,45 +1800,45 @@ uint32_t write_matrix(byte *data, uint32_t a, uint32_t b, uint32_t c, uint32_t d
 	value = a << 16;
 	hton_value = htonl(value);
 	memcpy(data + count, &hton_value, 4);
-	count = count + 4;
+	count+= 4;
 	//b in 16.16 format
 	value = b << 16;
 	hton_value = htonl(value);
 	memcpy(data + count, &hton_value, 4);
-	count = count + 4;
+	count+= 4;
 	//u in 2.30 format
 	value = 0;
 	memcpy(data + count, &value, 4);
-	count = count + 4;
+	count+= 4;
 	//c in 16.16 format
 	value = c << 16;
 	hton_value = htonl(value);
 	memcpy(data + count, &hton_value, 4);
-	count = count + 4;
+	count+= 4;
 	//d in 16.16 format
 	value = d << 16;
 	hton_value = htonl(value);
 	memcpy(data + count, &hton_value, 4);
-	count = count + 4;
+	count+= 4;
 	//v in 2.30 format
 	value = 0;
 	memcpy(data + count, &value, 4);
-	count = count + 4;
+	count+= 4;
 	//tx in 16.16 format
 	value = tx << 16;
 	hton_value = htonl(value);
 	memcpy(data + count, &hton_value, 4);
-	count = count + 4;
+	count+= 4;
 	//ty in 16.16 format
 	value = ty << 16;
 	hton_value = htonl(value);
 	memcpy(data + count, &hton_value, 4);
-	count = count + 4;
+	count+= 4;
 	//w in 2.30 format
 	value = 1 << 30;
 	hton_value = htonl(value);
 	memcpy(data + count, &hton_value, 4);
-	count = count + 4;
+	count+= 4;
 
     return count;
 }
