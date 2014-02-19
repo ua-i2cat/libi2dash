@@ -1,8 +1,8 @@
 #include "i2libdash.h"
 int main(){
 	i2ctx *context;
-	byte *sps_data, *pps_data, *metadata, *metadata2, *metadata3, *destination_data, *aac_data, *source_data;
-	uint32_t metadata_size, metadata2_size, metadata3_size, init_video, init_audio, size_source_data;
+	byte *sps_data, *pps_data, *metadata, *metadata2, *metadata3, *destination_data, *aac_data, *source_data, *source_data_a;
+	uint32_t metadata_size, metadata2_size, metadata3_size, init_video, init_audio, size_source_data, size_source_data_a;
 	uint32_t sps_size, pps_size, aac_data_size, duration_sample, timestamp, seg_size, i;
 	uint8_t is_intra, i2error;
 
@@ -143,7 +143,6 @@ int main(){
 		fclose(output_audio_i);
 	}
 
-printf("CONTEXT:\n DURATION %u, REFERENCE SIZE %u, TRESHH %u\n", context->duration_ms, context->reference_size, context->threshold_ms);
 	//VIDEO DATA
 	source_data = (byte *) malloc (100);
 	source_data[0] = 0x0;
@@ -188,31 +187,92 @@ printf("CONTEXT:\n DURATION %u, REFERENCE SIZE %u, TRESHH %u\n", context->durati
 	source_data[39] = 0x75;
 
 	size_source_data = 40;
+
+	source_data_a = (byte *) malloc (100);
+	source_data_a[0] = 0x21;
+	source_data_a[1] = 011;
+	source_data_a[2] = 0x45;
+	source_data_a[3] = 0x00;
+	source_data_a[4] = 0x14;
+	source_data_a[5] = 0x50;
+	source_data_a[6] = 0x01;
+	source_data_a[7] = 0x46;
+	source_data_a[8] = 0xFF;
+	source_data_a[9] = 0xF1;
+	source_data_a[10] = 0x0A;
+	source_data_a[11] = 0x5A;
+	source_data_a[12] = 0x5A;
+	source_data_a[13] = 0x5A;
+	source_data_a[14] = 0x5A;
+	source_data_a[15] = 0x5A;
+	source_data_a[16] = 0x5A;
+	source_data_a[17] = 0x5A;
+	source_data_a[18] = 0x5A;
+	source_data_a[19] = 0x5A;
+	source_data_a[20] = 0x5A;
+	source_data_a[21] = 0x5D;
+	source_data_a[22] = 0xE5;
+	source_data_a[23] = 0xC2;
+	source_data_a[24] = 0x14;
+	source_data_a[25] = 0xB4;
+	source_data_a[26] = 0xB4;
+	source_data_a[27] = 0xB4;
+	source_data_a[28] = 0xB4;
+	source_data_a[29] = 0xB4;
+	source_data_a[30] = 0xB4;
+	source_data_a[31] = 0xBC;
+	source_data_a[32] = 0x21;
+	source_data_a[33] = 0x1A;
+	source_data_a[34] = 0x13;
+	source_data_a[35] = 0xA5;
+	source_data_a[36] = 0x9C;
+	source_data_a[37] = 0x86;
+	source_data_a[38] = 0x04;
+	source_data_a[39] = 0x20;
+
+	size_source_data_a = 40;
+
 	duration_sample = 10;
 	timestamp = 0;
 	is_intra = 1;
-	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE);
-	seg_size = add_sample(source_data, size_source_data, duration_sample, timestamp, VIDEO_TYPE, destination_data, is_intra, &context);
+	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE);	
 	is_intra = 0;
 	for (i=0; i<500; i++) {
 		timestamp += 10;
+		if ((i == 495) || (i == 0))
+			is_intra = 1;
+		else
+			is_intra = 0;
 		seg_size = add_sample(source_data, size_source_data, duration_sample, timestamp, VIDEO_TYPE, destination_data, is_intra, &context);
-	}
-	is_intra = 1;
-	timestamp += 10;
-	seg_size = add_sample(source_data, size_source_data, duration_sample, timestamp, VIDEO_TYPE, destination_data, is_intra, &context);
-	printf("Segment size %d\n", seg_size);
-
-	if(init_video != I2ERROR) {
-		printf("OK VIDEO SEGMENT!\n");
-		output_video_i = fopen("/tmp/pruebas/i2dash/video_seg.m4v", "w");
-		int i = 0;
-		// int fputc(int c, FILE *stream);
-		for(i = 0; i < seg_size; i++) {
-			fputc(destination_data[i], output_video_i);
+		if ((seg_size != I2ERROR) && (seg_size != I2OK)) {
+			printf("OK VIDEO SEGMENT! %d\n", seg_size);
+			output_video_i = fopen("/tmp/pruebas/i2dash/video_seg.m4v", "w");
+			int i = 0;
+			// int fputc(int c, FILE *stream);
+			for(i = 0; i < seg_size; i++) {
+				fputc(destination_data[i], output_video_i);
+			}
+			fclose(output_video_i);
 		}
-		fclose(output_video_i);
+		if (i == 495) 
+			is_intra = 1;
+		else
+			is_intra = 0;
+		seg_size = add_sample(source_data_a, size_source_data_a, duration_sample, timestamp, AUDIO_TYPE, destination_data, is_intra, &context);
+		if ((seg_size != I2ERROR) && (seg_size != I2OK)) {
+			printf("OK AUDIO SEGEMENT! %d\n", seg_size);
+			output_audio_i = fopen("/tmp/pruebas/i2dash/audio_seg.m4a", "w");
+			int j = 0;
+			// int fputc(int c, FILE *stream);
+			for(j = 0; j < seg_size; j++) {
+				fputc(destination_data[j], output_audio_i);
+			}
+			fclose(output_audio_i);
+		}
 	}
+
+
+
 
 
 	return 0;

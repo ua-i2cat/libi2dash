@@ -181,8 +181,6 @@ uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *de
 	if (size_sidx < 8)
 		return I2ERROR;
 
-	printf("SIZE_SIDX: %u\n", size_sidx);
-
 	count+= size_moof + size_sidx;
 	size_mdat = write_mdat(source_data , size_source_data, destination_data + count, media_type, (*context));
 
