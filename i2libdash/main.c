@@ -239,7 +239,7 @@ int main(){
 	is_intra = 0;
 	for (i=0; i<550; i++) {
 		timestamp += 10;
-		if ((i == 499) || (i == 0))
+		if ((i == 500) || (i == 0))
 			is_intra = 1;
 		else
 			is_intra = 0;
@@ -254,7 +254,7 @@ int main(){
 			}
 			fclose(output_video_i);
 		}
-		if (i == 499) 
+		if (i == 500) 
 			is_intra = 1;
 		else
 			is_intra = 0;
