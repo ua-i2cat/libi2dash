@@ -27,7 +27,7 @@ int main(){
 	// VIDEO INIT GENERATOR TEST
 
 	// En este caso es el SPS/PPS, etc
-	source_data = (byte *) malloc (100 * sizeof(byte*));
+	source_data = (byte *) malloc (100);
 	source_data[0] = 0x01;
 	source_data[1] = 0x42;
 	source_data[2] = 0xC0;
@@ -71,7 +71,7 @@ int main(){
 
 	size_source_data = 40;
 
-	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE * sizeof(byte*));
+	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE);
 
 	initVideo = initVideoGenerator(source_data, size_source_data, destination_data, &context);
 
@@ -91,7 +91,7 @@ int main(){
 
 	// AUDIO INIT GENERATOR TEST
 
-	source_data = (byte *) malloc (100 * sizeof(byte*));
+	source_data = (byte *) malloc (100);
 	source_data[0] = 0xaf;
 	source_data[1] = 0x00;
 	source_data[2] = 0x11;
@@ -99,7 +99,7 @@ int main(){
 
 	size_source_data = 4;
 
-	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE * sizeof(byte*));
+	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE);
 
 	initAudio = initAudioGenerator(source_data, size_source_data, destination_data, &context);
 
@@ -148,7 +148,7 @@ int main(){
 		ctxVSample->mdat[i].delay = 0;
 	}
 	// mdat
-	source_data = (byte *) malloc (100 * sizeof(byte*));
+	source_data = (byte *) malloc (100);
 	source_data[0] = 0x0;
 	source_data[1] = 0x0;
 	source_data[2] = 0x02;
@@ -192,7 +192,7 @@ int main(){
 
 	size_source_data = 40;
 
-	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE * sizeof(byte*));
+	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE);
 
 	seg_gen_video = segmentGenerator(source_data, size_source_data, destination_data, media_type, &context);
 	if(seg_gen_video != I2ERROR) {
@@ -232,7 +232,7 @@ int main(){
 		ctxASample->mdat[i].size = 341; // 0x000c
 	}
 	// mdat
-	source_data = (byte *) malloc (100 * sizeof(byte*));
+	source_data = (byte *) malloc (100);
 	source_data[0] = 0x21;
 	source_data[1] = 011;
 	source_data[2] = 0x45;
@@ -276,7 +276,7 @@ int main(){
 
 	size_source_data = 40;
 
-	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE * sizeof(byte*));
+	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE);
 
 	seg_gen_audio = segmentGenerator(source_data, size_source_data, destination_data, media_type, &context);
 	if(seg_gen_audio != I2ERROR) {

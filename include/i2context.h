@@ -68,7 +68,7 @@ typedef struct {
 	i2ctx_audio		*ctxaudio;
 	i2ctx_video		*ctxvideo;
 	uint32_t		duration_ms; // Optimum duration
-	double			threshold_ms; // Segment duration threshold
+	uint32_t		threshold_ms; // Segment duration threshold
 	uint32_t		reference_size; // Se calcula en close fragments en llamada a sidx
 	uint8_t			audio_segment_flag;
 } i2ctx;
