@@ -8,8 +8,15 @@ typedef unsigned char byte;
 #define AUDIOVIDEO_TYPE 3
 #define MAX_MDAT_SAMPLE 65536
 #define MAX_DAT 10*1024*1024
-#define I2OK	2
-#define I2ERROR 1
+#define I2ERROR_IS_INTRA 9
+#define I2ERROR_DURATION_ZERO 7
+#define I2ERROR_DESTINATION_NULL 6
+#define I2ERROR_SOURCE_NULL 5
+#define I2ERROR_CONTEXT_NULL 4
+#define I2ERROR 3
+#define I2ERROR_MEDIA_TYPE 2
+#define I2ERROR_SIZE_ZERO 1
+#define I2OK	0
 #define TRUE	1
 #define	FALSE	0
 

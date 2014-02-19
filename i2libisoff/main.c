@@ -72,11 +72,11 @@ int main(){
 	size_source_data = 40;
 
 	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE);
-
+	
 	initVideo = initVideoGenerator(source_data, size_source_data, destination_data, &context);
 
-	if(initVideo != I2ERROR) {
-		printf("OK!\n");
+	if ((initVideo != I2ERROR) && (initVideo != I2ERROR_CONTEXT_NULL) && (initVideo != I2ERROR_SOURCE_NULL) && (initVideo != I2ERROR_DESTINATION_NULL) && (initVideo != I2ERROR_SIZE_ZERO)){
+		printf("OK INIT VIDEO!\n");
 		output_video_i = fopen("/tmp/pruebas/isoff/video_init.m4v", "w");
 		int i = 0;
 		// int fputc(int c, FILE *stream);
@@ -84,6 +84,22 @@ int main(){
 			fputc(destination_data[i], output_video_i);
 		}
 		fclose(output_video_i);
+	} else {
+		if (initVideo == I2ERROR_SIZE_ZERO) {
+			printf ("I2ERROR_SIZE_ZERO: %d\n", initVideo);
+		}
+		if (initVideo == I2ERROR) {
+			printf ("I2ERROR: %d\n", initVideo);
+		}
+		if (initVideo == I2ERROR_CONTEXT_NULL) {
+			printf ("I2ERROR_CONTEXT_NULL: %d\n", initVideo);
+		}		
+		if (initVideo == I2ERROR_SOURCE_NULL) {
+			printf ("I2ERROR_SOURCE_NULL: %d\n", initVideo);
+		}
+		if (initVideo == I2ERROR_DESTINATION_NULL) {
+			printf ("I2ERROR_DESTINATION_NULL: %d\n", initVideo);
+		}
 	}
 	
 	free(source_data);
@@ -102,9 +118,8 @@ int main(){
 	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE);
 
 	initAudio = initAudioGenerator(source_data, size_source_data, destination_data, &context);
-
-	if(initAudio != I2ERROR) {
-		printf("OK!\n");
+	if ((initAudio != I2ERROR) && (initAudio != I2ERROR_CONTEXT_NULL) && (initAudio != I2ERROR_SOURCE_NULL) && (initAudio != I2ERROR_DESTINATION_NULL) && (initAudio != I2ERROR_SIZE_ZERO)){
+		printf("OK INIT AUDIO!\n");
 		output_audio_i = fopen("/tmp/pruebas/isoff/audio_init.m4a", "w");
 		int i = 0;
 		// int fputc(int c, FILE *stream);
@@ -112,6 +127,22 @@ int main(){
 			fputc(destination_data[i], output_audio_i);
 		}
 		fclose(output_audio_i);
+	} else {
+		if (initAudio == I2ERROR_SIZE_ZERO) {
+			printf ("I2ERROR_SIZE_ZERO: %d\n", initAudio);
+		}
+		if (initAudio == I2ERROR) {
+			printf ("I2ERROR: %d\n", initAudio);
+		}
+		if (initAudio == I2ERROR_CONTEXT_NULL) {
+			printf ("I2ERROR_CONTEXT_NULL: %d\n", initAudio);
+		}		
+		if (initAudio == I2ERROR_SOURCE_NULL) {
+			printf ("I2ERROR_SOURCE_NULL: %d\n", initAudio);
+		}
+		if (initAudio == I2ERROR_DESTINATION_NULL) {
+			printf ("I2ERROR_DESTINATION_NULL: %d\n", initAudio);
+		}
 	}
 
 	uint32_t seg_gen_video, seg_gen_audio;
@@ -195,15 +226,33 @@ int main(){
 	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE);
 
 	seg_gen_video = segmentGenerator(source_data, size_source_data, destination_data, media_type, &context);
-	if(seg_gen_video != I2ERROR) {
-		printf("OK!\n");
+	if ((seg_gen_video != I2ERROR) && (seg_gen_video != I2ERROR_CONTEXT_NULL) && (seg_gen_video != I2ERROR_SOURCE_NULL) && (seg_gen_video != I2ERROR_DESTINATION_NULL) && (seg_gen_video != I2ERROR_SIZE_ZERO) && (seg_gen_video != I2ERROR_MEDIA_TYPE)){
+		printf("OK VIDEO SEGMENT!\n");
 		output_segment_v = fopen("/tmp/pruebas/isoff/video_segment.m4v", "w");
 		int i = 0;
-		// int fputc(int c, FILE *stream);
 		for(i = 0; i < seg_gen_video; i++) {
 			fputc(destination_data[i], output_segment_v);
 		}
 		fclose(output_segment_v);
+	} else {
+		if (seg_gen_video == I2ERROR_SIZE_ZERO) {
+			printf ("I2ERROR_SIZE_ZERO: %d\n", seg_gen_video);
+		}
+		if (seg_gen_video == I2ERROR_MEDIA_TYPE) {
+			printf ("I2ERROR_MEDIA_TYPE: %d\n", seg_gen_video);
+		}
+		if (seg_gen_video == I2ERROR) {
+			printf ("I2ERROR: %d\n", seg_gen_video);
+		}
+		if (seg_gen_video == I2ERROR_CONTEXT_NULL) {
+			printf ("I2ERROR_CONTEXT_NULL: %d\n", seg_gen_video);
+		}		
+		if (seg_gen_video == I2ERROR_SOURCE_NULL) {
+			printf ("I2ERROR_SOURCE_NULL: %d\n", seg_gen_video);
+		}
+		if (seg_gen_video == I2ERROR_DESTINATION_NULL) {
+			printf ("I2ERROR_DESTINATION_NULL: %d\n", seg_gen_video);
+		}
 	}
 	
 	// AUDIO SEGMENT GENERATOR TEST
@@ -279,8 +328,8 @@ int main(){
 	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE);
 
 	seg_gen_audio = segmentGenerator(source_data, size_source_data, destination_data, media_type, &context);
-	if(seg_gen_audio != I2ERROR) {
-		printf("OK!\n");
+	if ((seg_gen_audio != I2ERROR) && (seg_gen_audio != I2ERROR_CONTEXT_NULL) && (seg_gen_audio != I2ERROR_SOURCE_NULL) && (seg_gen_audio != I2ERROR_DESTINATION_NULL) && (seg_gen_audio != I2ERROR_SIZE_ZERO) && (seg_gen_audio != I2ERROR_MEDIA_TYPE)){
+		printf("OK AUDIO SEGMENT!\n");
 		output_segment_a = fopen("/tmp/pruebas/isoff/audio_segment.m4a", "w");
 		int i = 0;
 		// int fputc(int c, FILE *stream);
@@ -288,6 +337,25 @@ int main(){
 			fputc(destination_data[i], output_segment_a);
 		}
 		fclose(output_segment_a);
+	} else {
+		if (seg_gen_audio == I2ERROR_SIZE_ZERO) {
+			printf ("I2ERROR_SIZE_ZERO: %d\n", seg_gen_audio);
+		}
+		if (seg_gen_audio == I2ERROR_MEDIA_TYPE) {
+			printf ("I2ERROR_MEDIA_TYPE: %d\n", seg_gen_audio);
+		}
+		if (seg_gen_audio == I2ERROR) {
+			printf ("I2ERROR: %d\n", seg_gen_audio);
+		}
+		if (seg_gen_audio == I2ERROR_CONTEXT_NULL) {
+			printf ("I2ERROR_CONTEXT_NULL: %d\n", seg_gen_audio);
+		}		
+		if (seg_gen_audio == I2ERROR_SOURCE_NULL) {
+			printf ("I2ERROR_SOURCE_NULL: %d\n", seg_gen_audio);
+		}
+		if (seg_gen_audio == I2ERROR_DESTINATION_NULL) {
+			printf ("I2ERROR_DESTINATION_NULL: %d\n", seg_gen_audio);
+		}
 	}
 
 	return 0;

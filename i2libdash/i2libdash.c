@@ -1,7 +1,7 @@
 #include "i2libdash.h"
 
 // PRIVATE FUNCTIONS DECLARATION
-// Función que actualiza el context cada vez que se genera un segmento
+// Updates the context each time a new segment is generated
 void context_refresh(i2ctx **context, uint32_t media_type);
 
 void audio_context_initializer(i2ctx **context);
@@ -105,7 +105,7 @@ void context_refresh(i2ctx **context, uint32_t media_type) {
 		(*context)->ctxaudio->ctxsample->mdat_sample_length = 0;
 		(*context)->ctxaudio->ctxsample->mdat_total_size = 0;
 	}
-	// TODO, depende de lo que se precise en add_sample
+	
 }
 
 void video_sample_context_initializer(i2ctx_video **ctxVideo) {
@@ -116,32 +116,6 @@ void video_sample_context_initializer(i2ctx_video **ctxVideo) {
 	ctxVSample->mdat_sample_length = 0;
 	ctxVSample->mdat_total_size = 0;
 	ctxVSample->moof_pos = 0;
-}
-
-uint8_t context_initializer(i2ctx **context, uint32_t media_type){
-	if ((media_type != VIDEO_TYPE) && (media_type != AUDIO_TYPE) && (media_type != AUDIOVIDEO_TYPE)) {
-		(*context) = NULL;
-		return I2ERROR;
-	}
-	*context = (i2ctx *) malloc(sizeof(i2ctx));
-
-	(*context)->duration_ms = 5 * 1000;
-	(*context)->reference_size = 0;
-
-	if ((media_type == VIDEO_TYPE) || (media_type == AUDIOVIDEO_TYPE)) {
-		video_context_initializer(context);
-		// Threshold: 1/fps * 2 * 1000
-		(*context)->threshold_ms = (2*1000)/(((*context)->ctxvideo->frame_rate)); 
-	} else
-		(*context)->ctxvideo = NULL;
-
-	if ((media_type == AUDIO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
-		audio_context_initializer(context);
-	else
-		(*context)->ctxaudio = NULL;
-
-
-	return I2OK;
 }
 
 uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video **ctxVideo) {
@@ -179,12 +153,53 @@ uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video **ct
     return 0;
 }
 
+uint8_t context_initializer(i2ctx **context, uint32_t media_type){
+	if ((media_type != VIDEO_TYPE) && (media_type != AUDIO_TYPE) && (media_type != AUDIOVIDEO_TYPE)) {
+		(*context) = NULL;
+		return I2ERROR_MEDIA_TYPE;
+	}
+	*context = (i2ctx *) malloc(sizeof(i2ctx));
+
+	(*context)->duration_ms = 5 * 1000;
+	(*context)->reference_size = 0;
+
+	if ((media_type == VIDEO_TYPE) || (media_type == AUDIOVIDEO_TYPE)) {
+		video_context_initializer(context);
+		// Threshold: 1/fps * 2 * 1000
+		(*context)->threshold_ms = (2*1000)/(((*context)->ctxvideo->frame_rate)); 
+	} else
+		(*context)->ctxvideo = NULL;
+
+	if ((media_type == AUDIO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+		audio_context_initializer(context);
+	else
+		(*context)->ctxaudio = NULL;
+
+
+	return I2OK;
+}
+
+
 uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *metadata2, uint32_t metadata2_size, byte *sps_data, uint32_t *sps_size, byte *metadata3, uint32_t metadata3_size, byte *pps_data, uint32_t pps_size, byte *output_data, i2ctx **context) {
 
 	uint32_t initVideo, count, sps_pps_data_length;
 	uint16_t pps16, sps16, hton_sps_size, hton_pps_size;
 	byte *sps_pps_data;
 	uint32_t sps_s = *sps_size;
+
+	if ((*context) == NULL) {
+		return I2ERROR_CONTEXT_NULL;
+	}
+	if (output_data == NULL) {
+		return I2ERROR_DESTINATION_NULL;
+	}
+	if ((metadata == NULL) || (metadata2 == NULL) || (metadata3 == NULL) || (sps_data == NULL) || (pps_data == NULL)) {
+		return I2ERROR_SOURCE_NULL;
+	}
+	if ((metadata_size < 1) || (metadata2_size < 1) || (metadata3_size < 1) || ((*sps_size) < 1) || (pps_size < 1)) {
+		return I2ERROR_SIZE_ZERO;
+	}
+
 	//uint32_t total_size;
 
 	/*total_size = metadata_size + metadata2_size + 2 + sps_s + metadata3_size + 2 + pps_size;
@@ -237,7 +252,18 @@ uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *metada
 
 uint32_t init_audio_handler(byte *input_data, uint32_t size_input, byte *output_data, i2ctx **context) {
 	uint32_t initAudio;
-
+	if ((*context) == NULL) {
+		return I2ERROR_CONTEXT_NULL;
+	}
+	if (output_data == NULL) {
+		return I2ERROR_DESTINATION_NULL;
+	}
+	if (input_data == NULL) {
+		return I2ERROR_SOURCE_NULL;
+	}	
+	if (size_input < 1) {
+		return I2ERROR_SIZE_ZERO;
+	}
 	initAudio =  initAudioGenerator(input_data, size_input, output_data, context);
 
 	return initAudio;
@@ -245,33 +271,49 @@ uint32_t init_audio_handler(byte *input_data, uint32_t size_input, byte *output_
 
 uint32_t add_sample(byte *input_data, uint32_t size_input, uint32_t duration_sample, uint32_t timestamp, uint32_t media_type, byte *output_data, uint8_t is_intra, i2ctx **context) {
 	uint32_t seg_gen, samp_len;
-	
+
+	if ((*context) == NULL) {
+		return I2ERROR_CONTEXT_NULL;
+	}
+	if (output_data == NULL) {
+		return I2ERROR_DESTINATION_NULL;
+	}
+	if (input_data == NULL) {
+		return I2ERROR_SOURCE_NULL;
+	}	
+	if (size_input < 1) {
+		return I2ERROR_SIZE_ZERO;
+	}
+	if (duration_sample < 1) {
+		return I2ERROR_DURATION_ZERO;
+	}
+	if ((is_intra != TRUE) && (is_intra != FALSE)) {
+		return I2ERROR_IS_INTRA;
+	}
+	//TODO AUDIOVIDEO_TYPE
+	if ((media_type != AUDIO_TYPE) && (media_type != VIDEO_TYPE)) {
+		return I2ERROR_MEDIA_TYPE;
+	}
+
 	if (media_type == VIDEO_TYPE) {
 		seg_gen = I2OK;
-		//printf("Before close segmentation VIDEO, Condition: %d, Duration - threshold: %d, Current duration %d\n", ((((*context)->duration_ms) - ((*context)->threshold_ms)) <= ((*context)->ctxvideo->current_video_duration_ms)), (((*context)->duration_ms) - ((*context)->threshold_ms)), ((*context)->ctxvideo->current_video_duration_ms));
 		// Close segmentation
 		if ((is_intra == TRUE) && ((((*context)->duration_ms) - ((*context)->threshold_ms)) <= ((*context)->ctxvideo->current_video_duration_ms))) {
-			//printf("Close segmentation\n");
 			seg_gen = segmentGenerator((*context)->ctxvideo->segment_data, (*context)->ctxvideo->segment_data_size, output_data, VIDEO_TYPE, context);			
-			if(seg_gen != I2ERROR) {
-				(*context)->ctxvideo->sequence_number++;
-				context_refresh(context, VIDEO_TYPE); // TODO
-			} else {
+			if (seg_gen != I2ERROR)
+				context_refresh(context, VIDEO_TYPE);
+			else
 				seg_gen = I2ERROR;
-			}
 		}
 		// Add sample or Init new segmentation
-		//printf("Add sample or Init new segmentation %d\n", seg_gen);
 		if(seg_gen != I2ERROR) {
-			//printf("NO ERROR\n");
 			i2ctx_sample *ctxSample = (*context)->ctxvideo->ctxsample;
 			// Add segment data
 			memcpy((*context)->ctxvideo->segment_data + (*context)->ctxvideo->segment_data_size, input_data, size_input);
 			(*context)->ctxvideo->segment_data_size += size_input;
-			if(ctxSample->mdat_sample_length == 0) {
-				//printf("First sample\n");
+			if(ctxSample->mdat_sample_length == 0)
 				(*context)->ctxvideo->earliest_presentation_time = timestamp;
-			}
+
 			(*context)->ctxvideo->latest_presentation_time = timestamp;
 			(*context)->ctxvideo->current_video_duration_ms += duration_sample;
 
@@ -287,16 +329,12 @@ uint32_t add_sample(byte *input_data, uint32_t size_input, uint32_t duration_sam
 	} else if(media_type == AUDIO_TYPE) {
 		seg_gen = I2OK;
 		// Close segmentation
-		//printf("Before close segmentation AUDIO, Duration: %d, Current duration %d\n", (((*context)->duration_ms)), ((*context)->ctxaudio->current_audio_duration_ms));
 		if ((((*context)->ctxvideo != NULL) && (is_intra == TRUE)) || (((*context)->ctxvideo == NULL) && (((*context)->duration_ms) <= ((*context)->ctxaudio->current_audio_duration_ms)))) { //this condition should be checked
-			//printf("Close segmentation!!!\n");
 			seg_gen = segmentGenerator((*context)->ctxaudio->segment_data, (*context)->ctxaudio->segment_data_size, output_data, AUDIO_TYPE, context);			
-			if(seg_gen != I2ERROR) {
-				(*context)->ctxaudio->sequence_number++;
-				context_refresh(context, AUDIO_TYPE); // TODO
-			} else {
+			if(seg_gen != I2ERROR)
+				context_refresh(context, AUDIO_TYPE);
+			else
 				seg_gen = I2ERROR;
-			}
 		}
 		// Add sample or Init new segmentation
 		if(seg_gen != I2ERROR) {
@@ -317,10 +355,35 @@ uint32_t add_sample(byte *input_data, uint32_t size_input, uint32_t duration_sam
 			ctxSample->mdat[samp_len].key = is_intra;
 			ctxSample->mdat_sample_length++;
 		}
-	} else if(media_type == AUDIOVIDEO_TYPE) {
-		seg_gen = I2ERROR;
-	} else {
-		seg_gen = I2ERROR;
+	}
+
+	return seg_gen;
+}
+
+uint32_t finish_segment(uint32_t media_type, byte *output_data, i2ctx **context) {
+	uint32_t seg_gen;
+	if ((*context) == NULL) {
+		return I2ERROR_CONTEXT_NULL;
+	}
+	if (output_data == NULL) {
+		return I2ERROR_DESTINATION_NULL;
+	}
+	if ((media_type != VIDEO_TYPE) && (media_type != AUDIO_TYPE)) {
+		return I2ERROR_MEDIA_TYPE;
+	}
+	
+	if (media_type == VIDEO_TYPE) {
+		seg_gen = I2OK;
+		// Close segmentation
+		seg_gen = segmentGenerator((*context)->ctxvideo->segment_data, (*context)->ctxvideo->segment_data_size, output_data, VIDEO_TYPE, context);			
+		if ((seg_gen != I2ERROR) && (seg_gen != I2ERROR_SOURCE_NULL) && (seg_gen != I2ERROR_SIZE_ZERO))
+			context_refresh(context, VIDEO_TYPE);
+	} else if(media_type == AUDIO_TYPE) {
+		seg_gen = I2OK;
+		// Close segmentation
+		seg_gen = segmentGenerator((*context)->ctxaudio->segment_data, (*context)->ctxaudio->segment_data_size, output_data, AUDIO_TYPE, context);			
+		if ((seg_gen != I2ERROR) && (seg_gen != I2ERROR_SOURCE_NULL) && (seg_gen != I2ERROR_SIZE_ZERO))
+			context_refresh(context, AUDIO_TYPE);
 	}
 
 	return seg_gen;
