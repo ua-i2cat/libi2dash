@@ -237,9 +237,9 @@ int main(){
 	is_intra = 1;
 	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE);	
 	is_intra = 0;
-	for (i=0; i<500; i++) {
+	for (i=0; i<501; i++) {
 		timestamp += 10;
-		if ((i == 495) || (i == 0))
+		if ((i == 500) || (i == 0))
 			is_intra = 1;
 		else
 			is_intra = 0;
@@ -254,7 +254,7 @@ int main(){
 			}
 			fclose(output_video_i);
 		}
-		if (i == 495) 
+		if (i == 500) 
 			is_intra = 1;
 		else
 			is_intra = 0;
@@ -271,8 +271,29 @@ int main(){
 		}
 	}
 
+	i2error= context_initializer(&context, AUDIO_TYPE);
+	if (i2error == I2OK)
+		printf ("CONTEXT OK!\n");
+	else {
+		printf("CONTEXT NO OK!\n");
+		exit(1);
+	}
 
-
+	is_intra = 0;
+	for (i=0; i<501; i++) {
+		timestamp += 10;
+		seg_size = add_sample(source_data_a, size_source_data_a, duration_sample, timestamp, AUDIO_TYPE, destination_data, is_intra, &context);
+		if ((seg_size != I2ERROR) && (seg_size != I2OK)) {
+			printf("OK AUDIO SEGEMENT! %d\n", seg_size);
+			output_audio_i = fopen("/tmp/pruebas/i2dash/audio_seg_2.m4a", "w");
+			int j = 0;
+			// int fputc(int c, FILE *stream);
+			for(j = 0; j < seg_size; j++) {
+				fputc(destination_data[j], output_audio_i);
+			}
+			fclose(output_audio_i);
+		}
+	}
 
 
 	return 0;

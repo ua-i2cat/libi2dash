@@ -87,7 +87,7 @@ void video_context_initializer(i2ctx **context) {
 }
 
 void context_refresh(i2ctx **context, uint32_t media_type) {
-	if (media_type == VIDEO_TYPE) {
+	if ((media_type == VIDEO_TYPE) || (media_type == AUDIOVIDEO_TYPE)) {
 		(*context)->ctxvideo->earliest_presentation_time = 0;
 		(*context)->ctxvideo->latest_presentation_time = 0;
 		(*context)->ctxvideo->sequence_number++;
@@ -96,7 +96,7 @@ void context_refresh(i2ctx **context, uint32_t media_type) {
 		(*context)->ctxvideo->ctxsample->mdat_sample_length = 0;
 		(*context)->ctxvideo->ctxsample->mdat_total_size = 0;
 	}
-	if (media_type == AUDIO_TYPE) {
+	if ((media_type == AUDIO_TYPE) || (media_type == AUDIOVIDEO_TYPE)) {
 		(*context)->ctxaudio->earliest_presentation_time = 0;
 		(*context)->ctxaudio->latest_presentation_time = 0;
 		(*context)->ctxaudio->sequence_number++;
@@ -128,18 +128,19 @@ uint8_t context_initializer(i2ctx **context, uint32_t media_type){
 	(*context)->duration_ms = 5 * 1000;
 	(*context)->reference_size = 0;
 
-	if ((media_type == VIDEO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
+	if ((media_type == VIDEO_TYPE) || (media_type == AUDIOVIDEO_TYPE)) {
 		video_context_initializer(context);
-	else
+		// Threshold: 1/fps * 2 * 1000
+		(*context)->threshold_ms = (2*1000)/(((*context)->ctxvideo->frame_rate)); 
+	} else
 		(*context)->ctxvideo = NULL;
 
 	if ((media_type == AUDIO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
 		audio_context_initializer(context);
 	else
 		(*context)->ctxaudio = NULL;
-	
-	// Threshold: 1/fps * 2 * 1000
-	(*context)->threshold_ms = (2*1000)/(((*context)->ctxvideo->frame_rate)); 
+
+
 	return I2OK;
 }
 
@@ -286,7 +287,7 @@ uint32_t add_sample(byte *input_data, uint32_t size_input, uint32_t duration_sam
 	} else if(media_type == AUDIO_TYPE) {
 		seg_gen = I2OK;
 		// Close segmentation
-		//printf("Before close segmentation AUDIO, Condition: %d, Duration - threshold: %d, Current duration %d\n", ((((*context)->duration_ms) - ((*context)->threshold_ms)) <= ((*context)->ctxvideo->current_video_duration_ms)), (((*context)->duration_ms) - ((*context)->threshold_ms)), ((*context)->ctxvideo->current_video_duration_ms));
+		//printf("Before close segmentation AUDIO, Duration: %d, Current duration %d\n", (((*context)->duration_ms)), ((*context)->ctxaudio->current_audio_duration_ms));
 		if ((((*context)->ctxvideo != NULL) && (is_intra == TRUE)) || (((*context)->ctxvideo == NULL) && (((*context)->duration_ms) <= ((*context)->ctxaudio->current_audio_duration_ms)))) { //this condition should be checked
 			//printf("Close segmentation!!!\n");
 			seg_gen = segmentGenerator((*context)->ctxaudio->segment_data, (*context)->ctxaudio->segment_data_size, output_data, AUDIO_TYPE, context);			
