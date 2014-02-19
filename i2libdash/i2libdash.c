@@ -362,6 +362,7 @@ uint32_t add_sample(byte *input_data, uint32_t size_input, uint32_t duration_sam
 
 uint32_t finish_segment(uint32_t media_type, byte *output_data, i2ctx **context) {
 	uint32_t seg_gen;
+
 	if ((*context) == NULL) {
 		return I2ERROR_CONTEXT_NULL;
 	}
