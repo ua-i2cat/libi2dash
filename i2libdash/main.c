@@ -375,7 +375,6 @@ int main(){
 			fclose(output_video_i);
 		}
 		if (close_fragment) {
-			printf("entra!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 			is_intra = 1;
 			close_fragment = 0;
 		}
