@@ -8,7 +8,7 @@ CC:=gcc
 CFLAGS:=-g -Wall
 PROG = i2libdash
 
-all: main.o i2libdash.o
+all: main.o i2libdash.o $(LIBISOFF_PATH)/i2libisoff.o
 	@mkdir -p bin
 	$(CC) $(CFLAGS) -o $(BIN_PATH)/$(PROG) main.o i2libdash.o $(LIBISOFF_PATH)/i2libisoff.o $(INCLUDE_PATH)/h264_stream.o
 main.o: main.c i2libdash.o 

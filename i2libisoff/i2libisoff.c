@@ -118,13 +118,13 @@ uint32_t initVideoGenerator(byte *source_data, uint32_t size_source_data, byte *
 	size_ftyp = write_ftyp(destination_data + count, VIDEO_TYPE, (*context));
 
 	if (size_ftyp < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 
 	count+= size_ftyp;
 	size_moov = write_moov(destination_data + count, VIDEO_TYPE, (*context));
 
 	if (size_moov < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 
 	count+= size_moov;
 
@@ -152,13 +152,13 @@ uint32_t initAudioGenerator(byte *source_data, uint32_t size_source_data, byte *
 	size_ftyp = write_ftyp(destination_data + count, AUDIO_TYPE, (*context));
 	
 	if (size_ftyp < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 
 	count+= size_ftyp;
 	size_moov = write_moov(destination_data + count, AUDIO_TYPE, (*context));
 
 	if (size_moov < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 
 	count+= size_moov;
 
@@ -187,7 +187,7 @@ uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *de
 	size_styp = write_styp(destination_data + count, media_type, (*context));
 	
 	if (size_styp < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	
 	count+= size_styp;
 	
@@ -196,7 +196,7 @@ uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *de
 	size_moof = write_moof(destination_data + count + size_sidx, media_type, context);
 
 	if (size_moof < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	/*
 	*referenced_size: the distance in bytes from the first byte
 	* of the referenced item to the first byte of the next
@@ -208,16 +208,15 @@ uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *de
 	size_sidx = write_sidx(destination_data + count, media_type, (*context));
 	
 	if (size_sidx < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 
 	count+= size_moof + size_sidx;
 	size_mdat = write_mdat(source_data , size_source_data, destination_data + count, media_type, (*context));
 
 	if (size_mdat < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 
 	count+= size_mdat;
-
 	return count;
 }
 
@@ -266,17 +265,17 @@ uint32_t write_moov(byte *data, uint32_t media_type, i2ctx *context) {
 
     size_mvhd = write_mvhd(data + count, media_type, context);
 	if (size_mvhd < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 
 	count+= size_mvhd;
 	size_mvex = write_mvex(data + count, media_type, context);
 	if (size_mvex < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 
 	count+= size_mvex;
 	size_trak = write_trak(data + count, media_type, context);
 	if (size_trak < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 
 	count+= size_trak;
 
@@ -384,7 +383,7 @@ uint32_t write_mvex(byte *data, uint32_t media_type, i2ctx *context) {
 
 	size_trex = write_trex(data + count, media_type, context);
 	if (size_trex < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_trex;
 
 	//Box size
@@ -454,11 +453,11 @@ uint32_t write_trak(byte *data, uint32_t media_type, i2ctx *context) {
 
 	size_tkhd = write_tkhd(data + count, media_type, context);
 	if (size_tkhd < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_tkhd;
 	size_mdia = write_mdia(data + count, media_type, context);
 	if (size_mdia < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_mdia;
 
 	//Box size
@@ -581,15 +580,15 @@ uint32_t write_mdia(byte *data, uint32_t media_type, i2ctx *context) {
 
 	size_mdhd = write_mdhd(data + count, media_type, context);
 	if (size_mdhd < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_mdhd;
 	size_hdlr = write_hdlr(data + count, media_type, context);
 	if (size_hdlr < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_hdlr;
 	size_minf = write_minf(data + count, media_type, context);
 	if (size_minf < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_minf;
 
 	//Box size
@@ -605,7 +604,7 @@ uint32_t write_mdhd(byte *data, uint32_t media_type, i2ctx *context) {
 	uint16_t flag16, hton_flag16;
 
 	if ((media_type == NO_TYPE) || (media_type == AUDIOVIDEO_TYPE))
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 
 	count = 4;
 	//Box type
@@ -717,22 +716,22 @@ uint32_t write_minf(byte *data, uint32_t media_type, i2ctx *context) {
 	if (media_type == VIDEO_TYPE) {
 		size_vmhd = write_vmhd(data + count);
 		if (size_vmhd < 8)
-			return I2ERROR;
+			return I2ERROR_ISOFF;
 		count+= size_vmhd;
 	} else {
 		size_smhd = write_smhd(data + count);
 		if (size_smhd < 8)
-			return I2ERROR;
+			return I2ERROR_ISOFF;
 		count+= size_smhd;
 	}
 	
 	size_dinf = write_dinf(data + count, media_type, context);
 	if (size_dinf < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_dinf;
 	size_stbl = write_stbl(data + count, media_type, context);
 	if (size_stbl < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_stbl;
 
 	//Box size
@@ -803,7 +802,7 @@ uint32_t write_dinf(byte *data, uint32_t media_type, i2ctx *context) {
 	count+= 4;
 	size_dref = write_dref(data + count, media_type, context);
 	if (size_dref < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_dref;
 
 	// box size
@@ -833,7 +832,7 @@ uint32_t write_dref(byte *data, uint32_t media_type, i2ctx *context) {
 	count+= 4;
 	size_url = write_url(data + count);
 	if(size_url < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_url;
 
 	// box size
@@ -876,27 +875,27 @@ uint32_t write_stbl(byte *data, uint32_t media_type, i2ctx *context) {
 	// write subBoxes and update count value
 	size_stsd = write_stsd(data + count, media_type, context);
 	if (size_stsd < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_stsd;
 	
 	size_stts = write_stts(data + count, media_type, context);	
 	if (size_stts < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_stts;
 
 	size_stsc = write_stsc(data + count, media_type, context);
 	if (size_stsc < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_stsc;
 
 	size_stsz = write_stsz(data + count, media_type, context);
 	if (size_stsz < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_stsz;
 	
 	size_stco = write_stco(data + count, media_type, context);
 	if (size_stco < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_stco;
 	
 	// box size
@@ -938,16 +937,16 @@ uint32_t write_stsd(byte *data, uint32_t media_type, i2ctx *context) {
 		// write avc1
 		size_avc1 = write_avc1(data + count, ctxvideo);
 		if (size_avc1 < 8)
-			return I2ERROR;
+			return I2ERROR_ISOFF;
 		count+= size_avc1;
 	} else if(media_type == AUDIO_TYPE) {
 		// write mp4a
 		size_mp4a = write_mp4a(data + count, ctxaudio);
 		if (size_mp4a < 8)
-			return I2ERROR;
+			return I2ERROR_ISOFF;
 		count+= size_mp4a;
 	} else {
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	}
 
 	// box size
@@ -1033,7 +1032,7 @@ uint32_t write_avc1(byte *data, i2ctx_video *ctxVideo) {
 	// write avcC
 	size_avcc = write_avcc(data + count, ctxVideo);
 	if (size_avcc < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_avcc;
 	
 	// box size
@@ -1121,7 +1120,7 @@ uint32_t write_mp4a(byte *data, i2ctx_audio *ctxAudio) {
 	// write esds
 	size_esds = write_esds(data + count, ctxAudio);
 	if (size_esds < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_esds;
 
 	// box size
@@ -1486,13 +1485,13 @@ uint32_t write_moof(byte *data, uint32_t media_type, i2ctx **context) {
 	// write mfhd
 	size_mfhd = write_mfhd(data + count, media_type, (*context));
 	if (size_mfhd < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 
 	count+=size_mfhd;
 	// write traf
 	size_traf = write_traf(data + count, media_type, (*context));
 	if (size_traf < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 
 	count+= size_traf;
 
@@ -1548,19 +1547,19 @@ uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context) {
 	// write tfhd
 	size_tfhd = write_tfhd(data + count, media_type, context);
 	if (size_tfhd < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_tfhd;
 	
 	// write tfdt
 	size_tfdt = write_tfdt(data + count, media_type, context);
 	if (size_tfdt < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_tfdt;
 	
 	// write trun
 	size_trun = write_trun(data + count, media_type, context);
 	if (size_trun < 8)
-		return I2ERROR;
+		return I2ERROR_ISOFF;
 	count+= size_trun;
 
 	// box size

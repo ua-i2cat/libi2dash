@@ -1,28 +1,32 @@
 #include "i2libdash.h"
 int main(){
-	i2ctx *context;
+	i2ctx *context, *context_null = NULL;
 	byte *sps_data, *pps_data, *metadata, *metadata2, *metadata3, *destination_data, *aac_data, *source_data, *source_data_a;
 	uint32_t metadata_size, metadata2_size, metadata3_size, init_video, init_audio, size_source_data, size_source_data_a;
-	uint32_t sps_size, pps_size, aac_data_size, duration_sample, timestamp, seg_size, i;
-	uint8_t is_intra, i2error;
+	uint32_t sps_size, pps_size, aac_data_size, duration_sample, timestamp, seg_size, i, sps_zero = 0;
+	uint8_t is_intra, i2error, close_fragment;
 
 	FILE *output_video_i,*output_audio_i;
 
 	i2error= context_initializer(&context, NO_TYPE);
-	if (i2error == I2OK)
-		printf ("CONTEXT OK!\n");
-	else {
-		printf("CONTEXT NO OK!\n");
-	}
+	if (i2error == I2ERROR_MEDIA_TYPE)
+		printf ("I2ERROR_MEDIA_TYPE! code %d\n", i2error);
+	else
+		printf("CONTEXT OK!\n");
+
+	i2error= context_initializer(&context, 4);
+	if (i2error == I2ERROR_MEDIA_TYPE)
+		printf ("I2ERROR_MEDIA_TYPE! code %d\n", i2error);
+	else
+		printf("CONTEXT OK!\n");
 
 	i2error= context_initializer(&context, AUDIOVIDEO_TYPE);
-	if (i2error == I2OK)
-		printf ("CONTEXT OK!\n");
-	else {
-		printf("CONTEXT NO OK!\n");
-		exit(1);
+	if (i2error == I2ERROR_MEDIA_TYPE) {
+		printf ("I2ERROR_MEDIA_TYPE! code %d\n", i2error);
+		exit(1);	
 	}
-		
+	else
+		printf("CONTEXT OK!\n");
 	// INIT CONTEXT TEST
 
 	printf("CONTEXT:\n DURATION %u, REFERENCE SIZE %u, TRESHH %u\n", context->duration_ms, context->reference_size, context->threshold_ms);
@@ -96,17 +100,65 @@ int main(){
 	// DESTINATION DATA
 	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE);
 
-	// WIDTH AND HEIGHT TEST
-	printf("sps_size: %u\n", sps_size);
-	/*if(get_width_height(sps_data, &sps_size, &(context->ctxvideo)) != 0){
-		printf("KO! get_width_height\n");
-		return -1;
-	}*/
 
-	printf("WIDTH %u, HEIGHT %u\n", context->ctxvideo->width, context->ctxvideo->height);
+		//--------------------------------------------------//
+		//              ERROR CHECK INIT VIDEO              //
+		//--------------------------------------------------//
+	printf("//--------------------------------------------------//\n//              ERROR CHECK INIT VIDEO              //\n//--------------------------------------------------//\n");
+	init_video = init_video_handler(metadata, metadata_size, metadata2, metadata2_size, sps_data, &sps_size, metadata3, metadata3_size, pps_data, pps_size, destination_data, &context_null);
+	if (init_video == I2ERROR_CONTEXT_NULL)
+		printf ("I2ERROR_CONTEXT_NULL! code %d\n", init_video);
+
+	init_video = init_video_handler(metadata, metadata_size, metadata2, metadata2_size, sps_data, &sps_size, metadata3, metadata3_size, pps_data, pps_size, NULL, &context);
+	if (init_video == I2ERROR_DESTINATION_NULL)
+		printf ("I2ERROR_DESTINATION_NULL! code %d\n", init_video);
+
+	init_video = init_video_handler(NULL, metadata_size, metadata2, metadata2_size, sps_data, &sps_size, metadata3, metadata3_size, pps_data, pps_size, destination_data, &context);
+	if (init_video == I2ERROR_SOURCE_NULL)
+		printf ("I2ERROR_SOURCE_NULL! code %d\n", init_video);
+
+	init_video = init_video_handler(metadata, metadata_size, NULL, metadata2_size, sps_data, &sps_size, metadata3, metadata3_size, pps_data, pps_size, destination_data, &context);
+	if (init_video == I2ERROR_SOURCE_NULL)
+		printf ("I2ERROR_SOURCE_NULL! code %d\n", init_video);
+
+	init_video = init_video_handler(metadata, metadata_size, metadata2, metadata2_size, NULL, &sps_size, metadata3, metadata3_size, pps_data, pps_size, destination_data, &context);
+	if (init_video == I2ERROR_SOURCE_NULL)
+		printf ("I2ERROR_SOURCE_NULL! code %d\n", init_video);
+
+	init_video = init_video_handler(metadata, metadata_size, metadata2, metadata2_size, sps_data, &sps_size, NULL, metadata3_size, pps_data, pps_size, destination_data, &context);
+	if (init_video == I2ERROR_SOURCE_NULL)
+		printf ("I2ERROR_SOURCE_NULL! code %d\n", init_video);
+
+	init_video = init_video_handler(metadata, metadata_size, metadata2, metadata2_size, sps_data, &sps_size, metadata3, metadata3_size, NULL, pps_size, destination_data, &context);
+	if (init_video == I2ERROR_SOURCE_NULL)
+		printf ("I2ERROR_SOURCE_NULL! code %d\n", init_video);
+
+	init_video = init_video_handler(metadata, 0, metadata2, metadata2_size, sps_data, &sps_size, metadata3, metadata3_size, pps_data, pps_size, destination_data, &context);
+	if (init_video == I2ERROR_SIZE_ZERO)
+		printf ("I2ERROR_SIZE_ZERO! code %d\n", init_video);
+
+	init_video = init_video_handler(metadata, metadata_size, metadata2, 0, sps_data, &sps_size, metadata3, metadata3_size, pps_data, pps_size, destination_data, &context);
+	if (init_video == I2ERROR_SIZE_ZERO)
+		printf ("I2ERROR_SIZE_ZERO! code %d\n", init_video);
+
+	init_video = init_video_handler(metadata, metadata_size, metadata2, metadata2_size, sps_data, &sps_zero, metadata3, metadata3_size, pps_data, pps_size, destination_data, &context);
+	if (init_video == I2ERROR_SIZE_ZERO)
+		printf ("I2ERROR_SIZE_ZERO! code %d\n", init_video);
+
+	init_video = init_video_handler(metadata, metadata_size, metadata2, metadata2_size, sps_data, &sps_size, metadata3, 0, pps_data, pps_size, destination_data, &context);
+	if (init_video == I2ERROR_SIZE_ZERO)
+		printf ("I2ERROR_SIZE_ZERO! code %d\n", init_video);
+
+	init_video = init_video_handler(metadata, metadata_size, metadata2, metadata2_size, sps_data, &sps_size, metadata3, metadata3_size, pps_data, 0, destination_data, &context);
+	if (init_video == I2ERROR_SIZE_ZERO)
+		printf ("I2ERROR_SIZE_ZERO! code %d\n", init_video);
+	printf("//--------------------------------------------------//\n//             END ERROR CHECK INIT VIDEO           //\n//--------------------------------------------------//\n");
+		//--------------------------------------------------//
+		//            END-ERROR CHECK INIT VIDEO            //
+		//--------------------------------------------------//
 
 	init_video = init_video_handler(metadata, metadata_size, metadata2, metadata2_size, sps_data, &sps_size, metadata3, metadata3_size, pps_data, pps_size, destination_data, &context);
-	if(init_video != I2ERROR) {
+	if (init_video > I2ERROR_MAX) {
 		printf("OK INIT VIDEO!\n");
 		output_video_i = fopen("/tmp/pruebas/i2dash/video_init2.m4v", "w");
 		int i = 0;
@@ -129,10 +181,35 @@ int main(){
 	aac_data_size = 4;
 
 	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE);
+		//--------------------------------------------------//
+		//              ERROR CHECK INIT AUDIO              //
+		//--------------------------------------------------//
+	printf("//--------------------------------------------------//\n//              ERROR CHECK INIT AUDIO              //\n//--------------------------------------------------//\n");
+
+	init_audio = init_audio_handler(aac_data, aac_data_size, destination_data, &context_null);
+	if (init_audio == I2ERROR_CONTEXT_NULL)
+		printf ("I2ERROR_CONTEXT_NULL! code %d\n", init_audio);
+
+	init_audio = init_audio_handler(aac_data, aac_data_size, NULL, &context);
+	if (init_audio == I2ERROR_DESTINATION_NULL)
+		printf ("I2ERROR_DESTINATION_NULL! code %d\n", init_audio);
+
+	init_audio = init_audio_handler(NULL, aac_data_size, destination_data, &context);
+	if (init_audio == I2ERROR_SOURCE_NULL)
+		printf ("I2ERROR_SOURCE_NULL! code %d\n", init_audio);
+
+	init_audio = init_audio_handler(aac_data, 0, destination_data, &context);
+	if (init_audio == I2ERROR_SIZE_ZERO)
+		printf ("I2ERROR_SIZE_ZERO! code %d\n", init_audio);
+
+	printf("//--------------------------------------------------//\n//            END ERROR CHECK INIT AUDIO            //\n//--------------------------------------------------//\n");
+		//--------------------------------------------------//
+		//            END-ERROR CHECK INIT AUDIO            //
+		//--------------------------------------------------//
 
 	init_audio = init_audio_handler(aac_data, aac_data_size, destination_data, &context);
 
-	if(init_audio != I2ERROR) {
+	if (init_audio > I2ERROR_MAX) {
 		printf("OK INIT AUDIO!\n");
 		output_audio_i = fopen("/tmp/pruebas/i2dash/audio_init2.m4a", "w");
 		int j = 0;
@@ -234,9 +311,51 @@ int main(){
 
 	duration_sample = 10;
 	timestamp = 0;
-	is_intra = 1;
 	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE);	
 	is_intra = 0;
+
+		//--------------------------------------------------//
+		//           ERROR CHECK ADD SAMPLE VIDEO           //
+		//--------------------------------------------------//
+	printf("//--------------------------------------------------//\n//           ERROR CHECK ADD SAMPLE VIDEO           //\n//--------------------------------------------------//\n");
+	seg_size = add_sample(source_data, size_source_data, duration_sample, timestamp, VIDEO_TYPE, destination_data, is_intra, &context_null);
+	if (seg_size == I2ERROR_CONTEXT_NULL)
+		printf ("I2ERROR_CONTEXT_NULL! code %d\n", seg_size);
+
+	seg_size = add_sample(source_data, size_source_data, duration_sample, timestamp, VIDEO_TYPE, NULL, is_intra, &context);
+	if (seg_size == I2ERROR_DESTINATION_NULL)
+		printf ("I2ERROR_DESTINATION_NULL! code %d\n", seg_size);
+
+	seg_size = add_sample(NULL, size_source_data, duration_sample, timestamp, VIDEO_TYPE, destination_data, is_intra, &context);
+	if (seg_size == I2ERROR_SOURCE_NULL)
+		printf ("I2ERROR_SOURCE_NULL! code %d\n", seg_size);
+
+	seg_size = add_sample(source_data, 0, duration_sample, timestamp, VIDEO_TYPE, destination_data, is_intra, &context);
+	if (seg_size == I2ERROR_SIZE_ZERO)
+		printf ("I2ERROR_SIZE_ZERO! code %d\n", seg_size);
+
+	seg_size = add_sample(source_data, size_source_data, 0, timestamp, VIDEO_TYPE, destination_data, is_intra, &context);
+	if (seg_size == I2ERROR_DURATION_ZERO)
+		printf ("I2ERROR_DURATION_ZERO! code %d\n", seg_size);
+
+	seg_size = add_sample(source_data, size_source_data, duration_sample, timestamp, VIDEO_TYPE, destination_data, 2, &context);
+	if (seg_size == I2ERROR_IS_INTRA)
+		printf ("I2ERROR_IS_INTRA! code %d\n", seg_size);
+
+	seg_size = add_sample(source_data, size_source_data, duration_sample, timestamp, NO_TYPE, destination_data, is_intra, &context);
+	if (seg_size == I2ERROR_MEDIA_TYPE)
+		printf ("I2ERROR_MEDIA_TYPE! code %d\n", seg_size);
+
+	seg_size = add_sample(source_data, size_source_data, duration_sample, timestamp, AUDIOVIDEO_TYPE, destination_data, is_intra, &context);
+	if (seg_size == I2ERROR_MEDIA_TYPE)
+		printf ("I2ERROR_MEDIA_TYPE! code %d\n", seg_size);
+
+	printf("//--------------------------------------------------//\n//         END ERROR CHECK ADD SAMPLE VIDEO         //\n//--------------------------------------------------//\n");
+		//--------------------------------------------------//
+		//         END-ERROR CHECK ADD SAMPLE VIDEO         //
+		//--------------------------------------------------//
+
+	close_fragment = 0;
 	for (i=0; i<550; i++) {
 		timestamp += 10;
 		if ((i == 500) || (i == 0))
@@ -244,7 +363,8 @@ int main(){
 		else
 			is_intra = 0;
 		seg_size = add_sample(source_data, size_source_data, duration_sample, timestamp, VIDEO_TYPE, destination_data, is_intra, &context);
-		if ((seg_size != I2ERROR) && (seg_size != I2OK)) {
+		if (seg_size > I2ERROR_MAX) {
+			close_fragment = 1;
 			printf("OK VIDEO SEGMENT! %d\n", seg_size);
 			output_video_i = fopen("/tmp/pruebas/i2dash/video_seg.m4v", "w");
 			int i = 0;
@@ -254,12 +374,15 @@ int main(){
 			}
 			fclose(output_video_i);
 		}
-		if (i == 500) 
+		if (close_fragment) {
+			printf("entra!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 			is_intra = 1;
-		else
+			close_fragment = 0;
+		}
+		if (i == 0)
 			is_intra = 0;
 		seg_size = add_sample(source_data_a, size_source_data_a, duration_sample, timestamp, AUDIO_TYPE, destination_data, is_intra, &context);
-		if ((seg_size != I2ERROR) && (seg_size != I2OK)) {
+		if (seg_size > I2ERROR_MAX) {
 			printf("OK AUDIO SEGEMENT! %d\n", seg_size);
 			output_audio_i = fopen("/tmp/pruebas/i2dash/audio_seg.m4a", "w");
 			int j = 0;
@@ -271,8 +394,34 @@ int main(){
 		}
 	}
 
+		//--------------------------------------------------//
+		//         ERROR CHECK FINISH SEGMENT VIDEO         //
+		//--------------------------------------------------//
+	printf("//--------------------------------------------------//\n//         ERROR CHECK FINISH SEGMENT VIDEO         //\n//--------------------------------------------------//\n");
+	seg_size = finish_segment(VIDEO_TYPE, destination_data, &context_null);
+	if (seg_size == I2ERROR_CONTEXT_NULL)
+		printf ("I2ERROR_CONTEXT_NULL! code %d\n", seg_size);
+
+	seg_size = finish_segment(VIDEO_TYPE, NULL, &context);
+	if (seg_size == I2ERROR_DESTINATION_NULL)
+		printf ("I2ERROR_DESTINATION_NULL! code %d\n", seg_size);
+
+	seg_size = finish_segment(NO_TYPE, destination_data, &context);
+	if (seg_size == I2ERROR_MEDIA_TYPE)
+		printf ("I2ERROR_MEDIA_TYPE! code %d\n", seg_size);
+
+	seg_size = finish_segment(AUDIOVIDEO_TYPE, destination_data, &context);
+	if (seg_size == I2ERROR_MEDIA_TYPE)
+		printf ("I2ERROR_MEDIA_TYPE! code %d\n", seg_size);
+
+	printf("//--------------------------------------------------//\n//       END ERROR CHECK FINISH SEGMENT VIDEO       //\n//--------------------------------------------------//\n");
+		//--------------------------------------------------//
+		//       END-ERROR CHECK FINISH SEGMENT VIDEO       //
+		//--------------------------------------------------//
+
+
 	seg_size = finish_segment(VIDEO_TYPE, destination_data, &context);
-	if ((seg_size != I2ERROR) && (seg_size != I2OK)) {
+	if (seg_size > I2ERROR_MAX) {
 		printf("OK VIDEO SEGMENT! %d\n", seg_size);
 		output_video_i = fopen("/tmp/pruebas/i2dash/video_seg_last.m4v", "w");
 		int i = 0;
@@ -283,21 +432,62 @@ int main(){
 		fclose(output_video_i);
 	}
 
-//NEW CONTEXT
+//NEW CONTEXT ONLY AUDIO
 
 	i2error= context_initializer(&context, AUDIO_TYPE);
-	if (i2error == I2OK)
-		printf ("CONTEXT OK!\n");
-	else {
-		printf("CONTEXT NO OK!\n");
-		exit(1);
+	if (i2error == I2ERROR_MEDIA_TYPE) {
+		printf ("I2ERROR_MEDIA_TYPE! code %d\n", i2error);
+		exit(1);	
 	}
+	else
+		printf("CONTEXT OK!\n");
+
+		//--------------------------------------------------//
+		//           ERROR CHECK ADD SAMPLE AUDIO           //
+		//--------------------------------------------------//
+	printf("//--------------------------------------------------//\n//           ERROR CHECK ADD SAMPLE AUDIO           //\n//--------------------------------------------------//\n");
+	seg_size = add_sample(source_data_a, size_source_data_a, duration_sample, timestamp, AUDIO_TYPE, destination_data, is_intra, &context_null);
+	if (seg_size == I2ERROR_CONTEXT_NULL)
+		printf ("I2ERROR_CONTEXT_NULL! code %d\n", seg_size);
+
+	seg_size = add_sample(source_data_a, size_source_data_a, duration_sample, timestamp, AUDIO_TYPE, NULL, is_intra, &context);
+	if (seg_size == I2ERROR_DESTINATION_NULL)
+		printf ("I2ERROR_DESTINATION_NULL! code %d\n", seg_size);
+
+	seg_size = add_sample(NULL, size_source_data_a, duration_sample, timestamp, AUDIO_TYPE, destination_data, is_intra, &context);
+	if (seg_size == I2ERROR_SOURCE_NULL)
+		printf ("I2ERROR_SOURCE_NULL! code %d\n", seg_size);
+
+	seg_size = add_sample(source_data_a, 0, duration_sample, timestamp, AUDIO_TYPE, destination_data, is_intra, &context);
+	if (seg_size == I2ERROR_SIZE_ZERO)
+		printf ("I2ERROR_SIZE_ZERO! code %d\n", seg_size);
+
+	seg_size = add_sample(source_data_a, size_source_data_a, 0, timestamp, AUDIO_TYPE, destination_data, is_intra, &context);
+	if (seg_size == I2ERROR_DURATION_ZERO)
+		printf ("I2ERROR_DURATION_ZERO! code %d\n", seg_size);
+
+	seg_size = add_sample(source_data_a, size_source_data_a, duration_sample, timestamp, AUDIO_TYPE, destination_data, 2, &context);
+	if (seg_size == I2ERROR_IS_INTRA)
+		printf ("I2ERROR_IS_INTRA! code %d\n", seg_size);
+
+	seg_size = add_sample(source_data, size_source_data, duration_sample, timestamp, NO_TYPE, destination_data, is_intra, &context);
+	if (seg_size == I2ERROR_MEDIA_TYPE)
+		printf ("I2ERROR_MEDIA_TYPE! code %d\n", seg_size);
+
+	seg_size = add_sample(source_data, size_source_data, duration_sample, timestamp, AUDIOVIDEO_TYPE, destination_data, is_intra, &context);
+	if (seg_size == I2ERROR_MEDIA_TYPE)
+		printf ("I2ERROR_MEDIA_TYPE! code %d\n", seg_size);
+
+	printf("//--------------------------------------------------//\n//         END ERROR CHECK ADD SAMPLE AUDIO         //\n//--------------------------------------------------//\n");
+		//--------------------------------------------------//
+		//         END-ERROR CHECK ADD SAMPLE AUDIO         //
+		//--------------------------------------------------//
 
 	is_intra = 0;
 	for (i=0; i<550; i++) {
 		timestamp += 10;
 		seg_size = add_sample(source_data_a, size_source_data_a, duration_sample, timestamp, AUDIO_TYPE, destination_data, is_intra, &context);
-		if ((seg_size != I2ERROR) && (seg_size != I2OK)) {
+		if (seg_size > I2ERROR_MAX) {
 			printf("OK AUDIO SEGEMENT! %d\n", seg_size);
 			output_audio_i = fopen("/tmp/pruebas/i2dash/audio_seg_2.m4a", "w");
 			int j = 0;
@@ -308,8 +498,32 @@ int main(){
 			fclose(output_audio_i);
 		}
 	}
+		//--------------------------------------------------//
+		//         ERROR CHECK FINISH SEGMENT AUDIO         //
+		//--------------------------------------------------//
+	printf("//--------------------------------------------------//\n//         ERROR CHECK FINISH SEGMENT AUDIO         //\n//--------------------------------------------------//\n");
+	seg_size = finish_segment(AUDIO_TYPE, destination_data, &context_null);
+	if (seg_size == I2ERROR_CONTEXT_NULL)
+		printf ("I2ERROR_CONTEXT_NULL! code %d\n", seg_size);
+
+	seg_size = finish_segment(AUDIO_TYPE, NULL, &context);
+	if (seg_size == I2ERROR_DESTINATION_NULL)
+		printf ("I2ERROR_DESTINATION_NULL! code %d\n", seg_size);
+
+	seg_size = finish_segment(NO_TYPE, destination_data, &context);
+	if (seg_size == I2ERROR_MEDIA_TYPE)
+		printf ("I2ERROR_MEDIA_TYPE! code %d\n", seg_size);
+
+	seg_size = finish_segment(AUDIOVIDEO_TYPE, destination_data, &context);
+	if (seg_size == I2ERROR_MEDIA_TYPE)
+		printf ("I2ERROR_MEDIA_TYPE! code %d\n", seg_size);
+
+	printf("//--------------------------------------------------//\n//       END ERROR CHECK FINISH SEGMENT AUDIO       //\n//--------------------------------------------------//\n");
+		//--------------------------------------------------//
+		//       END-ERROR CHECK FINISH SEGMENT AUDIO       //
+		//--------------------------------------------------//
 	seg_size = finish_segment(AUDIO_TYPE, destination_data, &context);
-		if ((seg_size != I2ERROR) && (seg_size != I2OK)) {
+		if (seg_size > I2ERROR_MAX) {
 			printf("OK AUDIO SEGEMENT! %d\n", seg_size);
 			output_audio_i = fopen("/tmp/pruebas/i2dash/audio_seg_last.m4a", "w");
 			int j = 0;
