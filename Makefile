@@ -12,12 +12,15 @@ LDFLAGS = -fPIC -shared
 CFLAGS = -Wall -ggdb -fPIC
 PROG_ISOFF = isofftest
 PROG_I2DASH = i2dashtest
+PROG_LIB = i2libtest
 VERSION = 1.0.0
 LIB_SHARED_NAME = libi2dash.so
 LIB_STATIC_NAME = libi2dash.a
 TEST_DIR = /tmp/pruebas
 ISOFF_SEGMENT = isoff
 I2DASH_SEGMENT = i2dash
+LIB_SEGMENT = i2lib
+LIB_FLAGS = -li2dash
 
 all: testing
 
@@ -50,15 +53,23 @@ lib: i2libdash.o i2libisoff.o h264_stream.o
 	$(CC) $(LDFLAGS) -o $(LIB_PATH)/$(LIB_SHARED_NAME).$(VERSION) i2libdash.o i2libisoff.o h264_stream.o
 	ar rcs $(LIB_PATH)/$(LIB_STATIC_NAME) i2libdash.o i2libisoff.o h264_stream.o
 
-install-lib:
-	cp -f $(INCLUDE_PATH)/i2*.h $(INSTALL_INCLUDE_PATH)
+install-lib: lib
+	cp -f $(INCLUDE_PATH)/*.h $(INSTALL_INCLUDE_PATH)
 	cp -f $(LIB_PATH)/$(LIB_SHARED_NAME).$(VERSION) $(INSTALL_LIB_PATH)
 	cp -f $(LIB_PATH)/$(LIB_STATIC_NAME) $(INSTALL_LIB_PATH)
 	ln -f -s $(INSTALL_LIB_PATH)/$(LIB_SHARED_NAME).$(VERSION) $(INSTALL_LIB_PATH)/$(LIB_SHARED_NAME)
 	ldconfig
 
+testlib: lib_test.o
+	$(CC) $(CFLAGS) -o $(BIN_PATH)/$(PROG_LIB) $(TEST_PATH)/lib_test.o $(LIB_FLAGS)
+	mkdir -p $(TEST_DIR)/$(LIB_SEGMENT)
+
+lib_test.o:  $(TEST_PATH)/lib_test.c
+	$(CC) $(CFLAGS) -c $(TEST_PATH)/lib_test.c
+	mv lib_test.o $(TEST_PATH)/
+
 clean:
 	rm -f $(BIN_PATH)/* $(TEST_PATH)/*.o $(LIB_PATH)/* ./*.o
 
 unistall:
-	rm -f $(BIN_PATH)/* $(TEST_PATH)/*.o $(LIB_PATH)/* ./*.o $(INSTALL_INCLUDE_PATH)/i2*.h $(INSTALL_LIB_PATH)/$(LIB_SHARED_NAME).$(VERSION) $(INSTALL_LIB_PATH)/$(LIB_SHARED_NAME) $(INSTALL_LIB_PATH)/$(LIB_STATIC_NAME) 
+	rm -f $(BIN_PATH)/* $(TEST_PATH)/*.o $(LIB_PATH)/* ./*.o $(INSTALL_INCLUDE_PATH)/i2*.h $(INSTALL_INCLUDE_PATH)/h264_stream.h $(INSTALL_INCLUDE_PATH)/bs.h $(INSTALL_LIB_PATH)/$(LIB_SHARED_NAME).$(VERSION) $(INSTALL_LIB_PATH)/$(LIB_SHARED_NAME) $(INSTALL_LIB_PATH)/$(LIB_STATIC_NAME) 
