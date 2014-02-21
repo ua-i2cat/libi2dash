@@ -160,13 +160,13 @@ uint8_t context_initializer(i2ctx **context, uint32_t media_type){
 	}
 	*context = (i2ctx *) malloc(sizeof(i2ctx));
 
-	(*context)->duration_ms = 5 * 1000;
+	(*context)->duration_ms = 5 * SEC_TO_MSEC;
 	(*context)->reference_size = 0;
 
 	if ((media_type == VIDEO_TYPE) || (media_type == AUDIOVIDEO_TYPE)) {
 		video_context_initializer(context);
-		// Threshold: 1/fps * 2 * 1000
-		(*context)->threshold_ms = (2*1000)/(((*context)->ctxvideo->frame_rate)); 
+		// Threshold: 1/fps * %fps * 1000
+		(*context)->threshold_ms = (SEC_TO_MSEC*(FRAMERATE_PER_CENT/100))/(((*context)->ctxvideo->frame_rate)); 
 	} else
 		(*context)->ctxvideo = NULL;
 

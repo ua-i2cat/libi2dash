@@ -1425,7 +1425,7 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 	memcpy(data + count, &hton_one_32, 4);
 	count+= 4;
 	// timescale
-	hton_timescale = htonl(1000);
+	hton_timescale = htonl(SEC_TO_MSEC);
 	memcpy(data + count, &hton_timescale, 4);
 	count+= 4;
 	// earliest_presentation_time

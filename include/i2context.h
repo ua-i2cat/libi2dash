@@ -21,6 +21,8 @@ typedef unsigned char byte;
 #define I2OK	0
 #define TRUE	1
 #define	FALSE	0
+#define SEC_TO_MSEC 1000
+#define FRAMERATE_PER_CENT 10
 
 #include <netinet/in.h>
 
