@@ -15,6 +15,9 @@ PROG_I2DASH = i2dashtest
 VERSION = 1.0.0
 LIB_SHARED_NAME = libi2dash.so
 LIB_STATIC_NAME = libi2dash.a
+TEST_DIR = /tmp/pruebas
+ISOFF_SEGMENT = isoff
+I2DASH_SEGMENT = i2dash
 
 all: testing
 
@@ -22,6 +25,8 @@ testing: isoff_test.o i2dash_test.o
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $(BIN_PATH)/$(PROG_ISOFF) $(TEST_PATH)/isoff_test.o i2libisoff.o
 	$(CC) $(CFLAGS) -o $(BIN_PATH)/$(PROG_I2DASH) $(TEST_PATH)/i2dash_test.o i2libdash.o i2libisoff.o h264_stream.o
+	mkdir -p $(TEST_DIR)/$(ISOFF_SEGMENT)
+	mkdir -p $(TEST_DIR)/$(I2DASH_SEGMENT)
 
 i2dash_test.o:  $(TEST_PATH)/i2dash_test.c i2libdash.o h264_stream.o i2libisoff.o
 	$(CC) $(CFLAGS) -c $(TEST_PATH)/i2dash_test.c
@@ -45,11 +50,8 @@ lib: i2libdash.o i2libisoff.o h264_stream.o
 	$(CC) $(LDFLAGS) -o $(LIB_PATH)/$(LIB_SHARED_NAME).$(VERSION) i2libdash.o i2libisoff.o h264_stream.o
 	ar rcs $(LIB_PATH)/$(LIB_STATIC_NAME) i2libdash.o i2libisoff.o h264_stream.o
 
-install:
-	cp $(BIN_PATH)/* $(INSTALL_PATH)
-
 install-lib:
-	cp -f $(INCLUDE_PATH)/*.h $(INSTALL_INCLUDE_PATH)
+	cp -f $(INCLUDE_PATH)/i2*.h $(INSTALL_INCLUDE_PATH)
 	cp -f $(LIB_PATH)/$(LIB_SHARED_NAME).$(VERSION) $(INSTALL_LIB_PATH)
 	cp -f $(LIB_PATH)/$(LIB_STATIC_NAME) $(INSTALL_LIB_PATH)
 	ln -f -s $(INSTALL_LIB_PATH)/$(LIB_SHARED_NAME).$(VERSION) $(INSTALL_LIB_PATH)/$(LIB_SHARED_NAME)
@@ -59,4 +61,4 @@ clean:
 	rm -f $(BIN_PATH)/* $(TEST_PATH)/*.o $(LIB_PATH)/* ./*.o
 
 unistall:
-	rm -f $(BIN_PATH)/* $(TEST_PATH)/*.o $(LIB_PATH)/* ./*.o
+	rm -f $(BIN_PATH)/* $(TEST_PATH)/*.o $(LIB_PATH)/* ./*.o $(INSTALL_INCLUDE_PATH)/i2*.h $(INSTALL_LIB_PATH)/$(LIB_SHARED_NAME).$(VERSION) $(INSTALL_LIB_PATH)/$(LIB_SHARED_NAME) $(INSTALL_LIB_PATH)/$(LIB_STATIC_NAME) 
