@@ -272,6 +272,8 @@ uint32_t init_audio_handler(byte *input_data, uint32_t size_input, byte *output_
 uint32_t add_sample(byte *input_data, uint32_t size_input, uint32_t duration_sample, uint32_t timestamp, uint32_t media_type, byte *output_data, uint8_t is_intra, i2ctx **context) {
 	uint32_t seg_gen, samp_len;
 
+	seg_gen = 0;
+
 	if ((*context) == NULL) {
 		return I2ERROR_CONTEXT_NULL;
 	}
@@ -358,6 +360,7 @@ uint32_t add_sample(byte *input_data, uint32_t size_input, uint32_t duration_sam
 
 uint32_t finish_segment(uint32_t media_type, byte *output_data, i2ctx **context) {
 	uint32_t seg_gen;
+	seg_gen = 0;
 
 	if ((*context) == NULL) {
 		return I2ERROR_CONTEXT_NULL;

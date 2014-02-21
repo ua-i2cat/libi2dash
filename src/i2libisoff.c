@@ -1393,6 +1393,8 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 	byte flag8;
 	i2ctx_video *ctxVideo = context->ctxvideo;
 	i2ctx_audio *ctxAudio = context->ctxaudio;
+	earliest_presentation_time = 0;
+	latest_presentation_time = 0;
 
 	if (media_type == VIDEO_TYPE) {
 		earliest_presentation_time = ctxVideo->earliest_presentation_time;
@@ -1470,8 +1472,9 @@ uint32_t write_moof(byte *data, uint32_t media_type, i2ctx **context) {
 	uint32_t count, size, hton_size, size_traf, size_mfhd;
 	i2ctx_sample *samples; 
 
+	samples = NULL;
 	count = 4;
-	
+
 	if(media_type == VIDEO_TYPE)
 		samples = (*context)->ctxvideo->ctxsample;
 	else if (media_type == AUDIO_TYPE)
@@ -1604,6 +1607,7 @@ uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
 
 	i2ctx_video *ctxVideo = context->ctxvideo;
 	i2ctx_audio *ctxAudio = context->ctxaudio;
+	earliest_presentation_time = 0;
 
 	if (media_type == VIDEO_TYPE) {
 		earliest_presentation_time = ctxVideo->earliest_presentation_time;
@@ -1645,9 +1649,9 @@ uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
 	i2ctx_sample *samples;
 	//unsigned sample_key;
 	int i  = 0;
-
 	count = 4;
 	nitems = 0;
+	samples = NULL;
 
 	if(media_type == VIDEO_TYPE) {
 		samples = context->ctxvideo->ctxsample;
