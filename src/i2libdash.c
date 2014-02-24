@@ -166,7 +166,7 @@ uint8_t context_initializer(i2ctx **context, uint32_t media_type){
 	if ((media_type == VIDEO_TYPE) || (media_type == AUDIOVIDEO_TYPE)) {
 		video_context_initializer(context);
 		// Threshold: 1/fps * %fps * 1000
-		(*context)->threshold_ms = (SEC_TO_MSEC*(FRAMERATE_PER_CENT/100))/(((*context)->ctxvideo->frame_rate)); 
+		(*context)->threshold_ms = ((SEC_TO_MSEC*FRAMERATE_PER_CENT)/100)/(((*context)->ctxvideo->frame_rate)); 
 	} else
 		(*context)->ctxvideo = NULL;
 

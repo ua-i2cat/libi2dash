@@ -23,6 +23,7 @@ typedef unsigned char byte;
 #define	FALSE	0
 #define SEC_TO_MSEC 1000
 #define FRAMERATE_PER_CENT 10
+#define H264_FREQUENCY 90000
 
 #include <netinet/in.h>
 
