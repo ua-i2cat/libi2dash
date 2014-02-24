@@ -36,6 +36,7 @@ typedef unsigned char byte;
 #define RTP_LENGTH_HEADER 12
 #define H264_LENGTH_HEADER 2
 #define LENGTH_SIZE 4
+#define INTRA_TYPE 5
 
 #include <netinet/in.h>
 
