@@ -24,6 +24,18 @@ typedef unsigned char byte;
 #define SEC_TO_MSEC 1000
 #define FRAMERATE_PER_CENT 10
 #define H264_FREQUENCY 90000
+#define NAL_TYPE 0x1F
+#define NAL_UNIT_TYPE 0x1F
+#define NRI_TYPE 0x60
+#define FORBIDDEN_BIT 0x80
+#define START_BIT 0X80
+#define END_BIT 0X40
+#define FUA_TYPE 0x1C
+#define SPS_TYPE 7
+#define PPS_TYPE 8
+#define RTP_LENGTH_HEADER 12
+#define H264_LENGTH_HEADER 2
+#define LENGTH_SIZE 4
 
 #include <netinet/in.h>
 

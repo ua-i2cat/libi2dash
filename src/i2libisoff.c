@@ -1720,6 +1720,7 @@ uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
 
 uint32_t write_mdat(byte* source_data, uint32_t size_source_data, byte *data, uint32_t media_type, i2ctx *context) {
 	uint32_t count, mdat_size, hton_mdat_size;
+	uint8_t valor = 0;
 
 	count = 0;
 	mdat_size = size_source_data + 8;
