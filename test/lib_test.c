@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <stdio.h>
 
-int main(){
+int main(int argc, char *argv[]){
 	i2ctx *context;
 	byte *sps_data = NULL, *pps_data = NULL, *metadata = NULL, *metadata2 = NULL, *metadata3 = NULL;
 	byte *destination_data = NULL, *source_data = NULL;
@@ -16,12 +16,15 @@ int main(){
 	struct sockaddr_in  sock_addr_input;
     socklen_t sockaddrlen = sizeof(struct sockaddr);
     int sock_origen;
-    uint32_t c = 0, hton_timestamp = 0, decode_time;
+    uint32_t c = 0, hton_timestamp = 0, decode_time = 0;
 	byte buffer_in[3000];
 	struct timeval to;
 	fd_set ready;
 	FILE *output_video_i;
-	float duration_sample_f = 0.00;
+	float duration_sample_f = 0.00, decode_time_f = 0.00;
+	char* representation = "480";
+	if (argc == 2)
+		representation = argv[argc - 1];
 
 	source_data = (byte *) malloc(MAX_MDAT_SAMPLE * 2);
     sock_origen = socket(AF_INET, SOCK_DGRAM, 0 );
@@ -86,23 +89,47 @@ int main(){
 			memcpy(&hton_timestamp, buffer_in+4, sizeof(hton_timestamp));
 			nal_type = (*(buffer_in + RTP_LENGTH_HEADER)) & NAL_TYPE;
 			timestamp = htonl(hton_timestamp);
-			printf("paquete %u %d\n", timestamp, c);
+			if (i == 0) {
+				previous_timestamp = timestamp;
+				initial_timestamp = timestamp;
+				decode_time = 0;
+				size_source_data = 0;
+			}
 			if (nal_type == SPS_TYPE) {//SPS
-				printf("SPS SPS SPS SPS SPS SPS\n");
-				if (i == 0) {
+				if (i < 2) {
 					memcpy(sps_data, buffer_in+RTP_LENGTH_HEADER, (c-RTP_LENGTH_HEADER));
 					sps_size = c-RTP_LENGTH_HEADER;
 				}
 			}
 			if (nal_type == PPS_TYPE) {//PPS
-				printf("PPS PPS PPS PPS PPS PPS\n");
-				if (i == 1) {
+				if (i < 3) {
+					memcpy(pps_data, buffer_in + RTP_LENGTH_HEADER, (c-RTP_LENGTH_HEADER));
+					pps_size = c-RTP_LENGTH_HEADER;
+					init_video = init_video_handler(metadata, metadata_size, metadata2, metadata2_size, sps_data, &sps_size, metadata3, metadata3_size, pps_data, pps_size, destination_data, &context);
+					if (init_video > I2ERROR_MAX) {
+						char path[250];
+						bzero(path, 250);
+						printf("INIT i2libtest_%s_video_init.m4v done\n", representation);
+						sprintf(path, "%s%s%s","/tmp/pruebas/i2lib/i2libtest_", representation, "_video_init.m4v");
+						printf("OK INIT VIDEO!\n");
+						output_video_i = fopen(path, "w");
+						int i = 0;
+						// int fputc(int c, FILE *stream);
+						for(i = 0; i < init_video; i++) {
+							fputc(destination_data[i], output_video_i);
+						}
+						fclose(output_video_i);
+					}
+				}
+			}
+			/*if (nal_type == SEI_TYPE) {//SEI
+				if (i < 3) {
 					memcpy(pps_data, buffer_in + RTP_LENGTH_HEADER, (c-RTP_LENGTH_HEADER));
 					pps_size = c-RTP_LENGTH_HEADER;
 					init_video = init_video_handler(metadata, metadata_size, metadata2, metadata2_size, sps_data, &sps_size, metadata3, metadata3_size, pps_data, pps_size, destination_data, &context);
 					if (init_video > I2ERROR_MAX) {
 						printf("OK INIT VIDEO!\n");
-						output_video_i = fopen("/tmp/pruebas/i2lib/video_init.m4v", "w");
+						output_video_i = fopen("/tmp/pruebas/i2lib/i2libtest_1080_video_init.m4v", "w");
 						int i = 0;
 						// int fputc(int c, FILE *stream);
 						for(i = 0; i < init_video; i++) {
@@ -115,35 +142,43 @@ int main(){
 					decode_time = 0;
 					size_source_data = 0;
 				}
-			}
-			if ((i > 1) && (nal_type != PPS_TYPE) && (nal_type != SPS_TYPE)) {
+			}*/
+			if ((nal_type != PPS_TYPE) && (nal_type != SPS_TYPE)) {
 
 				if (previous_timestamp != timestamp) {
-					duration_sample = (((timestamp - previous_timestamp) * SEC_TO_MSEC)/H264_FREQUENCY);
+					duration_sample = ((timestamp - previous_timestamp) / H264_FREQUENCY_MS);
 					//TODO: is intra
 					if ((initial_timestamp == previous_timestamp) || (is_intra)){
 						is_intra = 1;
-						printf("IS INTRA\n");
 					}
 					else
 						is_intra = 0;
 					sample_count++;
-					decode_time = (((previous_timestamp - initial_timestamp) * SEC_TO_MSEC)/H264_FREQUENCY);
-					printf("initial time: %u previous time %u timestamp %u\ndecode time %u duration sample %u\n",  initial_timestamp, previous_timestamp, timestamp, (((previous_timestamp - initial_timestamp) * SEC_TO_MSEC)/H264_FREQUENCY), duration_sample);
-					duration_sample_f+= ((float)((timestamp - previous_timestamp) * SEC_TO_MSEC)/(float) H264_FREQUENCY);
+					decode_time = ((previous_timestamp - initial_timestamp) / H264_FREQUENCY_MS);
+					//printf("initial time: %u previous time %u timestamp %u\ndecode time %u duration sample %u\n",  initial_timestamp, previous_timestamp, timestamp, (((previous_timestamp - initial_timestamp) * SEC_TO_MSEC)/H264_FREQUENCY), duration_sample);
+					duration_sample_f+= (((float)(timestamp - previous_timestamp))/((float) (H264_FREQUENCY_MS)));
 					duration_sample_f-= (float) duration_sample;
 					if (duration_sample_f > 1) {
-						printf("ES MAYOR QUE UNO!!!!!!!!!!!!!!!!!!!!!!!\n");
+						//printf("ES MAYOR QUE UNO!!!!!!!!!!!!!!!!!!!!!!!\n");
 						duration_sample++;
 						duration_sample_f--;
 					}
+					decode_time_f= (((float)(previous_timestamp - initial_timestamp))/((float) (H264_FREQUENCY_MS)));
+					decode_time_f-= (float) decode_time;
+					if ((decode_time_f >= 0.5) ) {
+						//printf("INCREMENTO DECODE\n");
+						decode_time++;
+						//decode_time_f--;
+					}
 					seg_size = add_sample(source_data, size_source_data, duration_sample, decode_time, VIDEO_TYPE, destination_data, is_intra, &context);
 					is_intra = 0;
-					printf("Packet number %u, seg_size %u, duration %u duration float %f\n ", i, seg_size, duration_sample, duration_sample_f);
+					//printf("Packet number %u, seg_size %u, duration %u duration float %f\n ", i, seg_size, duration_sample, duration_sample_f);
 					if (seg_size > I2ERROR_MAX) {
+						//printf("initial time: %u previous time %u timestamp %u\ndecode time %u resta %u\n",  initial_timestamp, previous_timestamp, timestamp, decode_time, (previous_timestamp - initial_timestamp));
 						char path[250];
 						bzero(path, 250);
-						sprintf(path, "%s%d%s","/tmp/pruebas/i2lib/i2libtest_480_video_",segment_count,"_1.m4v");
+						printf("SEGMENT i2libtest_%s_video_%d_1.m4v done\n", representation, segment_count);
+						sprintf(path, "%s%s%s%d%s","/tmp/pruebas/i2lib/i2libtest_", representation, "_video_", segment_count, "_1.m4v");
 						segment_count++;
 						duration_sample_f = 0.00;
 						//printf("OK VIDEO SEGMENT! %d\ninitial time: %u previous time %u\ndecode time %u\n", seg_size,  initial_timestamp, previous_timestamp, (((previous_timestamp - initial_timestamp) * SEC_TO_MSEC)/H264_FREQUENCY));
@@ -156,7 +191,6 @@ int main(){
 						fclose(output_video_i);
 					}
 					if (nal_type == FUA_TYPE) {	//Fragmentation unit
-						uint8_t raro;
 						nal_unit_type = (*(buffer_in + RTP_LENGTH_HEADER + 1)) & NAL_UNIT_TYPE;
 						nri_type = (*(buffer_in + RTP_LENGTH_HEADER)) & NRI_TYPE;
 						fbit = (*(buffer_in + RTP_LENGTH_HEADER)) & FORBIDDEN_BIT;
@@ -165,16 +199,16 @@ int main(){
 						nal_header = fbit | nri_type | nal_unit_type;
 						
 						if (start_bit) {
-							printf ("start bit %u\n", timestamp);
+							//printf ("start bit %u\n", timestamp);
 							memcpy(source_data + LENGTH_SIZE, &nal_header, 1);
 							size_source_data = 1;
 						}
 						nal_size = c - RTP_LENGTH_HEADER - H264_LENGTH_HEADER;
-						printf("NAL fragment nal_type %u, nri_type %x, fbit %x\nstart_bit %x, end_bit %x, nal_size %u, nal_unit_type %u\n", nal_type, nri_type, fbit, start_bit, end_bit, nal_size, nal_unit_type);
+						//printf("NAL fragment nal_type %u, nri_type %x, fbit %x\nstart_bit %x, end_bit %x, nal_size %u, nal_unit_type %u\n", nal_type, nri_type, fbit, start_bit, end_bit, nal_size, nal_unit_type);
 						memcpy(source_data + size_source_data + LENGTH_SIZE, buffer_in + RTP_LENGTH_HEADER + H264_LENGTH_HEADER, nal_size);
-						raro = (*(buffer_in + RTP_LENGTH_HEADER + H264_LENGTH_HEADER + 1)) - 32;
+						//raro = (*(buffer_in + RTP_LENGTH_HEADER + H264_LENGTH_HEADER + 1)) - 32;
 						//memcpy(source_data + size_source_data + LENGTH_SIZE + 1, &raro, 1);
-						printf("el raro %x\n", raro);
+						//printf("el raro %x\n", raro);
 						size_source_data += nal_size;
 					} else {//Single NAL unit packet per H.264 
 						nal_size = c - RTP_LENGTH_HEADER;
@@ -201,7 +235,7 @@ int main(){
 						if (nal_unit_type == INTRA_TYPE)
 							is_intra = 1;
 						nal_size = c - RTP_LENGTH_HEADER - H264_LENGTH_HEADER;
-						printf("NAL fragment nal_type %u, nri_type %x, fbit %x\nstart_bit %x, end_bit %x, nal_size %u, nal_unit_type %u\n", nal_type, nri_type, fbit, start_bit, end_bit, nal_size, nal_unit_type);
+						//printf("NAL fragment nal_type %u, nri_type %x, fbit %x\nstart_bit %x, end_bit %x, nal_size %u, nal_unit_type %u\n", nal_type, nri_type, fbit, start_bit, end_bit, nal_size, nal_unit_type);
 						memcpy(source_data + size_source_data + LENGTH_SIZE, buffer_in + RTP_LENGTH_HEADER + H264_LENGTH_HEADER, nal_size);
 						size_source_data += nal_size;
 						if (end_bit) {							
@@ -227,8 +261,8 @@ int main(){
 			if (seg_size > I2ERROR_MAX) {
 				char path[250];
 				bzero(path, 250);
-				sprintf(path, "%s%d%s","/tmp/pruebas/i2lib/i2libtest_480_video_",segment_count,"_1.m4v");
-				printf("OK VIDEO SEGMENT! %d\n", seg_size);
+				printf("SEGMENT i2libtest_1080_video_%d_1.m4v done\n", segment_count);
+				sprintf(path, "%s%s%s%d%s","/tmp/pruebas/i2lib/i2libtest_", representation, "_video_", segment_count, "_1.m4v");
 				output_video_i = fopen(path, "w");
 				int j = 0;
 				// int fputc(int c, FILE *stream);

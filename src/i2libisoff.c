@@ -1440,7 +1440,7 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 	memcpy(data + count, &hton_earliest_presentation_time, 4);
 	count+= 4;
 	// first offset
-	hton_duration_ms = htonl(duration_ms+1); //TODO
+	hton_duration_ms = htonl(duration_ms); //TODO
 	memcpy(data + count, &hton_duration_ms, 4);
 	count+= 4;
 	// reserved
@@ -1455,7 +1455,7 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 	memcpy(data + count, &hton_reference_size, 4);
 	count+= 4;
 	// subsegment_duration
-	hton_duration_ms =  htonl(duration_ms+1);
+	hton_duration_ms =  htonl(duration_ms);
 	memcpy(data + count, &hton_duration_ms, 4);
 	count+= 4;
 	// 1st bit is reference type, the rest is reference size

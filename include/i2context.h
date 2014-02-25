@@ -7,7 +7,7 @@ typedef unsigned char byte;
 #define AUDIO_TYPE 2
 #define AUDIOVIDEO_TYPE 3
 #define MAX_MDAT_SAMPLE 65536
-#define MAX_DAT 10*1024*1024
+#define MAX_DAT 100*1024*1024
 #define I2ERROR_MAX 10
 #define I2ERROR_SPS_PPS 9
 #define I2ERROR_IS_INTRA 8
@@ -24,6 +24,7 @@ typedef unsigned char byte;
 #define SEC_TO_MSEC 1000
 #define FRAMERATE_PER_CENT 10
 #define H264_FREQUENCY 90000
+#define H264_FREQUENCY_MS 90
 #define NAL_TYPE 0x1F
 #define NAL_UNIT_TYPE 0x1F
 #define NRI_TYPE 0x60
@@ -31,8 +32,9 @@ typedef unsigned char byte;
 #define START_BIT 0X80
 #define END_BIT 0X40
 #define FUA_TYPE 0x1C
-#define SPS_TYPE 7
 #define PPS_TYPE 8
+#define SPS_TYPE 7
+#define SEI_TYPE 6
 #define RTP_LENGTH_HEADER 12
 #define H264_LENGTH_HEADER 2
 #define LENGTH_SIZE 4

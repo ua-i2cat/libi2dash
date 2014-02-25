@@ -206,16 +206,6 @@ uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *metada
 		return I2ERROR_SIZE_ZERO;
 	}
 
-	//uint32_t total_size;
-
-	/*total_size = metadata_size + metadata2_size + 2 + sps_s + metadata3_size + 2 + pps_size;
-	printf("TOTAL metadata_size %u\n", metadata_size); 
-	printf("TOTAL metadata_size2 %u\n", metadata2_size); 
-	printf("TOTAL sps_s %u\n", sps_s); 
-	printf("TOTAL metadata3_size %u\n", metadata3_size); 
-	printf("TOTAL pps_size %u\n", pps_size); 
-	printf("TOTAL SIZE %u\n", total_size); */
-
 	count = 0;
 
 	sps_pps_data = (byte *) malloc(metadata_size + metadata2_size + 2 + sps_s + metadata3_size + 2 + pps_size);
@@ -250,7 +240,6 @@ uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *metada
 
 	if(get_width_height(sps_data, sps_size, &((*context)->ctxvideo)) == I2ERROR_SPS_PPS)
 		return I2ERROR_SPS_PPS;
-	//printf("WIDTH %u, HEIGHT %u\n", (*context)->ctxvideo->width, (*context)->ctxvideo->height);
 	initVideo = initVideoGenerator(sps_pps_data, sps_pps_data_length, output_data, context);
 
 	return initVideo;
