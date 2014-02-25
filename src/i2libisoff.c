@@ -83,7 +83,7 @@ uint32_t write_moof(byte *data, uint32_t media_type, i2ctx **context);
 //mfhd for audio and video files is the same
 uint32_t write_mfhd(byte *data, uint32_t media_type, i2ctx *context);
 
-uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context);
+uint32_t write_traf(byte *data, uint32_t media_type, i2ctx **context);
 
 //tfhd for audio and video files is the same
 uint32_t write_tfhd(byte *data, uint32_t media_type, i2ctx *context);
@@ -192,7 +192,14 @@ uint32_t segmentGenerator(byte *source_data, uint32_t size_source_data, byte *de
 	count+= size_styp;
 	
 	size_sidx = 44;
-
+	if ((media_type == VIDEO_TYPE) || (media_type == AUDIOVIDEO_TYPE)) {
+		(*context)->ctxvideo->ctxsample->trun_pos+= count + size_sidx;
+		(*context)->ctxvideo->ctxsample->moof_pos+= count + size_sidx;
+	}
+	if ((media_type == AUDIO_TYPE) || (media_type == AUDIOVIDEO_TYPE)) {
+		(*context)->ctxaudio->ctxsample->trun_pos+= count + size_sidx;
+		(*context)->ctxaudio->ctxsample->moof_pos+= count + size_sidx;
+	}
 	size_moof = write_moof(destination_data + count + size_sidx, media_type, context);
 
 	if (size_moof < 8)
@@ -1433,7 +1440,7 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 	memcpy(data + count, &hton_earliest_presentation_time, 4);
 	count+= 4;
 	// first offset
-	hton_duration_ms = htonl(duration_ms); //TODO
+	hton_duration_ms = htonl(duration_ms+1); //TODO
 	memcpy(data + count, &hton_duration_ms, 4);
 	count+= 4;
 	// reserved
@@ -1448,7 +1455,7 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 	memcpy(data + count, &hton_reference_size, 4);
 	count+= 4;
 	// subsegment_duration
-	hton_duration_ms =  htonl(duration_ms);
+	hton_duration_ms =  htonl(duration_ms+1);
 	memcpy(data + count, &hton_duration_ms, 4);
 	count+= 4;
 	// 1st bit is reference type, the rest is reference size
@@ -1469,30 +1476,30 @@ uint32_t write_sidx(byte *data, uint32_t media_type, i2ctx *context) {
 }
 
 uint32_t write_moof(byte *data, uint32_t media_type, i2ctx **context) {
-	uint32_t count, size, hton_size, size_traf, size_mfhd;
-	i2ctx_sample *samples; 
+	uint32_t count, size, hton_size, size_traf, size_mfhd; 
 
-	samples = NULL;
 	count = 4;
-
-	if(media_type == VIDEO_TYPE)
-		samples = (*context)->ctxvideo->ctxsample;
-	else if (media_type == AUDIO_TYPE)
-		samples = (*context)->ctxaudio->ctxsample;
 
 	// box type
 	memcpy(data + count, "moof", 4);
 	count+= 4;
-	samples->moof_pos = count;
+
 
 	// write mfhd
 	size_mfhd = write_mfhd(data + count, media_type, (*context));
 	if (size_mfhd < 8)
 		return I2ERROR_ISOFF;
-
+	
 	count+=size_mfhd;
 	// write traf
-	size_traf = write_traf(data + count, media_type, (*context));
+	if ((media_type == VIDEO_TYPE) || (media_type == AUDIOVIDEO_TYPE)) {
+		(*context)->ctxvideo->ctxsample->trun_pos+= count;
+	}
+	if ((media_type == AUDIO_TYPE) || (media_type == AUDIOVIDEO_TYPE)) {
+		(*context)->ctxaudio->ctxsample->trun_pos+= count;
+	}
+
+	size_traf = write_traf(data + count, media_type, context);
 	if (size_traf < 8)
 		return I2ERROR_ISOFF;
 
@@ -1538,7 +1545,7 @@ uint32_t write_mfhd(byte *data, uint32_t media_type, i2ctx *context) {
 	return count;
 }
 
-uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context) {
+uint32_t write_traf(byte *data, uint32_t media_type, i2ctx **context) {
 	uint32_t count, size_tfhd, size_tfdt, size_trun, size, hton_size;
 
 	count = 4;
@@ -1548,19 +1555,25 @@ uint32_t write_traf(byte *data, uint32_t media_type, i2ctx *context) {
 	count+= 4;
 	
 	// write tfhd
-	size_tfhd = write_tfhd(data + count, media_type, context);
+	size_tfhd = write_tfhd(data + count, media_type, (*context));
 	if (size_tfhd < 8)
 		return I2ERROR_ISOFF;
 	count+= size_tfhd;
 	
 	// write tfdt
-	size_tfdt = write_tfdt(data + count, media_type, context);
+	size_tfdt = write_tfdt(data + count, media_type, (*context));
 	if (size_tfdt < 8)
 		return I2ERROR_ISOFF;
 	count+= size_tfdt;
-	
+
+	if ((media_type == VIDEO_TYPE) || (media_type == AUDIOVIDEO_TYPE)) {
+		(*context)->ctxvideo->ctxsample->trun_pos+= count;
+	}
+	if ((media_type == AUDIO_TYPE) || (media_type == AUDIOVIDEO_TYPE)) {
+		(*context)->ctxaudio->ctxsample->trun_pos+= count;
+	}
 	// write trun
-	size_trun = write_trun(data + count, media_type, context);
+	size_trun = write_trun(data + count, media_type, (*context));
 	if (size_trun < 8)
 		return I2ERROR_ISOFF;
 	count+= size_trun;
@@ -1644,7 +1657,7 @@ uint32_t write_tfdt(byte *data, uint32_t media_type, i2ctx *context) {
 uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
 
 	uint32_t count, nitems, flags, hton_flags, hton_sample_size, hton_sample_duration;
-	uint32_t hton_sample_delay, sample_num, hton_sample_num, offset, hton_offset, moof_pos, size, hton_size;
+	uint32_t hton_sample_delay, sample_num, hton_sample_num, offset, hton_offset, moof_pos, size, hton_size, trun_pos;
 	
 	i2ctx_sample *samples;
 	//unsigned sample_key;
@@ -1664,12 +1677,11 @@ uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
 	flags = samples->box_flags;
 	sample_num = samples->mdat_sample_length;
 	moof_pos = samples->moof_pos;
-
-
+	trun_pos = samples->trun_pos;
 	// box type
 	memcpy(data + count, "trun", 4);
 	count+= 4;
-	offset = (count - moof_pos) + 20 + (sample_num * nitems * 4) + 8;
+	offset = (trun_pos - moof_pos) + 20 + (sample_num * nitems * 4) + 8;
 
 	// flags
 	hton_flags = htonl(flags);
@@ -1685,7 +1697,6 @@ uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
 	hton_offset = htonl(offset);
 	memcpy(data + count, &hton_offset, 4);
 	count+= 4;
-	samples->moof_pos = 0;
 
 	for (i = 0; i < sample_num; i++)
 	{

@@ -16,11 +16,12 @@ int main(){
 	struct sockaddr_in  sock_addr_input;
     socklen_t sockaddrlen = sizeof(struct sockaddr);
     int sock_origen;
-    uint32_t c = 0, hton_timestamp = 0;
+    uint32_t c = 0, hton_timestamp = 0, decode_time;
 	byte buffer_in[3000];
 	struct timeval to;
 	fd_set ready;
 	FILE *output_video_i;
+	float duration_sample_f = 0.00;
 
 	source_data = (byte *) malloc(MAX_MDAT_SAMPLE * 2);
     sock_origen = socket(AF_INET, SOCK_DGRAM, 0 );
@@ -111,6 +112,7 @@ int main(){
 					}
 					previous_timestamp = timestamp;
 					initial_timestamp = timestamp;
+					decode_time = 0;
 					size_source_data = 0;
 				}
 			}
@@ -126,15 +128,25 @@ int main(){
 					else
 						is_intra = 0;
 					sample_count++;
-					seg_size = add_sample(source_data, size_source_data, duration_sample, previous_timestamp, VIDEO_TYPE, destination_data, is_intra, &context);
+					decode_time = (((previous_timestamp - initial_timestamp) * SEC_TO_MSEC)/H264_FREQUENCY);
+					printf("initial time: %u previous time %u timestamp %u\ndecode time %u duration sample %u\n",  initial_timestamp, previous_timestamp, timestamp, (((previous_timestamp - initial_timestamp) * SEC_TO_MSEC)/H264_FREQUENCY), duration_sample);
+					duration_sample_f+= ((float)((timestamp - previous_timestamp) * SEC_TO_MSEC)/(float) H264_FREQUENCY);
+					duration_sample_f-= (float) duration_sample;
+					if (duration_sample_f > 1) {
+						printf("ES MAYOR QUE UNO!!!!!!!!!!!!!!!!!!!!!!!\n");
+						duration_sample++;
+						duration_sample_f--;
+					}
+					seg_size = add_sample(source_data, size_source_data, duration_sample, decode_time, VIDEO_TYPE, destination_data, is_intra, &context);
 					is_intra = 0;
-					printf("Packet number %u, seg_size %u, duration %u\n", i, seg_size, duration_sample);
+					printf("Packet number %u, seg_size %u, duration %u duration float %f\n ", i, seg_size, duration_sample, duration_sample_f);
 					if (seg_size > I2ERROR_MAX) {
 						char path[250];
 						bzero(path, 250);
 						sprintf(path, "%s%d%s","/tmp/pruebas/i2lib/i2libtest_480_video_",segment_count,"_1.m4v");
 						segment_count++;
-						printf("OK VIDEO SEGMENT! %d\n", seg_size);
+						duration_sample_f = 0.00;
+						//printf("OK VIDEO SEGMENT! %d\ninitial time: %u previous time %u\ndecode time %u\n", seg_size,  initial_timestamp, previous_timestamp, (((previous_timestamp - initial_timestamp) * SEC_TO_MSEC)/H264_FREQUENCY));
 						output_video_i = fopen(path, "w");
 						int j = 0;
 						// int fputc(int c, FILE *stream);
@@ -208,26 +220,7 @@ int main(){
 					}
 					//printf("Packet number %u, size_source_data %u\n", i, size_source_data);
 				}
-			} 
-			if (sample_count == 50000) {
-				printf("212 samples %u\n", context->ctxvideo->segment_data_size);
-				seg_size = finish_segment(VIDEO_TYPE, destination_data, &context);
-				if (seg_size > I2ERROR_MAX) {
-					char path[250];
-					bzero(path, 250);
-					sprintf(path, "%s%d%s","/tmp/pruebas/i2lib/i2libtest_480_video_",segment_count,"_1.m4v");
-					printf("OK VIDEO SEGMENT! %d\n", seg_size);
-					output_video_i = fopen(path, "w");
-					int j = 0;
-					// int fputc(int c, FILE *stream);
-					for(j = 0; j < seg_size; j++) {
-						fputc(destination_data[j], output_video_i);
-					}
-					fclose(output_video_i);
-				}
-				break;
 			}
-						
 		} else {
 			printf("5 sec %u\n", context->ctxvideo->segment_data_size);
 			seg_size = finish_segment(VIDEO_TYPE, destination_data, &context);

@@ -67,6 +67,7 @@ void audio_sample_context_initializer(i2ctx_audio **ctxAudio) {
 	ctxASample->mdat_sample_length = 0;
 	ctxASample->mdat_total_size = 0;
 	ctxASample->moof_pos = 0;
+	ctxASample->trun_pos = 0;
 }
 
 void video_context_initializer(i2ctx **context) {
@@ -95,6 +96,8 @@ void context_refresh(i2ctx **context, uint32_t media_type) {
 		(*context)->ctxvideo->segment_data_size = 0;
 		(*context)->ctxvideo->ctxsample->mdat_sample_length = 0;
 		(*context)->ctxvideo->ctxsample->mdat_total_size = 0;
+		(*context)->ctxvideo->ctxsample->moof_pos = 0;
+		(*context)->ctxvideo->ctxsample->trun_pos = 0;
 	}
 	if ((media_type == AUDIO_TYPE) || (media_type == AUDIOVIDEO_TYPE)) {
 		(*context)->ctxaudio->earliest_presentation_time = 0;
@@ -104,6 +107,8 @@ void context_refresh(i2ctx **context, uint32_t media_type) {
 		(*context)->ctxaudio->segment_data_size = 0;
 		(*context)->ctxaudio->ctxsample->mdat_sample_length = 0;
 		(*context)->ctxaudio->ctxsample->mdat_total_size = 0;
+		(*context)->ctxaudio->ctxsample->moof_pos = 0;
+		(*context)->ctxaudio->ctxsample->trun_pos = 0;
 	}
 	
 }
@@ -116,6 +121,7 @@ void video_sample_context_initializer(i2ctx_video **ctxVideo) {
 	ctxVSample->mdat_sample_length = 0;
 	ctxVSample->mdat_total_size = 0;
 	ctxVSample->moof_pos = 0;
+	ctxVSample->trun_pos = 0;
 }
 
 uint8_t get_width_height(byte *nal_sps, uint32_t *size_nal_sps, i2ctx_video **ctxVideo) {

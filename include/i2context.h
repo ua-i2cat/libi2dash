@@ -56,6 +56,7 @@ typedef struct {
 	uint32_t		mdat_sample_length;
 	uint32_t		mdat_total_size;
 	uint32_t		moof_pos; // setted in write_moof, used in write_trun
+	uint32_t		trun_pos; // setted in write_moof, used in write_trun
 } i2ctx_sample;
 
 //CONTEXT
