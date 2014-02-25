@@ -122,27 +122,6 @@ int main(int argc, char *argv[]){
 					}
 				}
 			}
-			/*if (nal_type == SEI_TYPE) {//SEI
-				if (i < 3) {
-					memcpy(pps_data, buffer_in + RTP_LENGTH_HEADER, (c-RTP_LENGTH_HEADER));
-					pps_size = c-RTP_LENGTH_HEADER;
-					init_video = init_video_handler(metadata, metadata_size, metadata2, metadata2_size, sps_data, &sps_size, metadata3, metadata3_size, pps_data, pps_size, destination_data, &context);
-					if (init_video > I2ERROR_MAX) {
-						printf("OK INIT VIDEO!\n");
-						output_video_i = fopen("/tmp/pruebas/i2lib/i2libtest_1080_video_init.m4v", "w");
-						int i = 0;
-						// int fputc(int c, FILE *stream);
-						for(i = 0; i < init_video; i++) {
-							fputc(destination_data[i], output_video_i);
-						}
-						fclose(output_video_i);
-					}
-					previous_timestamp = timestamp;
-					initial_timestamp = timestamp;
-					decode_time = 0;
-					size_source_data = 0;
-				}
-			}*/
 			if ((nal_type != PPS_TYPE) && (nal_type != SPS_TYPE)) {
 
 				if (previous_timestamp != timestamp) {
