@@ -295,16 +295,21 @@ uint32_t add_sample(byte *input_data, uint32_t size_input, uint32_t duration_sam
 	if (media_type == VIDEO_TYPE) {
 		seg_gen = I2OK;		
 		if ((is_intra == TRUE) && ((((*context)->duration_ms) - ((*context)->threshold_ms)) <= ((*context)->ctxvideo->current_video_duration_ms))) {
+			//printf ("Close segment\n");
 			// Close segmentation
 			seg_gen = segmentGenerator((*context)->ctxvideo->segment_data, (*context)->ctxvideo->segment_data_size, output_data, VIDEO_TYPE, context);
+			//printf("Segment generator %u\n", seg_gen);
 			if (seg_gen > I2ERROR_MAX)
 				context_refresh(context, VIDEO_TYPE);
+			//printf("context refresh done\n");
 		}
 		// Add sample or Init new segmentation
 		if ((seg_gen == I2OK) || (seg_gen > I2ERROR_MAX)) {
 			i2ctx_sample *ctxSample = (*context)->ctxvideo->ctxsample;
 			// Add segment data
+			//printf("Before SIZE DATA %u\n",(*context)->ctxvideo->segment_data_size);
 			memcpy((*context)->ctxvideo->segment_data + (*context)->ctxvideo->segment_data_size, input_data, size_input);
+			//printf("SIZE DATA %u\n",(*context)->ctxvideo->segment_data_size);
 			(*context)->ctxvideo->segment_data_size += size_input;
 			if(ctxSample->mdat_sample_length == 0)
 				(*context)->ctxvideo->earliest_presentation_time = timestamp;
@@ -313,7 +318,9 @@ uint32_t add_sample(byte *input_data, uint32_t size_input, uint32_t duration_sam
 			(*context)->ctxvideo->current_video_duration_ms += duration_sample;
 
 			// Add metadata
+			
 			samp_len = ctxSample->mdat_sample_length;
+			//printf("Sample %u\n", samp_len);
 			ctxSample->mdat[samp_len].size = size_input;
 			ctxSample->mdat[samp_len].duration_ms = duration_sample;
 			ctxSample->mdat[samp_len].timestamp = timestamp;
