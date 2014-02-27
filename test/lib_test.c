@@ -10,13 +10,13 @@ int main(int argc, char *argv[]){
 	byte *destination_data = NULL, *source_data = NULL;
 	uint32_t metadata_size = 0, metadata2_size = 0, metadata3_size = 0, init_video = 0, size_source_data = 0, initial_timestamp = 0;
 	uint32_t sps_size = 0, pps_size = 0, duration_sample = 0, timestamp = 0, previous_timestamp = 0, i = 0, seg_size = 0;
-	uint32_t nal_size = 0, hton_nal_size = 0, sample_count = 0, hton_size_source_data = 0, segment_count = 0;
+	uint32_t nal_size = 0, hton_nal_size = 0, sample_count = 0, hton_sum_nal = 0, segment_count = 0;
 	uint8_t i2error = 0, is_intra = 0, nal_type = 0, nri_type = 0, fbit = 0, start_bit = 0, end_bit = 0, nal_header = 0;
 	uint8_t nal_unit_type = 0;
 	struct sockaddr_in  sock_addr_input;
     socklen_t sockaddrlen = sizeof(struct sockaddr);
     int sock_origen;
-    uint32_t c = 0, hton_timestamp = 0, decode_time = 0;
+    uint32_t c = 0, hton_timestamp = 0, decode_time = 0, nal_length = 0, sum_nal = 0;
 	byte buffer_in[3000];
 	struct timeval to;
 	fd_set ready;
@@ -88,6 +88,7 @@ int main(int argc, char *argv[]){
 			//printf("Entro %u\n", i);
 			c = recvfrom (sock_origen, buffer_in, sizeof(buffer_in), 0, (struct sockaddr *)&sock_addr_input, &sockaddrlen);
 			memcpy(&hton_timestamp, buffer_in+4, sizeof(hton_timestamp));
+			printf("Packet number %u; Length %u\n", i, (c+42));
 			//printf ("Memcpy timestamp\n");
 			nal_type = (*(buffer_in + RTP_LENGTH_HEADER)) & NAL_TYPE;
 			timestamp = htonl(hton_timestamp);
@@ -135,15 +136,15 @@ int main(int argc, char *argv[]){
 					else
 						is_intra = 0;
 					sample_count++;
-					if ((sample_count % 10) == 0) {
+					/*if ((sample_count % 10) == 0) {
 						printf(".");
 						fflush(stdout);
-					}
+					}*/
 					decode_time = ((previous_timestamp - initial_timestamp) / H264_FREQUENCY_MS);
 					//printf("initial time: %u previous time %u timestamp %u\ndecode time %u duration sample %u\n",  initial_timestamp, previous_timestamp, timestamp, (((previous_timestamp - initial_timestamp) * SEC_TO_MSEC)/H264_FREQUENCY), duration_sample);
 					duration_sample_f+= (((float)(timestamp - previous_timestamp))/((float) (H264_FREQUENCY_MS)));
 					duration_sample_f-= (float) duration_sample;
-					if (duration_sample_f > 1) {
+					if (duration_sample_f >= 1) {
 						//printf("ES MAYOR QUE UNO!!!!!!!!!!!!!!!!!!!!!!!\n");
 						duration_sample++;
 						duration_sample_f--;
@@ -168,6 +169,7 @@ int main(int argc, char *argv[]){
 						sprintf(path, "%s%s%s%d%s","/tmp/pruebas/i2lib/i2libtest_", representation, "_video_", segment_count, "_1.m4v");
 						//printf("After path: %s\n", path);
 						segment_count++;
+						sample_count = 0;
 						duration_sample_f = 0.00;
 						//printf("OK VIDEO SEGMENT! %d\ninitial time: %u previous time %u\ndecode time %u\n", seg_size,  initial_timestamp, previous_timestamp, (((previous_timestamp - initial_timestamp) )/H264_FREQUENCY_MS));
 						//printf("Before fopen file\n");
@@ -183,18 +185,21 @@ int main(int argc, char *argv[]){
 						//printf("FILE CLOSE\n");
 					}
 					if (nal_type == FUA_TYPE) {	//Fragmentation unit
-						//printf("FUA\n");
+						printf("FUA\n");
 						nal_unit_type = (*(buffer_in + RTP_LENGTH_HEADER + 1)) & NAL_UNIT_TYPE;
 						nri_type = (*(buffer_in + RTP_LENGTH_HEADER)) & NRI_TYPE;
 						fbit = (*(buffer_in + RTP_LENGTH_HEADER)) & FORBIDDEN_BIT;
 						start_bit = (*(buffer_in + RTP_LENGTH_HEADER + 1)) & START_BIT;
 						end_bit = (*(buffer_in + RTP_LENGTH_HEADER + 1)) & END_BIT;
-						nal_header = fbit | nri_type | nal_unit_type;
+						
 						
 						if (start_bit) {
-							//printf ("start bit %u\n", timestamp);
+							nal_length = 0;
+							nal_header = fbit | nri_type | nal_unit_type;
+							printf ("start bit %u\n", i);
 							memcpy(source_data + LENGTH_SIZE, &nal_header, 1);
 							size_source_data = 1;
+							sum_nal = 1;
 						}
 						nal_size = c - RTP_LENGTH_HEADER - H264_LENGTH_HEADER;
 						//printf("NAL fragment nal_type %u, nri_type %x, fbit %x\nstart_bit %x, end_bit %x, nal_size %u, nal_unit_type %u\n", nal_type, nri_type, fbit, start_bit, end_bit, nal_size, nal_unit_type);
@@ -204,6 +209,7 @@ int main(int argc, char *argv[]){
 						//memcpy(source_data + size_source_data + LENGTH_SIZE + 1, &raro, 1);
 						//printf("el raro %x\n", raro);
 						size_source_data += nal_size;
+						sum_nal += nal_size;
 					} else {//Single NAL unit packet per H.264 
 						nal_size = c - RTP_LENGTH_HEADER;
 						hton_nal_size = htonl(nal_size);
@@ -213,7 +219,7 @@ int main(int argc, char *argv[]){
 						size_source_data += nal_size;
 					}
 					previous_timestamp = timestamp;
-				} else {
+				} else { //Same timestamp
 					if (nal_type == FUA_TYPE) {	//Fragmentation unit
 						nal_unit_type = (*(buffer_in + RTP_LENGTH_HEADER + 1)) & NAL_UNIT_TYPE;
 						nri_type = (*(buffer_in + RTP_LENGTH_HEADER)) & NRI_TYPE;
@@ -221,20 +227,26 @@ int main(int argc, char *argv[]){
 						start_bit = (*(buffer_in + RTP_LENGTH_HEADER + 1)) & START_BIT;
 						end_bit = (*(buffer_in + RTP_LENGTH_HEADER + 1)) & END_BIT;
 						
-						/*nal_header = fbit | nri_type | nal_type;
+						
 						if (start_bit) {
-							memcpy(source_data + LENGTH_SIZE, &nal_header, 1);
-							size_source_data = LENGTH_SIZE + 1;
-						}*/
+							printf ("start bit %u\n", i);
+							nal_length = size_source_data;
+							nal_header = fbit | nri_type | nal_type;
+							memcpy(source_data + size_source_data + LENGTH_SIZE, &nal_header, 1);
+							size_source_data += 1;
+							sum_nal = 1;
+						}
 						if (nal_unit_type == INTRA_TYPE)
 							is_intra = 1;
 						nal_size = c - RTP_LENGTH_HEADER - H264_LENGTH_HEADER;
 						//printf("NAL fragment nal_type %u, nri_type %x, fbit %x\nstart_bit %x, end_bit %x, nal_size %u, nal_unit_type %u\n", nal_type, nri_type, fbit, start_bit, end_bit, nal_size, nal_unit_type);
 						memcpy(source_data + size_source_data + LENGTH_SIZE, buffer_in + RTP_LENGTH_HEADER + H264_LENGTH_HEADER, nal_size);
 						size_source_data += nal_size;
-						if (end_bit) {							
-							hton_size_source_data = htonl(size_source_data);
-							memcpy(source_data, &hton_size_source_data, LENGTH_SIZE);
+						sum_nal += nal_size;
+						if (end_bit) {
+							printf ("end bit %u\n", (i+1));				
+							hton_sum_nal = htonl(sum_nal);
+							memcpy(source_data + nal_length, &hton_sum_nal, LENGTH_SIZE);
 							size_source_data += LENGTH_SIZE;
 						}
 						
@@ -245,8 +257,9 @@ int main(int argc, char *argv[]){
 						size_source_data += 4;
 						memcpy(source_data + size_source_data, buffer_in + RTP_LENGTH_HEADER, nal_size);
 						size_source_data += nal_size;
+						printf("Single NAL Packet number %u, size_source_data %u\n", (i+1), size_source_data);
 					}
-					//printf("Packet number %u, size_source_data %u\n", i, size_source_data);
+					printf("Packet number %u, size_source_data %u\n", (i+1), size_source_data);
 				}
 			}
 		} else {
