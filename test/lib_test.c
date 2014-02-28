@@ -85,12 +85,12 @@ int main(int argc, char *argv[]){
 			exit(-1);
 		}
 		if (FD_ISSET(sock_origen, &ready)) {
-			uint16_t hton_seq_num = 0, seq_num;
+			//uint16_t hton_seq_num = 0, seq_num;
 			//printf("Entro %u\n", i);
 			c = recvfrom (sock_origen, buffer_in, sizeof(buffer_in), 0, (struct sockaddr *)&sock_addr_input, &sockaddrlen);
 			memcpy(&hton_timestamp, buffer_in+4, sizeof(hton_timestamp));
-			memcpy(&hton_seq_num, buffer_in + 2, sizeof(hton_seq_num));
-			seq_num = ntohs(hton_seq_num);
+			//memcpy(&hton_seq_num, buffer_in + 2, sizeof(hton_seq_num));
+			//seq_num = ntohs(hton_seq_num);
 			//printf("Packet number %u seq_num %u\n", (i+1), seq_num);
 			//printf ("Memcpy timestamp\n");
 			nal_type = (*(buffer_in + RTP_LENGTH_HEADER)) & NAL_TYPE;
