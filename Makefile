@@ -13,6 +13,7 @@ CFLAGS = -Wall -ggdb -fPIC
 PROG_ISOFF = isofftest
 PROG_I2DASH = i2dashtest
 PROG_LIB = i2libtest
+PROG_A_LIB = i2libtest_audio
 VERSION = 1.0.0
 LIB_SHARED_NAME = libi2dash.so
 LIB_STATIC_NAME = libi2dash.a
@@ -60,13 +61,18 @@ install-lib: lib
 	ln -f -s $(INSTALL_LIB_PATH)/$(LIB_SHARED_NAME).$(VERSION) $(INSTALL_LIB_PATH)/$(LIB_SHARED_NAME)
 	ldconfig
 
-testlib: lib_test.o
+testlib: lib_test.o lib_test_audio.o
 	$(CC) $(CFLAGS) -o $(BIN_PATH)/$(PROG_LIB) $(TEST_PATH)/lib_test.o $(LIB_FLAGS)
+	$(CC) $(CFLAGS) -o $(BIN_PATH)/$(PROG_A_LIB) $(TEST_PATH)/lib_test_audio.o $(LIB_FLAGS)
 	mkdir -p $(TEST_DIR)/$(LIB_SEGMENT)
 
 lib_test.o:  $(TEST_PATH)/lib_test.c
 	$(CC) $(CFLAGS) -c $(TEST_PATH)/lib_test.c
 	mv lib_test.o $(TEST_PATH)/
+
+lib_test_audio.o:  $(TEST_PATH)/lib_test_audio.c
+	$(CC) $(CFLAGS) -c $(TEST_PATH)/lib_test_audio.c
+	mv lib_test_audio.o $(TEST_PATH)/
 
 clean:
 	rm -f $(BIN_PATH)/* $(TEST_PATH)/*.o $(LIB_PATH)/* ./*.o

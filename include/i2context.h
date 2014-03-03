@@ -25,6 +25,8 @@ typedef unsigned char byte;
 #define FRAMERATE_PER_CENT 10
 #define H264_FREQUENCY 90000
 #define H264_FREQUENCY_MS 90
+#define AAC_48K_FREQUENCY_MS 48
+#define AAC_48K_FREQUENCY 48000
 #define NAL_TYPE 0x1F
 #define NAL_UNIT_TYPE 0x1F
 #define NRI_TYPE 0x60
@@ -37,6 +39,7 @@ typedef unsigned char byte;
 #define SEI_TYPE 6
 #define RTP_LENGTH_HEADER 12
 #define H264_LENGTH_HEADER 2
+#define AAC_LENGTH_HEADER 0
 #define LENGTH_SIZE 4
 #define INTRA_TYPE 5
 
