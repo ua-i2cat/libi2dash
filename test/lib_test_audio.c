@@ -10,7 +10,7 @@ int main(int argc, char *argv[]){
 	byte *destination_data = NULL, *source_data = NULL;
 	uint32_t metadata_size = 0, size_source_data = 0, initial_timestamp = 0;
 	uint32_t duration_sample = 0, timestamp = 0, previous_timestamp = 0, i = 0, seg_size = 0;
-	uint32_t sample_count = 0, segment_count = 0;
+	uint32_t sample_count = 0, segment_count = 0, init_audio = 0;
 	uint8_t i2error = 0, is_intra = 1;
 	struct sockaddr_in  sock_addr_input;
     socklen_t sockaddrlen = sizeof(struct sockaddr);
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]){
     sock_addr_input.sin_family = AF_INET;
     sock_addr_input.sin_port = htons(10002);
 
-	if (bind(sock_origen, (struct sockaddr *)&sock_addr_input, sizeof(sock_addr_input) ) == -1) {
+if (bind(sock_origen, (struct sockaddr *)&sock_addr_input, sizeof(sock_addr_input) ) == -1) {
 		perror("Error bind\n");
 		close(sock_origen);
 		exit(-1);
@@ -49,15 +49,13 @@ int main(int argc, char *argv[]){
 	else
 		printf("CONTEXT OK!\n");
 
-	// METADATA
+	// METADATA HE AAC v2 Stereo 48kHz
 	metadata = (byte *) malloc (100);
-	metadata[0] = 0x01;
-	metadata[1] = 0x42;
-	metadata[2] = 0xC0;
-	metadata[3] = 0x1E;
-	metadata_size = 3;
-	metadata_size++;
-
+	metadata[0] = 0xEB;
+	metadata[1] = 0x09;
+	metadata[2] = 0x88;
+	metadata[3] = 0x00;
+	metadata_size = 4;
 
 	// DESTINATION DATA
 	destination_data = (byte *) malloc (MAX_DAT);
@@ -88,6 +86,20 @@ int main(int argc, char *argv[]){
 				initial_timestamp = timestamp;
 				decode_time = 0;
 				size_source_data = 0;
+				init_audio = init_audio_handler(metadata, metadata_size, destination_data, &context);
+					if (init_audio > I2ERROR_MAX) {
+						char path[250];
+						bzero(path, 250);
+						sprintf(path, "%s%s%s","/tmp/pruebas/i2lib/i2libtest_", representation, "_audio_init.m4a");
+						output_audio_i = fopen(path, "w");
+						int i = 0;
+						// int fputc(int c, FILE *stream);
+						for(i = 0; i < init_audio; i++) {
+							fputc(destination_data[i], output_audio_i);
+						}
+						fclose(output_audio_i);
+						printf("INIT i2libtest_%s_audio_init.m4a done\n", representation);
+					}
 			}
 			if (previous_timestamp != timestamp) {
 				sample_count++;
