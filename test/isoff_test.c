@@ -108,12 +108,23 @@ int main(){
 	// AUDIO INIT GENERATOR TEST
 
 	source_data = (byte *) malloc (100);
-	source_data[0] = 0xaf;
-	source_data[1] = 0x00;
-	source_data[2] = 0x11;
-	source_data[3] = 0x90;
+	/*
+    AUDIO LC AAC --> 1190
+	source_data[0] = 0x11;
+	source_data[0] = 0x90;
 
-	size_source_data = 4;
+	size_source_data = 2;
+    */
+
+    /*
+    AUDIO HE AAC --> EB098800
+    */
+    source_data[0] = 0xEB;
+    source_data[1] = 0x09;
+    source_data[2] = 0x88;
+    source_data[3] = 0x00;
+
+    size_source_data = 4;
 
 	destination_data = (byte *) malloc (MAX_MDAT_SAMPLE);
 

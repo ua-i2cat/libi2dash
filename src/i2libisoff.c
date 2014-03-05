@@ -1152,8 +1152,8 @@ uint32_t write_esds(byte *data, i2ctx_audio *ctxAudio) {
 	one_16 = 1;
 	aac_data = ctxAudio->aac_data;
 	aac_data_length = ctxAudio->aac_data_length;
-	dsi = aac_data + 2; //TODO check
-	dsi_len = aac_data_length -2; // TODO check
+	dsi = aac_data;
+	dsi_len = aac_data_length;
 	tag_esd = 0x03;
 	size_esd = 23 + dsi_len;
 	tag_dcd = 0x04;
