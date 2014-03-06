@@ -11,6 +11,10 @@ int main(int argc, char *argv[]){
 	uint32_t metadata_size = 0, size_source_data = 0, initial_timestamp = 0;
 	uint32_t duration_sample = 0, timestamp = 0, previous_timestamp = 0, i = 0, seg_size = 0;
 	uint32_t sample_count = 0, segment_count = 0, init_audio = 0;
+<<<<<<< HEAD
+=======
+	uint16_t aac_length_header = 0, ntohs_aac_length_header = 0, count = 0;
+>>>>>>> TVRING-192: Obtains AU Header length
 	uint8_t i2error = 0, is_intra = 1;
 	struct sockaddr_in  sock_addr_input;
     socklen_t sockaddrlen = sizeof(struct sockaddr);
@@ -72,35 +76,40 @@ if (bind(sock_origen, (struct sockaddr *)&sock_addr_input, sizeof(sock_addr_inpu
 			exit(-1);
 		}
 		if (FD_ISSET(sock_origen, &ready)) {
-			//uint16_t hton_seq_num = 0, seq_num;
-			//printf("Entro %u\n", i);
+
 			c = recvfrom (sock_origen, buffer_in, sizeof(buffer_in), 0, (struct sockaddr *)&sock_addr_input, &sockaddrlen);
 			memcpy(&hton_timestamp, buffer_in+4, sizeof(hton_timestamp));
-			//memcpy(&hton_seq_num, buffer_in + 2, sizeof(hton_seq_num));
-			//seq_num = ntohs(hton_seq_num);
-			//printf("Packet number %u seq_num %u\n", (i+1), seq_num);
-			//printf ("Memcpy timestamp\n");
+
 			timestamp = htonl(hton_timestamp);
+
+			memcpy(&aac_length_header, buffer_in + RTP_LENGTH_HEADER, sizeof(aac_length_header));
+			printf("aac_length_header: %u\n", aac_length_header);
+			ntohs_aac_length_header = ntohs(aac_length_header) / (AU_LENGTH_HEADER*BYTE_SIZE);
+			printf("ntohs_aac_length_header: %u\n", ntohs_aac_length_header);
+
+			count = ntohs_aac_length_header;
+
 			if (i == 0) {
 				previous_timestamp = timestamp;
 				initial_timestamp = timestamp;
 				decode_time = 0;
 				size_source_data = 0;
 				init_audio = init_audio_handler(metadata, metadata_size, destination_data, &context);
-					if (init_audio > I2ERROR_MAX) {
-						char path[250];
-						bzero(path, 250);
-						sprintf(path, "%s%s%s","/tmp/pruebas/i2lib/i2libtest_", representation, "_audio_init.m4a");
-						output_audio_i = fopen(path, "w");
-						int i = 0;
-						// int fputc(int c, FILE *stream);
-						for(i = 0; i < init_audio; i++) {
-							fputc(destination_data[i], output_audio_i);
-						}
-						fclose(output_audio_i);
-						printf("INIT i2libtest_%s_audio_init.m4a done\n", representation);
+				if (init_audio > I2ERROR_MAX) {
+					char path[250];
+					bzero(path, 250);
+					sprintf(path, "%s%s%s","/tmp/pruebas/i2lib/i2libtest_", representation, "_audio_init.m4a");
+					output_audio_i = fopen(path, "w");
+					int i = 0;
+					// int fputc(int c, FILE *stream);
+					for(i = 0; i < init_audio; i++) {
+						fputc(destination_data[i], output_audio_i);
 					}
+					fclose(output_audio_i);
+					printf("INIT i2libtest_%s_audio_init.m4a done\n", representation);
+				}
 			}
+
 			if (previous_timestamp != timestamp) {
 				sample_count++;
 				duration_sample = ((timestamp - previous_timestamp) / AAC_48K_FREQUENCY_MS);
@@ -149,12 +158,12 @@ if (bind(sock_origen, (struct sockaddr *)&sock_addr_input, sizeof(sock_addr_inpu
 				aac_length = c - RTP_LENGTH_HEADER - AAC_LENGTH_HEADER;
 				memcpy(source_data + size_source_data, buffer_in + RTP_LENGTH_HEADER + AAC_LENGTH_HEADER, aac_length);
 				size_source_data= aac_length;
-			} else {//Same time
+			} /*else {//Same time
 				aac_length = c - RTP_LENGTH_HEADER - AAC_LENGTH_HEADER;
 				memcpy(source_data + size_source_data, buffer_in + RTP_LENGTH_HEADER + AAC_LENGTH_HEADER, aac_length);
 				size_source_data+= aac_length;
-			}
-		} else {
+			}*/
+		} else { /** Caso termina tx y espera 5 segundos **/
 			printf("5 sec %u\n", context->ctxaudio->segment_data_size);
 			seg_size = finish_segment(AUDIO_TYPE, destination_data, &context);
 			if (seg_size > I2ERROR_MAX) {

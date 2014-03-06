@@ -39,7 +39,9 @@ typedef unsigned char byte;
 #define SEI_TYPE 6
 #define RTP_LENGTH_HEADER 12
 #define H264_LENGTH_HEADER 2
-#define AAC_LENGTH_HEADER 0
+#define AAC_LENGTH_HEADER 2
+#define AU_LENGTH_HEADER 2
+#define BYTE_SIZE 8
 #define LENGTH_SIZE 4
 #define INTRA_TYPE 5
 

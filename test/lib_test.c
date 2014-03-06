@@ -119,10 +119,10 @@ int main(int argc, char *argv[]){
 						sprintf(path, "%s%s%s","/tmp/pruebas/i2lib/i2libtest_", representation, "_video_init.m4v");
 						//printf("OK INIT VIDEO!\n");
 						output_video_i = fopen(path, "w");
-						int i = 0;
+						int k = 0;
 						// int fputc(int c, FILE *stream);
-						for(i = 0; i < init_video; i++) {
-							fputc(destination_data[i], output_video_i);
+						for(k = 0; k < init_video; k++) {
+							fputc(destination_data[k], output_video_i);
 						}
 						fclose(output_video_i);
 					}
