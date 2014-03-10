@@ -118,16 +118,17 @@ int main(int argc, char *argv[]){
 			}
 
 			// TODO check in the first segment, maybe wrong
-			duration_sample = ((timestamp - previous_timestamp) / AAC_48K_FREQUENCY_MS);
+			//duration_sample = ((timestamp - previous_timestamp) / AAC_48K_FREQUENCY_MS);
+			duration_sample = ((timestamp - previous_timestamp) / au_num);
 
-			duration_sample_f+= (((float)(timestamp - previous_timestamp))/((float) (AAC_48K_FREQUENCY_MS)));
+			/*duration_sample_f+= (((float)(timestamp - previous_timestamp))/((float) (AAC_48K_FREQUENCY_MS)));
 
 			duration_sample_f-= (float) duration_sample;
 
 			if (duration_sample_f >= 1) {
 				duration_sample++;
 				duration_sample_f--;
-			}
+			}*/
 
 			previous_timestamp = timestamp;
 
@@ -140,30 +141,40 @@ int main(int argc, char *argv[]){
 				sample_size = ntohs(hton_sample_size);
 				
 				sample_size_shifted = (sample_size>>=3);
-				printf("\nSAMPLE_SIZE %d: %u", j,sample_size_shifted);
+				printf("\nSAMPLE %d, SIZE %u, DECODE_TIME %u", j,sample_size_shifted,decode_time);
+
+				duration_sample_f+= (((float)(timestamp - previous_timestamp))/((float) (AAC_48K_FREQUENCY_MS)));
+
+				duration_sample_f-= (float) duration_sample;
+
+				if (duration_sample_f >= 1) {
+					duration_sample++;
+					duration_sample_f--;
+				}
 
 				segment_size = add_sample(buffer_in + sample_pos, sample_size_shifted, duration_sample, decode_time, AUDIO_TYPE, destination_data, 1, &context);
 
 				sample_pos += sample_size_shifted;
+
+				if(segment_size > I2ERROR_MAX)  {
+					char path[250];
+					bzero(path, 250);
+					printf("\nSEGMENT i2libtest_%s_audio_%d_1.m4a done\n", representation, segment_count);
+					sprintf(path, "%s%s%s%d%s","/tmp/pruebas/i2lib/i2libtest_", representation, "_audio_", segment_count, "_1.m4a");
+					segment_count++;
+					duration_sample_f = 0.00;
+					output_audio_i = fopen(path, "w");
+					int j = 0;
+					for(j = 0; j < segment_size; j++) {
+						fputc(destination_data[j], output_audio_i);
+					}
+					fclose(output_audio_i);
+					printf("FILE CLOSE\n");	
+				}
 			}
 
 			printf("\nTIMESTAMP: %u\nAAC_LENGTH: %u\nAU_NUM: %u\nSAMPLE_POS: %u\nSAMPLE_SIZE: %u\nMESSAGE_LENGTH: %u\n", timestamp, aac_length, au_num, sample_pos, sample_size_shifted, message_length);
 
-			if(segment_size > I2ERROR_MAX)  {
-				char path[250];
-				bzero(path, 250);
-				printf("\nSEGMENT i2libtest_%s_audio_%d_1.m4a done\n", representation, segment_count);
-				sprintf(path, "%s%s%s%d%s","/tmp/pruebas/i2lib/i2libtest_", representation, "_audio_", segment_count, "_1.m4a");
-				segment_count++;
-				duration_sample_f = 0.00;
-				output_audio_i = fopen(path, "w");
-				int j = 0;
-				for(j = 0; j < segment_size; j++) {
-					fputc(destination_data[j], output_audio_i);
-				}
-				fclose(output_audio_i);
-				printf("FILE CLOSE\n");	
-			}
 		} else {	// wait 5 seconds until finish segment
 			printf("5 sec %u\n", context->ctxaudio->segment_data_size);
 			seg_size = finish_segment(AUDIO_TYPE, destination_data, &context);
