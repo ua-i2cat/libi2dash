@@ -327,9 +327,8 @@ uint32_t add_sample(byte *input_data, uint32_t size_input, uint32_t duration_sam
 		// Close segmentation
 		if ((((*context)->ctxvideo != NULL) && (is_intra == TRUE)) || (((*context)->ctxvideo == NULL) && (((*context)->duration_ms) <= ((*context)->ctxaudio->current_audio_duration_ms)))) { //this condition should be checked
 			seg_gen = segmentGenerator((*context)->ctxaudio->segment_data, (*context)->ctxaudio->segment_data_size, output_data, AUDIO_TYPE, context);			
-			if (seg_gen > I2ERROR_MAX) {
+			if (seg_gen > I2ERROR_MAX)
 				context_refresh(context, AUDIO_TYPE);
-			}
 		}
 		// Add sample or Init new segmentation
 		if ((seg_gen == I2OK) || (seg_gen > I2ERROR_MAX)) {
