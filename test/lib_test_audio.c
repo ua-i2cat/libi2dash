@@ -119,7 +119,7 @@ int main(int argc, char *argv[]){
 
 			// TODO check in the first segment, maybe wrong
 			//duration_sample = ((timestamp - previous_timestamp) / AAC_48K_FREQUENCY_MS);
-			duration_sample = ((timestamp - previous_timestamp) / au_num);
+			duration_sample = ((timestamp - previous_timestamp) / (AAC_48K_FREQUENCY_MS * au_num));
 
 			/*duration_sample_f+= (((float)(timestamp - previous_timestamp))/((float) (AAC_48K_FREQUENCY_MS)));
 
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]){
 				sample_size_shifted = (sample_size>>=3);
 				printf("\nSAMPLE %d, SIZE %u, DECODE_TIME %u", j,sample_size_shifted,decode_time);
 
-				duration_sample_f+= (((float)(timestamp - previous_timestamp))/((float) (AAC_48K_FREQUENCY_MS)));
+				duration_sample_f+= (((float)(timestamp - previous_timestamp))/((float) (AAC_48K_FREQUENCY_MS * au_num)));
 
 				duration_sample_f-= (float) duration_sample;
 
