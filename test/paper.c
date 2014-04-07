@@ -25,8 +25,6 @@ int main(int argc, char *argv[]){
     FILE *output_video_i, *output_paper;
     float duration_sample_f = 0.00, decode_time_f = 0.00;
     char* representation = "480";
-	int timescale;
-	char *time_utc;
 	char *paper_name;
     if (argc >= 2)
         representation = argv[1];
