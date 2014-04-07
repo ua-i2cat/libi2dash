@@ -161,7 +161,7 @@ int main(int argc, char *argv[]){
 					//printf("%u %u\n", requestStart.tv_sec, requestStart.tv_nsec); 
                     seg_size = add_sample(source_data, size_source_data, duration_sample, decode_time, VIDEO_TYPE, destination_data, is_intra, &context);
 					clock_gettime(CLOCK_MONOTONIC, &requestEnd);
-					printf("%ld %ld\n", requestEnd.tv_nsec, requestStart.tv_nsec);
+					//printf("%ld %ld\n", requestEnd.tv_nsec, requestStart.tv_nsec);
                     is_intra = 0;
                     if (seg_size > I2ERROR_MAX) {
                         char path[250];
