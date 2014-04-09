@@ -22,13 +22,13 @@ void set_segment_duration(uint32_t segment_duration, i2ctx **context);
 
 uint32_t get_segment_duration(i2ctx *context);
 
-void set_frame_rate(uint32_t frame_rate, i2ctx_video **ctxVideo);
+void set_frame_rate(uint32_t frame_rate, i2ctx **context);
 
-uint32_t get_frame_rate(i2ctx_video *ctxVideo);
+uint32_t get_frame_rate(i2ctx *context);
 
-void set_sample_rate(uint32_t sample_rate, i2ctx_audio **ctxAudio);
+void set_sample_rate(uint32_t sample_rate, i2ctx **context);
 
-uint32_t get_sample_rate(i2ctx_audio *ctxAudio);
+uint32_t get_sample_rate(i2ctx *context);
 
 #endif
 

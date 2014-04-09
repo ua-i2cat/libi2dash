@@ -55,6 +55,7 @@ int main(int argc, char *argv[]){
     }
     else
         printf("CONTEXT OK!\n");
+    set_segment_duration(2, &context);
     sps_data = (byte *) malloc (100);
     pps_data = (byte *) malloc (100);
     
@@ -227,8 +228,10 @@ int main(int argc, char *argv[]){
                             size_source_data += 1;
                             sum_nal = 1;
                         }
-                        if (nal_unit_type == INTRA_TYPE)
+                        if (nal_unit_type == INTRA_TYPE) {
+                            
                             is_intra = 1;
+                            }
                         nal_size = c - RTP_LENGTH_HEADER - H264_LENGTH_HEADER;
                         memcpy(source_data + size_source_data, buffer_in + RTP_LENGTH_HEADER + H264_LENGTH_HEADER, nal_size);
                         size_source_data += nal_size;

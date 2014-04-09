@@ -17,27 +17,31 @@ uint8_t is_key_frame(byte *input_data, uint32_t size_input);
 
 // IMPLEMENTATION
 void set_segment_duration(uint32_t segment_duration, i2ctx **context){
-    (*context)->duration_ms = segment_duration;
+    (*context)->duration_ms = segment_duration * SEC_TO_MSEC;
 }
 
 uint32_t get_segment_duration(i2ctx *context){
-    return context->duration_ms;
+    return (context->duration_ms / SEC_TO_MSEC);
 }
 
-void set_frame_rate(uint32_t frame_rate, i2ctx_video **ctxVideo){
-    (*ctxVideo)->frame_rate = frame_rate;
+void set_frame_rate(uint32_t frame_rate, i2ctx **context){
+    uint32_t fps_per_cent = 0;
+    (*context)->ctxvideo->frame_rate = frame_rate;
+    fps_per_cent = ((*context)->ctxvideo->frame_rate * FRAMERATE_PER_CENT)/100;
+    // Threshold: 1/fps * %fps * 1000
+    (*context)->threshold_ms = (SEC_TO_MSEC * fps_per_cent)/(((*context)->ctxvideo->frame_rate));
 }
 
-uint32_t get_frame_rate(i2ctx_video *ctxVideo){
-    return ctxVideo->frame_rate;
+uint32_t get_frame_rate(i2ctx *context){
+    return context->ctxvideo->frame_rate;
 }
 
-void set_sample_rate(uint32_t sample_rate, i2ctx_audio **ctxAudio){
-    (*ctxAudio)->sample_rate = sample_rate;
+void set_sample_rate(uint32_t sample_rate, i2ctx **context){
+    (*context)->ctxaudio->sample_rate = sample_rate;
 }
 
-uint32_t get_sample_rate(i2ctx_audio *ctxAudio){
-    return ctxAudio->sample_rate;
+uint32_t get_sample_rate(i2ctx *context){
+    return context->ctxaudio->sample_rate;
 }
 
 void audio_context_initializer(i2ctx **context) {
@@ -76,7 +80,7 @@ void video_context_initializer(i2ctx **context) {
     ctxVideo->segment_data_size = 0;
     ctxVideo->width = 0;
     ctxVideo->height = 0;
-    ctxVideo->frame_rate = 25;
+    ctxVideo->frame_rate = 24;
     ctxVideo->earliest_presentation_time = 0;
     ctxVideo->latest_presentation_time = 0;
     ctxVideo->sequence_number = 0;
@@ -164,12 +168,12 @@ uint8_t context_initializer(i2ctx **context, uint32_t media_type){
 
     (*context)->duration_ms = 5 * SEC_TO_MSEC;
     (*context)->reference_size = 0;
-
     if ((media_type == VIDEO_TYPE) || (media_type == AUDIOVIDEO_TYPE)) {
+        uint32_t fps_per_cent = 0;
         video_context_initializer(context);
-        
+        fps_per_cent = ((*context)->ctxvideo->frame_rate * FRAMERATE_PER_CENT)/100;
         // Threshold: 1/fps * %fps * 1000
-        (*context)->threshold_ms = ((SEC_TO_MSEC*FRAMERATE_PER_CENT)/100)/(((*context)->ctxvideo->frame_rate)); 
+        (*context)->threshold_ms = (SEC_TO_MSEC * fps_per_cent)/(((*context)->ctxvideo->frame_rate)); 
     } else
         (*context)->ctxvideo = NULL;
 
@@ -295,7 +299,8 @@ uint32_t add_sample(byte *input_data, uint32_t size_input, uint32_t duration_sam
     }
 
     if (media_type == VIDEO_TYPE) {
-        seg_gen = I2OK;     
+        seg_gen = I2OK;
+        //printf("%u %u %u\n", (*context)->duration_ms, (*context)->threshold_ms, (*context)->ctxvideo->current_video_duration_ms);
         if ((is_intra == TRUE) && ((((*context)->duration_ms) - ((*context)->threshold_ms)) <= ((*context)->ctxvideo->current_video_duration_ms))) {
             seg_gen = segmentGenerator((*context)->ctxvideo->segment_data, (*context)->ctxvideo->segment_data_size, output_data, VIDEO_TYPE, context);
             if (seg_gen > I2ERROR_MAX)
