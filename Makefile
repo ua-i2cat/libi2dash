@@ -61,16 +61,16 @@ install-lib: lib
 	cp -f $(LIB_PATH)/$(LIB_STATIC_NAME) $(INSTALL_LIB_PATH)
 	ln -f -s $(INSTALL_LIB_PATH)/$(LIB_SHARED_NAME).$(VERSION) $(INSTALL_LIB_PATH)/$(LIB_SHARED_NAME)
 	ldconfig
-#testlib: lib_test_video.o lib_test_audio.o paper.o
+testlib: lib_test_video.o lib_test_audio.o paper.o
 testlib: lib_test_video.o lib_test_audio.o
 	$(CC) $(CFLAGS) -o $(BIN_PATH)/$(PROG_V_LIB) $(TEST_PATH)/lib_test_video.o $(LIB_FLAGS)
 	$(CC) $(CFLAGS) -o $(BIN_PATH)/$(PROG_A_LIB) $(TEST_PATH)/lib_test_audio.o $(LIB_FLAGS)
-#	$(CC) $(CFLAGS) -o $(BIN_PATH)/$(PROG_PAPER) $(TEST_PATH)/paper.o $(LIB_FLAGS) -lrt
+	$(CC) $(CFLAGS) -o $(BIN_PATH)/$(PROG_PAPER) $(TEST_PATH)/paper.o $(LIB_FLAGS) -lrt
 	mkdir -p $(TEST_DIR)/$(LIB_SEGMENT)
 
-#paper.o:  $(TEST_PATH)/paper.c
-#	$(CC) $(CFLAGS) -c $(TEST_PATH)/paper.c
-#	mv paper.o $(TEST_PATH)/
+paper.o:  $(TEST_PATH)/paper.c
+	$(CC) $(CFLAGS) -c $(TEST_PATH)/paper.c
+	mv paper.o $(TEST_PATH)/
 
 lib_test_video.o:  $(TEST_PATH)/lib_test_video.c
 	$(CC) $(CFLAGS) -c $(TEST_PATH)/lib_test_video.c

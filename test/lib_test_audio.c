@@ -119,6 +119,7 @@ int main(int argc, char *argv[]){
                     sample_size_shifted = (sample_size>>3);
                     
                     duration_sample = ((timestamp - previous_timestamp) / (AAC_48K_FREQUENCY_MS * au_num));
+					printf("duration %u %d\n", duration_sample, i);
                     duration_sample_f+= (((float)(timestamp - previous_timestamp))/((float) (AAC_48K_FREQUENCY_MS * au_num)));
                     duration_sample_f-= (float) duration_sample;
 

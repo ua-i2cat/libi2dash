@@ -152,6 +152,8 @@ int main(int argc, char *argv[]){
                     if ((decode_time_f >= 0.5) ) {
                         decode_time++;
                     }
+			printf ("SAMPLE DURATION %u\n", duration_sample);
+			printf ("DECODE TIME %u\n", decode_time);
 					struct timespec requestStart, requestEnd;
 					/*time_t timer;
 		   			struct tm * ptm;
@@ -228,7 +230,7 @@ int main(int argc, char *argv[]){
                             size_source_data += 1;
                             sum_nal = 1;
                         }
-                        if (nal_unit_type == INTRA_TYPE) {
+                        if ((nal_unit_type == INTRA_TYPE) || (nal_unit_type == 6)) {
                             
                             is_intra = 1;
                             }
