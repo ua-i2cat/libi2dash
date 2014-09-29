@@ -28,15 +28,33 @@
 #define MAXMATRIX 267 //255+12
 #define MAXCNTCYCLE 255
 #define MAXLENGTHPPS 6
-#define FPICPARAMETERSETID 0X80
-#define FSEQPARAMETERSETID 0X40
-#define FENTROPYCODINGMODEFLAG 0X20
-#define FNUMSLICEGROUPMINUS1 0X08
+#define FPICPARAMETERSETID 0x80
+#define FSEQPARAMETERSETID 0x40
+#define FENTROPYCODINGMODEFLAG 0x20
+#define FNUMSLICEGROUPMINUS1 0x08
 #define FSLICEGROUPSMAPTYPE 0x07
 #define FTOPLEFT 0xF0
-#define FBOTTOMRIGHT 0X0F
-#define FSLICEGROUPCHANGEDIRECTIONFLAG 0X80
-#define FSLICEGROUPCHANGERATEMINUS1 0X7F
+#define FBOTTOMRIGHT 0x0F
+#define FSLICEGROUPCHANGEDIRECTIONFLAG 0x80
+#define FSLICEGROUPCHANGERATEMINUS1 0x7F
+#define FNUMREFIDX10DEFAULTACTIVEMINUS1 0x07
+#define FNUMREFIDX11DEFAULTACTIVEMINUS1 0x80
+#define FWEIGHTEDPREDFLAG 0x40
+#define FWEIGHTEDBIPREDIDC 0x30
+#define FPICINITQPMINUS26H 0x0F
+#define FPICINITQPMINUS26L 0x80
+#define FSIGNOQP26 0x0F
+#define FPICINITQSMINUS26 0x40
+#define FSIGNOQS26 0x0F
+#define FCHROMAQPINDEXOFFSET 0x3E
+#define FDEBLOCKINGFILTERTCONTROLPRESENTFLAG 0x01
+#define FCONSTRAINEDINTRAPREDFLAG 0x80
+#define FREDUNDANTPICCNTPRESENTLAG 0x40
+#define FTRANSFORM8X8MODEFLAG 0x20
+#define FPICSACALINGMATRIXPRESENTFLAG 0x10
+
+#define FPICINITQPMINUS26H 0x0F
+#define FPICINITQPMINUS26L 0x80
 
 
 typedef unsigned char byte;
@@ -97,10 +115,10 @@ typedef struct {
 	byte picOrderCntType; //ue(v)
 	byte log2MaxPicOrderCntLsbMinus4; //ue(v)
 	byte DeltaPicOrderAlwaysZeroFlag; //u(1)
-	byte offsetForNonRefPic; //se(v)
-	byte offsetForTopToBottomField; //se(v)
+	int offsetForNonRefPic; //se(v)
+	int offsetForTopToBottomField; //se(v)
 	byte numRefFramesInPicOrderCntCycle; //ue(v)
-	byte offserForRefFrame[MAXCNTCYCLE]; //se(v)
+	int offserForRefFrame[MAXCNTCYCLE]; //se(v)
 	byte maxNumRefFrames; //ue(v)
 	byte gapsInFrameNumValueAlloweFlag; //u(1)
 	byte picWidthInMbsMinus1; //ue(v)
