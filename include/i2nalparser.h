@@ -27,6 +27,7 @@
 #define MAXIGROUP 512
 #define MAXMATRIX 267 //255+12
 #define MAXCNTCYCLE 255
+//PPS FLAGS
 #define MAXLENGTHPPS 6
 #define FPICPARAMETERSETID 0x80
 #define FSEQPARAMETERSETID 0x40
@@ -54,6 +55,8 @@
 #define FPICSACALINGMATRIXPRESENTFLAG 0x10
 #define FSECONDCHROMAQPINDEXOFFSETH 0x0F
 #define FSECONDCHROMAQPINDEXOFFSETL 0x80
+#define FRBSPSTOPONEBIT 0x40
+#define FRBSPALIGNMENTZEROBIT 0x3F
 
 
 typedef unsigned char byte;
@@ -90,6 +93,8 @@ typedef struct {
 	byte picScalingMatrixPresentFlag; //u(1)
 	byte picScalingListPresentFlag[12]; //u(1)
 	byte secondChromaQpIndexOffset; //se(v)
+	byte rbspStopOneBit; //u(1)
+	byte rbspAlignmentZeroBit; //u(6) = 0
 } ppsStruct;
 
 typedef struct {

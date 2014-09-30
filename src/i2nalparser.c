@@ -58,12 +58,12 @@ bool ppsToRbsp(unsigned char* ppsHeader, uint32_t ppsLength, nalHeader* headers)
 				picScalingListPresentFlag[i] = ;
 			}
 		}
-		header->pps.secondChromaQpIndexOffset
+		header->pps.secondChromaQpIndexOffset = ((ppsHeader[offset] & FSECONDCHROMAQPINDEXOFFSETH) << 1) | ((ppsHeader[offset+1] & FSECONDCHROMAQPINDEXOFFSETL) >> 7);
+		offset++;
 	}
-	
-
-	byte ; //se(v)
-
+	header->pps.rbspStopOneBit = (ppsHeader[offset] & FRBSPSTOPONEBIT) >> 6;
+	//TODO While(byte_aligned())
+	header->pps.rbspAlignmentZeroBit = (ppsHeader[offset] & FRBSPALIGNMENTZEROBIT);
 }
 bool spsToRbsp(unsigned char* spsHeader, uint32_t spsLength, nalHeader* headers);
 uint32_t getWidth(nalHeader headers);
