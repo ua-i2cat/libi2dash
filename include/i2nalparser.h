@@ -58,6 +58,56 @@
 #define FRBSPSTOPONEBIT 0x40
 #define FRBSPALIGNMENTZEROBIT 0x3F
 
+//SPS FLAGS
+#define FCONSTRAINTSET0FLAG 0x80
+#define FCONSTRAINTSET1FLAG 0x40
+#define FCONSTRAINTSET2FLAG 0x20
+#define FCONSTRAINTSET3FLAG 0x10
+#define FCONSTRAINTSET4FLAG 0x08
+#define FCONSTRAINTSET5FLAG 0x04
+#define FRESERVEDZERO2BITS 0x03
+#define FSEQPARAMETERSETID 0x80
+#define FCHROMAFORMATIDC 0x70
+#define FSEPARATECOLOURPLANEFLAG 0x08
+#define FBITDEPTHLUMAMINUS8 0x08
+#define FBITDEPTHCHROMAMINUS8 0x04
+#define FQPPRIMEYZEROTRANSFORMBYPASSFLAG 0x02
+#define FSEQSCALINGMATRIXPRESENTLAG 0x01
+#define FSEQSCALINGLISTPRESENTFLAGNBIT7 0x80
+#define FSEQSCALINGLISTPRESENTFLAGNBIT6 0x40
+#define FSEQSCALINGLISTPRESENTFLAGNBIT5 0x20
+#define FSEQSCALINGLISTPRESENTFLAGNBIT4 0x10
+#define FSEQSCALINGLISTPRESENTFLAGNBIT3 0x08
+#define FSEQSCALINGLISTPRESENTFLAGNBIT2 0x04
+#define FSEQSCALINGLISTPRESENTFLAGNBIT1 0x02
+#define FSEQSCALINGLISTPRESENTFLAGNBIT0 0x01
+#define FLOG2MAXFRAMENUMMINUS4 0x80
+#define FPICORDERCNTTYPE 0x70
+#define FLOG2MAXPICORDERCNTLSBMINUSH 0x0F
+#define FLOG2MAXPICORDERCNTLSBMINUSL 0xF0
+#define FDELTAPICORDERALWAYSZEROGFLAG 0x80
+#define FOFFSETFORNONREFPIC 0x40
+#define FOFFSETFORTOPTOBOTTOMFIELD 0x20
+#define FNUMREFFRAMESINOICORDERCNTCYCLE 0x01
+#define FMAXNUMREFFRAMESH 0x0F
+#define FMAXNUMREFFRAMESL 0x80
+#define FGAPSINFRAMENUMVALUEALLOWEDFLAG 0x40
+#define FPICWIDTHINMBSMINUS1H 0x3F
+#define FPICWIDTHINMBSMINUS1L 0xFE
+#define FPICHEIGHTINMAPUNITSMINUS1H 0x01
+#define FPICHEIGHTINMAPUNITSMINUS1M 0xFF
+#define FPICHEIGHTINMAPUNITSMINUS1L 0xC0
+#define FFRAMEMBSONLYFLAG 0x20
+#define FMBADAPTIVEFRAMEFIELDFLAG 0x10
+#define FDIRECT8X8INFERENCEFLAG 0x10
+#define FFRAMECROPPINGFLAG 0x08
+#define FFRAMECROPLEFTOFFSET 0x06
+#define FFRAMECROPRIGHTOFFSETH 0x01
+#define FFRAMECROPRIGHTOFFSETL 0x80
+#define FFRAMECROPTOPOFFSET 0x60
+#define FFRAMECROPBOTTOMOFFSETH 0x10
+#define FFRAMECROPBOTTOMOFFSETL 0x08
+#define FVUIPARAMETERSPRESENTLAG 0x40
 
 typedef unsigned char byte;
 
@@ -98,8 +148,8 @@ typedef struct {
 } ppsStruct;
 
 typedef struct {
-	byte profileIdc;
-	byte constraintSet0Flag; //u(8)
+	byte profileIdc; //u(8)
+	byte constraintSet0Flag; //u(1)
 	byte constraintSet1Flag; //u(1)
 	byte constraintSet2Flag; //u(1)
 	byte constraintSet3Flag; //u(1)
@@ -119,14 +169,14 @@ typedef struct {
 	byte picOrderCntType; //ue(v)
 	byte log2MaxPicOrderCntLsbMinus4; //ue(v)
 	byte DeltaPicOrderAlwaysZeroFlag; //u(1)
-	int offsetForNonRefPic; //se(v)
-	int offsetForTopToBottomField; //se(v)
+	byte offsetForNonRefPic; //se(v)
+	byte offsetForTopToBottomField; //se(v)
 	byte numRefFramesInPicOrderCntCycle; //ue(v)
-	int offserForRefFrame[MAXCNTCYCLE]; //se(v)
+	byte offserForRefFrame[MAXCNTCYCLE]; //se(v)
 	byte maxNumRefFrames; //ue(v)
 	byte gapsInFrameNumValueAlloweFlag; //u(1)
-	byte picWidthInMbsMinus1; //ue(v)
-	byte picHeightInMapUnitsMinus1; //ue(v)
+	int  picWidthInMbsMinus1; //ue(v)
+	int  picHeightInMapUnitsMinus1; //ue(v)
 	byte framMbsOnlyFlag; //u(1)
 	byte mbAdaptiveFrameFieldFlag; //u(1)
 	byte direct8x8InferenceFlag; //u(1)
@@ -136,6 +186,39 @@ typedef struct {
 	byte frameCroppinTopOffset; //u(1)
 	byte frameCroppinBottomOffset; //u(1)
 	byte vuiParametersPresentFlag; //u(1)
+	//VUI Parameters
+	byte aspectRatioInfoPresentFlag; //u(1)
+	byte aspectRatioIdc; //u(8)
+	uint16_t sarWidth; //u(16)
+	uint16_t sarHeight; //u(16)
+	byte overscanInfoPresentFlag; //u(1)
+	byte overscanAppropriateFlag; //u(1)
+	byte videoSignalTypePresentFlag; //u(1)
+	byte videoFormat; //u(3)
+	byte videoFullRangeFlag; //u(1)
+	byte colourDescriptionPresentFlag; //u(1)
+	byte colourPrimaries; //u(8)
+	byte transferCharacteristics; //u(8)
+	byte matrixCoefficients; //u(8)
+	byte chromaLocInfoPresent_flag; //u(1)
+	byte chromaSampleLocTypeTopField; //ue(v)
+	byte chromaSampleLocTypeBottomField; //ue(v)
+	byte timingInfoPresentFlag; //u(1)
+	uint32_t numUnitsInTick; //u(32)
+	uint32_t timeScale; //u(32)
+	byte fixeFrameRateFlag; //u(1)
+	byte nalHrdParametersPresentFlag; //u(1)
+	byte vclHrdParametersPresentFlag; //u(1)
+	byte lowDelayHrdFlag; //u(1)
+	byte picStructPresentFlag; //u(1)
+	byte bitstreamRestrictionFlag; //u(1)
+	byte montionVectorsOverPicBoundariesFlag; //u(1)
+	byte maxBytesPerPicDenom; //ue(v)
+	byte maxBitsPerMbDenom; //ue(v)
+	byte log2MaxMvLengthHorizontal; //ue(v)
+	byte log2MaxMvLengthVertical; //ue(v)
+	byte maxNumReorderFrames; //ue(v)
+	byte maxDecFrameBuffering; //ue(v)
 
 } spsStruct;
 
