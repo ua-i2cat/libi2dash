@@ -181,6 +181,102 @@ bool spsToRbsp(unsigned char* spsHeader, uint32_t spsLength, nalHeader* headers)
 	}
 	headers->sps.vuiParametersPresentFlag = (spsHeader[offset] & FVUIPARAMETERSPRESENTLAG) >> 2;
 	if (headers->sps.vuiParametersPresentFlag) {
+		headers->sps.aspectRatioInfoPresentFlag = (spsHeader[offset] & FASPECTRATIOINFOPRESENTLAG) >> 1;
+		if (headers->sps.aspectRatioInfoPresentFlag) {
+			headers->sps.aspectRatioIdc = ((spsHeader[offset] & FASPECTRATIOIDCH) << 7) | ((spsHeader[offset+1] & FASPECTRATIOIDCL) >> 1);
+			offset++;
+			if (headers->sps.aspectRatioIdc == EXTENDESAR) {
+				headers->sps.sarWidth = ((spsHeader[offset] & FSARWIDTHH) * 32768) + ((spsHeader[offset+1] & FSARWIDTHM) * 128) + ((spsHeader[offset+2] & FSARWIDTHL) >> 1);
+				offset+= 2;
+				headers->sps.sarHeight = ((spsHeader[offset] & FSARHEIGHTH) * 32768) + ((spsHeader[offset+1] & FSARHEIGHTM) * 128) + ((spsHeader[offset+2] & FSARHEIGHTL) >> 1);
+				offset+= 2;
+			}
+		}
+		headers->sps.overscanInfoPresentFlag = (spsHeader[offset] & FOVERSCANINFOPRESENTFLAG);
+		offset++;
+		if (headers->sps.overscanInfoPresentFlag) {
+			headers->sps.overscanAppropriateFlag = (spsHeader[offset] & FOVERSCANAPPROPIATEFLAG) >> 7;
+		}
+		headers->sps.videoSignalTypePresentFlag = (spsHeader[offset] & FVIDEOSIGNALTYPEPRESENTLAG) >> 7;
+		if (headers->sps.videoSignalTypePresentFlag) {
+			headers->sps.videoFormat = (spsHeader[offset] & FVIDEOFORMAT) >> 4;
+			headers->sps.videoFullRangeFlag = (spsHeader[offset] & FVIDEOFULLRANGEFLAG) >> 3;
+			headers->sps.colourDescriptionPresentFlag = (spsHeader[offset] & FCOLOURDESCRIPTIONPRESENTLAG) >> 2;
+			if (headers->sps.colourDescriptionPresentFlag) {
+				headers->sps.colourPrimaries = ((spsHeader[offset] & FCOLOURPRIMARIESH) << 6) | ((spsHeader[offset+1] & FCOLOURPRIMARIESL) >> 2);
+				offset++;
+				headers->sps.transferCharacteristics = ((spsHeader[offset] & FTRANSFERCHARACTERISTICSH) << 6) | ((spsHeader[offset+1] & FTRANSFERCHARACTERISTICSL) >> 2);
+				offset++;
+				headers->sps.matrixCoefficients = ((spsHeader[offset] & FMATRIXCOEFFICIENTSH) << 6) | ((spsHeader[offset+1] & FMATRIXCOEFFICIENTSL) >> 2);
+				offset++;
+			}
+		}
+		headers->sps.chromaLocInfoPresentFlag = (spsHeader[offset] & FCHROMALOCINFOPRESENTFLAG) >> 6;
+		if (headers->sps.chromaLocInfoPresentFlag) {
+			headers->sps.chromaSampleLocTypeTopField = (spsHeader[offset] & FCHROMASAMPLELOCTYPETOPFIELD) >> 2;
+			eaders->sps.chromaSampleLocTypeBottomField = ((spsHeader[offset] & FCHROMASAMPLELOCTYPEBOTTOMFIELDH) << 2) | ((spsHeader[offset+1] & FCHROMASAMPLELOCTYPEBOTTOMFIELDL) >> 6);
+			offset++;
+		}
+		headers->sps.timingInfoPresentFlag = (spsHeader[offset] & FTIMINGINFOPRESENTLAG) >> 5;
+		if (headers->sps.timingInfoPresentFlag) {
+			headers->sps.numUnitsInTick = ((spsHeader[offset] & FNUMUNITSINTICKH) * 134217728) + ((spsHeader[offset+1] & FNUMUNITSINTICKM) * 524288) + ((spsHeader[offset+2] & FNUMUNITSINTICKM) * 2048) + ((spsHeader[offset+3] & FNUMUNITSINTICKM) * 8) + ((spsHeader[offset+4] & FNUMUNITSINTICKL) >> 5);
+			offset+= 4;
+			headers->sps.timeScale = ((spsHeader[offset] & FTIMESCALEH) * 134217728) + ((spsHeader[offset+1] & FTIMESCALEM) * 524288) + ((spsHeader[offset+2] & FTIMESCALEM) * 2048) + ((spsHeader[offset+3] & FTIMESCALEM) * 8) + ((spsHeader[offset+4] & FTIMESCALEL) >> 5);
+			offset+= 4;
+			headers->sps.fixedFrameRateFlag = (spsHeader[offset] & FFIXEDFRAMERATEFLAG) >> 4;
+		}
+		headers->sps.nalHrdParametersPresentFlag = (spsHeader[offset] & FNALHRDPARAMETERSPRESENTLAG) >> 3;
+		if (headers->sps.nalHrdParametersPresentFlag) {
+			byte nalcpbCntMinus1; //ue(v)
+			byte nalbitRateScale; //u(4)
+			byte nalcpbSizeScale; //u(4)
+			byte nalbitRateValueMinus1[MAXCNTMINUSONE]; //ue(v)
+			byte nalcpbSizeValueMinus1[MAXCNTMINUSONE]; //ue(v)
+			byte nalcbrFlag; //u(1)
+			byte nalinitialCpbRemovalDelayLengthMinus1; //u(5)
+			byte nalcpbRemovalDelayLengthMinus1; //u(5)
+			byte naldpbOutputDelayLengthMinus1; //u(5)
+			byte naltimeOffsetLength; //u(5)
+		}
+		headers->sps.vclHrdParametersPresentFlag = (spsHeader[offset] & FVCLHRDPARAMETERSPRESENTLAG) >> 2;
+		if (headers->sps.vclHrdParametersPresentFlag) {
+			byte vclcpbCntMinus1; //ue(v)
+			byte vclbitRateScale; //u(4)
+			byte vclcpbSizeScale; //u(4)
+			byte vclbitRateValueMinus1[MAXCNTMINUSONE]; //ue(v)
+			byte vclcpbSizeValueMinus1[MAXCNTMINUSONE]; //ue(v)
+			byte vclcbrFlag; //u(1)
+			byte vclinitialCpbRemovalDelayLengthMinus1; //u(5)
+			byte vclcpbRemovalDelayLengthMinus1; //u(5)
+			byte vcldpbOutputDelayLengthMinus1; //u(5)
+			byte vcltimeOffsetLength; //u(5)
+		}		
+		if (headers->sps.nalHrdParametersPresentFlag || headers->sps.vclHrdParametersPresentFlag) {
+			headers->sps.lowDelayHrdFlag = (spsHeader[offset] & FLOWDELAYHRDFLAG) >> 1;
+		}
+		headers->sps.picStructPresentFlag = (spsHeader[offset] & FPICSTRUCTPRESENTLAG) >> 1;
+		headers->sps.bitstreamRestrictionFlag = (spsHeader[offset] & FBITSTREAMRESTRICTIONFLAG);
+		offset++;
+		if (headers->sps.bitstreamRestrictionFlag) {
+			headers->sps.montionVectorsOverPicBoundariesFlag = (spsHeader[offset] & FMONTIONVECTORSOVERPICBOUNDARIESFLAG) >> 7;
+			headers->sps.maxBytesPerPicDenom = (spsHeader[offset] & FMAXBYTESPERPICDENOM) >> 6;
+			headers->sps.maxBitsPerMbDenom = (spsHeader[offset] & FMAXBITSPERMBDENOM) >> 5;
+			headers->sps.log2MaxMvLengthHorizontal = ((spsHeader[offset] & FLOG2MAXMVLENGTHHORIZONTALH) << 2) | ((spsHeader[offset+1] & FLOG2MAXMVLENGTHHORIZONTALL) >> 6);
+			offset++;
+			headers->sps.log2MaxMvLengthVertical = ((spsHeader[offset] & FLOG2MAXMVLENGTHVERTICALH) << 1) | ((spsHeader[offset+1] & FLOG2MAXMVLENGTHVERTICALL) >> 7);
+			offset++;
+			headers->sps.maxNumReorderFrames = (spsHeader[offset] & FMAXNUMREODERFRAMES) >> 6;
+			headers->sps.maxDecFrameBuffering = (spsHeader[offset] & FMAXEDCFRAMEBUFFERING) >> 1;
+			headers->sps.rbspStopBit = (spsHeader[offset] & FRBSPSTOPBIT) >> 1;
+		}
+
+
+
+
+
+
+
+
 
 	}
 

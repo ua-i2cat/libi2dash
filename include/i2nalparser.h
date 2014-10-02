@@ -27,6 +27,8 @@
 #define MAXIGROUP 512
 #define MAXMATRIX 267 //255+12
 #define MAXCNTCYCLE 255
+#define MAXCNTMINUSONE 255
+#define EXTENDESAR 255
 //PPS FLAGS
 #define MAXLENGTHPPS 6
 #define FPICPARAMETERSETID 0x80
@@ -108,6 +110,62 @@
 #define FFRAMECROPBOTTOMOFFSETH 0x10
 #define FFRAMECROPBOTTOMOFFSETL 0x08
 #define FVUIPARAMETERSPRESENTLAG 0x40
+//VUI FLAG
+#define FASPECTRATIOINFOPRESENTLAG 0x02
+#define FASPECTRATIOIDCH 0x01
+#define FASPECTRATIOIDCL 0xFE
+#define FSARWIDTHH 0x01
+#define FSARWIDTHM 0xFF
+#define FSARWIDTHL 0xFE
+#define FSARHEIGHTH 0x01
+#define FSARHEIGHTM 0xFF
+#define FSARHEIGHTL 0xFE
+#define FOVERSCANINFOPRESENTFLAG 0x01
+#define FOVERSCANAPPROPIATEFLAG 0x80
+#define FVIDEOSIGNALTYPEPRESENTLAG 0x80 //REDEFINIR
+#define FVIDEOFORMAT 0x70
+#define FVIDEOFULLRANGEFLAG 0X08
+#define FCOLOURDESCRIPTIONPRESENTLAG 0x04
+#define FCOLOURPRIMARIESH 0x03
+#define FCOLOURPRIMARIESL 0xFC
+#define FTRANSFERCHARACTERISTICSH 0x03
+#define FTRANSFERCHARACTERISTICSL 0xFC
+#define FMATRIXCOEFFICIENTSH 0x03
+#define FMATRIXCOEFFICIENTSL 0xFC
+#define FCHROMALOCINFOPRESENTFLAG 0x40
+#define FCHROMASAMPLELOCTYPETOPFIELD 0x3C //REDEFINIR
+#define FCHROMASAMPLELOCTYPEBOTTOMFIELDH 0x03 //REDEFINIR
+#define FCHROMASAMPLELOCTYPEBOTTOMFIELDL 0xC0 //REDEFINIR
+#define FTIMINGINFOPRESENTLAG 0x20
+#define FNUMUNITSINTICKH 0x1F 
+#define FNUMUNITSINTICKM 0xFF 
+#define FNUMUNITSINTICKL 0xE0 
+#define FTIMESCALEH 0x1F 
+#define FTIMESCALEM 0xFF 
+#define FTIMESCALEL 0xE0
+#define FFIXEDFRAMERATEFLAG 0x10
+#define FNALHRDPARAMETERSPRESENTLAG 0x08
+#define FVCLHRDPARAMETERSPRESENTLAG 0x04
+#define FLOWDELAYHRDFLAG 0x02
+#define FPICSTRUCTPRESENTLAG 0x02 //REDEFINIR
+#define FBITSTREAMRESTRICTIONFLAG 0x01
+#define FMONTIONVECTORSOVERPICBOUNDARIESFLAG 0x80
+#define FMAXBYTESPERPICDENOM 0x40
+#define FMAXBITSPERMBDENOM 0x20
+#define FLOG2MAXMVLENGTHHORIZONTALH 0x1F
+#define FLOG2MAXMVLENGTHHORIZONTALL 0xC0
+#define FLOG2MAXMVLENGTHVERTICALH 0x3F
+#define FLOG2MAXMVLENGTHVERTICALL 0x80
+#define FMAXNUMREODERFRAMES 0x40
+#define FMAXEDCFRAMEBUFFERING 0x3E
+#define FRBSPSTOPBIT 0X01 //ESTO SE VE EN WIRESHARK PERO NO EN LA ESPECIFICACION
+//NAL HDR FLAGS
+#define FNALCPBCNTMINUS1H 0x07
+#define FNALCPBCNTMINUS1L 0xC0
+#define FNALBITRATESCALE 0x3C
+#define FNALCPBSIZESCALEH 0x03
+#define FNALCPBSIZESCALEL 0xC0
+
 
 typedef unsigned char byte;
 
@@ -200,13 +258,13 @@ typedef struct {
 	byte colourPrimaries; //u(8)
 	byte transferCharacteristics; //u(8)
 	byte matrixCoefficients; //u(8)
-	byte chromaLocInfoPresent_flag; //u(1)
+	byte chromaLocInfoPresentFlag; //u(1)
 	byte chromaSampleLocTypeTopField; //ue(v)
 	byte chromaSampleLocTypeBottomField; //ue(v)
 	byte timingInfoPresentFlag; //u(1)
 	uint32_t numUnitsInTick; //u(32)
 	uint32_t timeScale; //u(32)
-	byte fixeFrameRateFlag; //u(1)
+	byte fixedFrameRateFlag; //u(1)
 	byte nalHrdParametersPresentFlag; //u(1)
 	byte vclHrdParametersPresentFlag; //u(1)
 	byte lowDelayHrdFlag; //u(1)
@@ -219,6 +277,29 @@ typedef struct {
 	byte log2MaxMvLengthVertical; //ue(v)
 	byte maxNumReorderFrames; //ue(v)
 	byte maxDecFrameBuffering; //ue(v)
+	byte rbspStopBit; //u(1)
+	//NAL HRD Parameters
+	byte nalcpbCntMinus1; //ue(v)
+	byte nalbitRateScale; //u(4)
+	byte nalcpbSizeScale; //u(4)
+	uint32_t nalbitRateValueMinus1[MAXCNTMINUSONE]; //ue(v)
+	uint32_t nalcpbSizeValueMinus1[MAXCNTMINUSONE]; //ue(v)
+	byte nalcbrFlag; //u(1)
+	byte nalinitialCpbRemovalDelayLengthMinus1; //u(5)
+	byte nalcpbRemovalDelayLengthMinus1; //u(5)
+	byte naldpbOutputDelayLengthMinus1; //u(5)
+	byte naltimeOffsetLength; //u(5)
+	//VCL HRD Parameters
+	byte vclcpbCntMinus1; //ue(v)
+	byte vclbitRateScale; //u(4)
+	byte vclcpbSizeScale; //u(4)
+	byte vclbitRateValueMinus1[MAXCNTMINUSONE]; //ue(v)
+	byte vclcpbSizeValueMinus1[MAXCNTMINUSONE]; //ue(v)
+	byte vclcbrFlag; //u(1)
+	byte vclinitialCpbRemovalDelayLengthMinus1; //u(5)
+	byte vclcpbRemovalDelayLengthMinus1; //u(5)
+	byte vcldpbOutputDelayLengthMinus1; //u(5)
+	byte vcltimeOffsetLength; //u(5)
 
 } spsStruct;
 
