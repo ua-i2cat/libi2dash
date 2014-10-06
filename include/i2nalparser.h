@@ -27,8 +27,8 @@
 #define MAXIGROUP 512
 #define MAXMATRIX 267 //255+12
 #define MAXCNTCYCLE 255
-#define MAXCNTMINUSONE 255
 #define EXTENDESAR 255
+#define MAXCPBCNTMINUSONE 31
 //PPS FLAGS
 #define MAXLENGTHPPS 6
 #define FPICPARAMETERSETID 0x80
@@ -136,6 +136,12 @@
 #define FCHROMASAMPLELOCTYPETOPFIELD 0x3C //REDEFINIR
 #define FCHROMASAMPLELOCTYPEBOTTOMFIELDH 0x03 //REDEFINIR
 #define FCHROMASAMPLELOCTYPEBOTTOMFIELDL 0xC0 //REDEFINIR
+/* FCHROMASAMPLELOCTYPETOPFIELD - FCHROMASAMPLELOCTYPEBOTTOMFIELD
+The value of chroma_sample_loc_type_top_field and chroma_sample_loc_type_bottom_field shall be in the range of 0
+to 5, inclusive. When the chroma_sample_loc_type_top_field and chroma_sample_loc_type_bottom_field are not
+present, the values of chroma_sample_loc_type_top_field and chroma_sample_loc_type_bottom_field shall be inferred
+to be equal to 0.
+*/
 #define FTIMINGINFOPRESENTLAG 0x20
 #define FNUMUNITSINTICKH 0x1F 
 #define FNUMUNITSINTICKM 0xFF 
@@ -157,7 +163,24 @@
 #define FLOG2MAXMVLENGTHVERTICALH 0x3F
 #define FLOG2MAXMVLENGTHVERTICALL 0x80
 #define FMAXNUMREODERFRAMES 0x40
+/* FMAXNUMREODERFRAMES
+The value of max_num_reorder_frames shall be in the range of 0 to max_dec_frame_buffering, inclusive. When the
+max_num_reorder_frames syntax element is not present, the value of max_num_reorder_frames value shall be inferred
+as follows:
+– If profile_idc is equal to 44, 86, 100, 110, 122, or 244 and constraint_set3_flag is equal to 1, the value of
+max_num_reorder_frames shall be inferred to be equal to 0.
+– Otherwise (profile_idc is not equal to 44, 86, 100, 110, 122, or 244 or constraint_set3_flag is equal to 0), the value of
+max_num_reorder_frames shall be inferred to be equal to MaxDpbFrames. MaxDpbFrames (0-16)
+*/
 #define FMAXEDCFRAMEBUFFERING 0x3E
+/* FMAXEDCFRAMEBUFFERING
+The value of max_dec_frame_buffering shall be greater than or equal to max_num_ref_frames. An upper bound for the value of
+max_dec_frame_buffering is specified by the level limits in subclauses A.3.1, A.3.2, G.10.2.1, and H.10.2. When the max_dec_frame_buffering syntax element is not present, the value of max_dec_frame_buffering shall be inferred as follows:
+– If profile_idc is equal to 44, 86, 100, 110, 122, or 244 and constraint_set3_flag is equal to 1, the value of
+max_num_reorder_frames shall be inferred to be equal to 0.
+– Otherwise (profile_idc is not equal to 44, 86, 100, 110, 122, or 244 or constraint_set3_flag is equal to 0), the value of
+max_num_reorder_frames shall be inferred to be equal to MaxDpbFrames. MaxDpbFrames (0-16)
+*/
 #define FRBSPSTOPBIT 0X01 //ESTO SE VE EN WIRESHARK PERO NO EN LA ESPECIFICACION
 //NAL HDR FLAGS
 #define FNALCPBCNTMINUS1H 0x07
@@ -165,6 +188,97 @@
 #define FNALBITRATESCALE 0x3C
 #define FNALCPBSIZESCALEH 0x03
 #define FNALCPBSIZESCALEL 0xC0
+#define FBITRATEVALUEMINUS1H0 0xFF
+#define FBITRATEVALUEMINUS1M 0xFF
+#define FBITRATEVALUEMINUS1L0 0xFF
+#define FCPBSIZEVALUEMINUS1H0 0xFF
+#define FCPBSIZEVALUEMINUS1M 0xFF
+#define FCPBSIZEVALUEMINUS1L0 0xFF
+#define FCBRFLAG0 0x80
+#define FBITRATEVALUEMINUS1H1 0x7F
+#define FBITRATEVALUEMINUS1L1 0x80
+#define FCPBSIZEVALUEMINUS1H1 0x7F
+#define FCPBSIZEVALUEMINUS1L1 0x80
+#define FCBRFLAG1 0x40
+#define FBITRATEVALUEMINUS1H2 0x3F
+#define FBITRATEVALUEMINUS1L2 0xC0
+#define FCPBSIZEVALUEMINUS1H2 0x3F
+#define FCPBSIZEVALUEMINUS1L2 0xC0
+#define FCBRFLAG2 0x20
+#define FBITRATEVALUEMINUS1H3 0x1F
+#define FBITRATEVALUEMINUS1L3 0xE0
+#define FCPBSIZEVALUEMINUS1H3 0x1F
+#define FCPBSIZEVALUEMINUS1L3 0xE0
+#define FCBRFLAG3 0x10
+#define FBITRATEVALUEMINUS1H4 0x0F
+#define FBITRATEVALUEMINUS1L4 0xF0
+#define FCPBSIZEVALUEMINUS1H4 0x0F
+#define FCPBSIZEVALUEMINUS1L4 0xF0
+#define FCBRFLAG4 0x08
+#define FBITRATEVALUEMINUS1H5 0x07
+#define FBITRATEVALUEMINUS1L5 0xF8
+#define FCPBSIZEVALUEMINUS1H5 0x07
+#define FCPBSIZEVALUEMINUS1L5 0xF8
+#define FCBRFLAG5 0x04
+#define FBITRATEVALUEMINUS1H6 0x03
+#define FBITRATEVALUEMINUS1L6 0xFC
+#define FCPBSIZEVALUEMINUS1H6 0x03
+#define FCPBSIZEVALUEMINUS1L6 0xFC
+#define FCBRFLAG6 0x02
+#define FBITRATEVALUEMINUS1H7 0x01
+#define FBITRATEVALUEMINUS1L7 0xFE
+#define FCPBSIZEVALUEMINUS1H7 0x01
+#define FCPBSIZEVALUEMINUS1L7 0xFE
+#define FCBRFLAG7 0x01
+
+#define FINITIALCPBREMOVALDELAYLENGTHMINUS10 0xF8
+#define FINITIALCPBREMOVALDELAYLENGTHMINUS11 0x7C
+#define FINITIALCPBREMOVALDELAYLENGTHMINUS12 0x3E
+#define FINITIALCPBREMOVALDELAYLENGTHMINUS13 0x1F
+#define FINITIALCPBREMOVALDELAYLENGTHMINUS14H 0x0F
+#define FINITIALCPBREMOVALDELAYLENGTHMINUS14L 0x80
+#define FINITIALCPBREMOVALDELAYLENGTHMINUS15H 0x07
+#define FINITIALCPBREMOVALDELAYLENGTHMINUS15L 0xC0
+#define FINITIALCPBREMOVALDELAYLENGTHMINUS16H 0x03
+#define FINITIALCPBREMOVALDELAYLENGTHMINUS16L 0xE0
+#define FINITIALCPBREMOVALDELAYLENGTHMINUS17H 0x01
+#define FINITIALCPBREMOVALDELAYLENGTHMINUS17L 0xF0
+#define FCPBREMOVALDELAYLENGTHMINUS10 0xF8
+#define FCPBREMOVALDELAYLENGTHMINUS11 0x7C
+#define FCPBREMOVALDELAYLENGTHMINUS12 0x3E
+#define FCPBREMOVALDELAYLENGTHMINUS13 0x1F
+#define FCPBREMOVALDELAYLENGTHMINUS14H 0x0F
+#define FCPBREMOVALDELAYLENGTHMINUS14L 0x80
+#define FCPBREMOVALDELAYLENGTHMINUS15H 0x07
+#define FCPBREMOVALDELAYLENGTHMINUS15L 0xC0
+#define FCPBREMOVALDELAYLENGTHMINUS16H 0x03
+#define FCPBREMOVALDELAYLENGTHMINUS16L 0xE0
+#define FCPBREMOVALDELAYLENGTHMINUS17H 0x01
+#define FCPBREMOVALDELAYLENGTHMINUS17L 0xF0
+#define FDPBOUTPUTDEALYLENGTHMINUS10 0xF8
+#define FDPBOUTPUTDEALYLENGTHMINUS11 0x7C
+#define FDPBOUTPUTDEALYLENGTHMINUS12 0x3E
+#define FDPBOUTPUTDEALYLENGTHMINUS13 0x1F
+#define FDPBOUTPUTDEALYLENGTHMINUS14H 0x0F
+#define FDPBOUTPUTDEALYLENGTHMINUS14L 0x80
+#define FDPBOUTPUTDEALYLENGTHMINUS15H 0x07
+#define FDPBOUTPUTDEALYLENGTHMINUS15L 0xC0
+#define FDPBOUTPUTDEALYLENGTHMINUS16H 0x03
+#define FDPBOUTPUTDEALYLENGTHMINUS16L 0xE0
+#define FDPBOUTPUTDEALYLENGTHMINUS17H 0x01
+#define FDPBOUTPUTDEALYLENGTHMINUS17L 0xF0
+#define FTIMEOFFSETLENGTH0 0xF8
+#define FTIMEOFFSETLENGTH1 0x7C
+#define FTIMEOFFSETLENGTH2 0x3E
+#define FTIMEOFFSETLENGTH3 0x1F
+#define FTIMEOFFSETLENGTH4H 0x0F
+#define FTIMEOFFSETLENGTH4L 0x80
+#define FTIMEOFFSETLENGTH5H 0x07
+#define FTIMEOFFSETLENGTH5L 0xC0
+#define FTIMEOFFSETLENGTH6H 0x03
+#define FTIMEOFFSETLENGTH6L 0xE0
+#define FTIMEOFFSETLENGTH7H 0x01
+#define FTIMEOFFSETLENGTH7L 0xF0
 
 
 typedef unsigned char byte;
@@ -282,8 +396,8 @@ typedef struct {
 	byte nalcpbCntMinus1; //ue(v)
 	byte nalbitRateScale; //u(4)
 	byte nalcpbSizeScale; //u(4)
-	uint32_t nalbitRateValueMinus1[MAXCNTMINUSONE]; //ue(v)
-	uint32_t nalcpbSizeValueMinus1[MAXCNTMINUSONE]; //ue(v)
+	uint32_t nalbitRateValueMinus1[MAXCPBCNTMINUSONE]; //ue(v)
+	uint32_t nalcpbSizeValueMinus1[MAXCPBCNTMINUSONE]; //ue(v)
 	byte nalcbrFlag; //u(1)
 	byte nalinitialCpbRemovalDelayLengthMinus1; //u(5)
 	byte nalcpbRemovalDelayLengthMinus1; //u(5)
@@ -293,8 +407,8 @@ typedef struct {
 	byte vclcpbCntMinus1; //ue(v)
 	byte vclbitRateScale; //u(4)
 	byte vclcpbSizeScale; //u(4)
-	byte vclbitRateValueMinus1[MAXCNTMINUSONE]; //ue(v)
-	byte vclcpbSizeValueMinus1[MAXCNTMINUSONE]; //ue(v)
+	uint32_t vclbitRateValueMinus1[MAXCPBCNTMINUSONE]; //ue(v)
+	uint32_t vclcpbSizeValueMinus1[MAXCPBCNTMINUSONE]; //ue(v)
 	byte vclcbrFlag; //u(1)
 	byte vclinitialCpbRemovalDelayLengthMinus1; //u(5)
 	byte vclcpbRemovalDelayLengthMinus1; //u(5)

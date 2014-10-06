@@ -227,12 +227,41 @@ bool spsToRbsp(unsigned char* spsHeader, uint32_t spsLength, nalHeader* headers)
 		}
 		headers->sps.nalHrdParametersPresentFlag = (spsHeader[offset] & FNALHRDPARAMETERSPRESENTLAG) >> 3;
 		if (headers->sps.nalHrdParametersPresentFlag) {
-			byte nalcpbCntMinus1; //ue(v)
-			byte nalbitRateScale; //u(4)
-			byte nalcpbSizeScale; //u(4)
-			byte nalbitRateValueMinus1[MAXCNTMINUSONE]; //ue(v)
-			byte nalcpbSizeValueMinus1[MAXCNTMINUSONE]; //ue(v)
-			byte nalcbrFlag; //u(1)
+			int index = 0;
+			headers->sps.nalcpbCntMinus1 = ((spsHeader[offset] & FNALCPBCNTMINUS1H) << 2) | ((spsHeader[offset+1] & FNALCPBCNTMINUS1L) >> 5);
+			offset++;
+			headers->sps.nalbitRateScale = (spsHeader[offset] & FNALBITRATESCALE) >> 2;
+			headers->sps.nalcpbSizeScale = ((spsHeader[offset] & FNALCPBSIZESCALEH) << 2) | ((spsHeader[offset+1] & FNALCPBSIZESCALEL) >> 5);
+			offset++;
+			for (int i = 0; i < nalcpbCntMinus1; i++) {
+				index = (i % 8);
+				switch (index) {
+				case 0:
+					headers->sps.nalbitRateValueMinus1 = 
+					uint32_t nalbitRateValueMinus1[MAXCPBCNTMINUSONE]; //ue(v)
+					uint32_t nalcpbSizeValueMinus1[MAXCPBCNTMINUSONE]; //ue(v)
+					byte nalcbrFlag; //u(1)					
+					break;
+				case 1:
+					break;
+				case 2:
+					break;
+				case 3:
+					break;
+				case 4:
+					break;
+				case 5:
+					break;
+				case 6:
+					break;
+				case 7:
+					break;
+				}
+
+			}
+
+
+
 			byte nalinitialCpbRemovalDelayLengthMinus1; //u(5)
 			byte nalcpbRemovalDelayLengthMinus1; //u(5)
 			byte naldpbOutputDelayLengthMinus1; //u(5)
