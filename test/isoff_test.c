@@ -76,7 +76,7 @@ int main(){
     if ((initVideo != I2ERROR_ISOFF) && (initVideo != I2ERROR_CONTEXT_NULL) && (initVideo != I2ERROR_SOURCE_NULL) && (initVideo != I2ERROR_DESTINATION_NULL) && (initVideo != I2ERROR_SIZE_ZERO)){
         printf("OK INIT VIDEO!\n");
         output_video_i = fopen("/tmp/pruebas/isoff/video_init.m4v", "w");
-        int i = 0;
+        unsigned int i = 0;
         for(i = 0; i < initVideo; i++) {
             fputc(destination_data[i], output_video_i);
         }
@@ -128,7 +128,7 @@ int main(){
     if ((initAudio != I2ERROR_ISOFF) && (initAudio != I2ERROR_CONTEXT_NULL) && (initAudio != I2ERROR_SOURCE_NULL) && (initAudio != I2ERROR_DESTINATION_NULL) && (initAudio != I2ERROR_SIZE_ZERO)){
         printf("OK INIT AUDIO!\n");
         output_audio_i = fopen("/tmp/pruebas/isoff/audio_init.m4a", "w");
-        int i = 0;
+        unsigned int i = 0;
         for(i = 0; i < initAudio; i++) {
             fputc(destination_data[i], output_audio_i);
         }
@@ -167,7 +167,7 @@ int main(){
     ctxVSample->box_flags = 3841;
     ctxVSample->mdat_sample_length = 2;
     
-    int i = 0;
+    unsigned int i = 0;
     ctxVSample->mdat[0].duration_ms = 41;
     ctxVSample->mdat[0].size = 1868;
     ctxVSample->mdat[0].key = 1;
@@ -230,7 +230,7 @@ int main(){
     if ((seg_gen_video != I2ERROR_ISOFF) && (seg_gen_video != I2ERROR_CONTEXT_NULL) && (seg_gen_video != I2ERROR_SOURCE_NULL) && (seg_gen_video != I2ERROR_DESTINATION_NULL) && (seg_gen_video != I2ERROR_SIZE_ZERO) && (seg_gen_video != I2ERROR_MEDIA_TYPE)){
         printf("OK VIDEO SEGMENT!\n");
         output_segment_v = fopen("/tmp/pruebas/isoff/video_segment.m4v", "w");
-        int i = 0;
+        unsigned int i = 0;
         for(i = 0; i < seg_gen_video; i++) {
             fputc(destination_data[i], output_segment_v);
         }
@@ -330,7 +330,7 @@ int main(){
     if ((seg_gen_audio != I2ERROR_ISOFF) && (seg_gen_audio != I2ERROR_CONTEXT_NULL) && (seg_gen_audio != I2ERROR_SOURCE_NULL) && (seg_gen_audio != I2ERROR_DESTINATION_NULL) && (seg_gen_audio != I2ERROR_SIZE_ZERO) && (seg_gen_audio != I2ERROR_MEDIA_TYPE)){
         printf("OK AUDIO SEGMENT!\n");
         output_segment_a = fopen("/tmp/pruebas/isoff/audio_segment.m4a", "w");
-        int i = 0;
+        unsigned int i = 0;
 
         for(i = 0; i < seg_gen_audio; i++) {
             fputc(destination_data[i], output_segment_a);

@@ -37,8 +37,11 @@ i2dash_test.o:  $(TEST_PATH)/i2dash_test.c i2libdash.o h264_stream.o i2libisoff.
 	$(CC) $(CFLAGS) -c $(TEST_PATH)/i2dash_test.c
 	mv i2dash_test.o $(TEST_PATH)/
 
-i2libdash.o: $(SRC_PATH)/i2libdash.c $(INCLUDE_PATH)/i2libdash.h h264_stream.o i2libisoff.o
+i2libdash.o: $(SRC_PATH)/i2libdash.c $(INCLUDE_PATH)/i2libdash.h i2nalparser.o h264_stream.o i2libisoff.o
 	$(CC) $(CFLAGS) -c $(SRC_PATH)/i2libdash.c
+
+i2nalparser.o: $(SRC_PATH)/i2nalparser.c $(INCLUDE_PATH)/i2nalparser.h
+	$(CC) $(CFLAGS) -c $(SRC_PATH)/i2nalparser.c
 
 h264_stream.o: $(SRC_PATH)/h264_stream.c $(INCLUDE_PATH)/h264_stream.h $(INCLUDE_PATH)/bs.h
 	$(CC) $(CFLAGS) -c $(SRC_PATH)/h264_stream.c
@@ -62,7 +65,7 @@ install-lib: lib
 	ln -f -s $(INSTALL_LIB_PATH)/$(LIB_SHARED_NAME).$(VERSION) $(INSTALL_LIB_PATH)/$(LIB_SHARED_NAME)
 	ldconfig
 testlib: lib_test_video.o lib_test_audio.o paper.o
-testlib: lib_test_video.o lib_test_audio.o
+#testlib: lib_test_video.o lib_test_audio.o
 	$(CC) $(CFLAGS) -o $(BIN_PATH)/$(PROG_V_LIB) $(TEST_PATH)/lib_test_video.o $(LIB_FLAGS)
 	$(CC) $(CFLAGS) -o $(BIN_PATH)/$(PROG_A_LIB) $(TEST_PATH)/lib_test_audio.o $(LIB_FLAGS)
 	$(CC) $(CFLAGS) -o $(BIN_PATH)/$(PROG_PAPER) $(TEST_PATH)/paper.o $(LIB_FLAGS) -lrt
