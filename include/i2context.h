@@ -70,6 +70,7 @@ typedef unsigned char byte;
 #define INTRA_TYPE 5
 
 #include <netinet/in.h>
+#include "i2nalparser.h"
 
 typedef struct {
     uint32_t        size;
@@ -94,6 +95,7 @@ typedef struct {
 typedef struct {
     byte            *pps_sps_data;
     uint32_t        pps_sps_data_length;
+	nalHeader		nalsHeader;
     byte            segment_data[MAX_DAT];
     uint32_t        segment_data_size;
     uint16_t        width;

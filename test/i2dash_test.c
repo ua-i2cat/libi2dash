@@ -161,7 +161,7 @@ int main(){
     if (init_video > I2ERROR_MAX) {
         printf("OK INIT VIDEO!\n");
         output_video_i = fopen("/tmp/pruebas/i2dash/video_init2.m4v", "w");
-        int i = 0;
+        unsigned int i = 0;
         for(i = 0; i < init_video; i++) {
             fputc(destination_data[i], output_video_i);
         }
@@ -211,7 +211,7 @@ int main(){
     if (init_audio > I2ERROR_MAX) {
         printf("OK INIT AUDIO!\n");
         output_audio_i = fopen("/tmp/pruebas/i2dash/audio_init2.m4a", "w");
-        int j = 0;
+        unsigned int j = 0;
         for(j = 0; j < init_audio; j++) {
             fputc(destination_data[j], output_audio_i);
         }
@@ -365,7 +365,7 @@ int main(){
             close_fragment = 1;
             printf("OK VIDEO SEGMENT! %d\n", seg_size);
             output_video_i = fopen("/tmp/pruebas/i2dash/video_seg.m4v", "w");
-            int i = 0;
+            unsigned int i = 0;
             for(i = 0; i < seg_size; i++) {
                 fputc(destination_data[i], output_video_i);
             }
@@ -381,7 +381,7 @@ int main(){
         if (seg_size > I2ERROR_MAX) {
             printf("OK AUDIO SEGEMENT! %d\n", seg_size);
             output_audio_i = fopen("/tmp/pruebas/i2dash/audio_seg.m4a", "w");
-            int j = 0;
+            unsigned int j = 0;
             // int fputc(int c, FILE *stream);
             for(j = 0; j < seg_size; j++) {
                 fputc(destination_data[j], output_audio_i);
@@ -420,7 +420,7 @@ int main(){
     if (seg_size > I2ERROR_MAX) {
         printf("OK VIDEO SEGMENT! %d\n", seg_size);
         output_video_i = fopen("/tmp/pruebas/i2dash/video_seg_last.m4v", "w");
-        int i = 0;
+        unsigned int i = 0;
         for(i = 0; i < seg_size; i++) {
             fputc(destination_data[i], output_video_i);
         }
@@ -485,7 +485,7 @@ int main(){
         if (seg_size > I2ERROR_MAX) {
             printf("OK AUDIO SEGEMENT! %d\n", seg_size);
             output_audio_i = fopen("/tmp/pruebas/i2dash/audio_seg_2.m4a", "w");
-            int j = 0;
+            unsigned int j = 0;
             for(j = 0; j < seg_size; j++) {
                 fputc(destination_data[j], output_audio_i);
             }
@@ -520,7 +520,7 @@ int main(){
         if (seg_size > I2ERROR_MAX) {
             printf("OK AUDIO SEGEMENT! %d\n", seg_size);
             output_audio_i = fopen("/tmp/pruebas/i2dash/audio_seg_last.m4a", "w");
-            int j = 0;
+            unsigned int j = 0;
             for(j = 0; j < seg_size; j++) {
                 fputc(destination_data[j], output_audio_i);
             }

@@ -25,6 +25,7 @@
 #define __I2NALPARSER_H__
 
 #include <cstdlib>
+#include <cstdio>
 
 #define MAXIGROUP 512
 #define MAXMATRIX 267 //255+12
@@ -49,7 +50,7 @@
 #define FWEIGHTEDBIPREDIDC 0x30
 #define FPICINITQPMINUS26H 0x0F
 #define FPICINITQPMINUS26L 0x80
-#define FSIGNOQP26 0x0F
+#define FSIGNOQP26 0x07
 #define FPICINITQSMINUS26 0x40
 #define FSIGNOQS26 0x0F
 #define FCHROMAQPINDEXOFFSET 0x3E
@@ -74,6 +75,7 @@
 #define FRBSPALIGNMENTZEROBIT 0x3F
 
 //SPS FLAGS
+#define MAXLENGTHSPS 100
 #define FCONSTRAINTSET0FLAG 0x80
 #define FCONSTRAINTSET1FLAG 0x40
 #define FCONSTRAINTSET2FLAG 0x20
@@ -82,7 +84,7 @@
 #define FCONSTRAINTSET5FLAG 0x04
 #define FRESERVEDZERO2BITS 0x03
 #define FSPSSEQPARAMETERSETID 0x80
-#define FCHROMAFORMATIDC 0x70
+#define FCHROMAFORMATIDC 0x30
 #define FSEPARATECOLOURPLANEFLAG 0x08
 #define FBITDEPTHLUMAMINUS8 0x08
 #define FBITDEPTHCHROMAMINUS8 0x04
@@ -166,16 +168,27 @@ to be equal to 0.
 #define FVCLHRDPARAMETERSPRESENTLAG 0x04
 
 #define FLOWDELAYHRDFLAG 0x02
-#define FPICSTRUCTPRESENTLAG 0x02 //REDEFINIR
-#define FBITSTREAMRESTRICTIONFLAG 0x01
-#define FMONTIONVECTORSOVERPICBOUNDARIESFLAG 0x80
-#define FMAXBYTESPERPICDENOM 0x40
-#define FMAXBITSPERMBDENOM 0x20
-#define FLOG2MAXMVLENGTHHORIZONTALH 0x1F
-#define FLOG2MAXMVLENGTHHORIZONTALL 0xC0
-#define FLOG2MAXMVLENGTHVERTICALH 0x3F
-#define FLOG2MAXMVLENGTHVERTICALL 0x80
-#define FMAXNUMREODERFRAMES 0x40
+#define FPICSTRUCTPRESENTLAG1 0x02 //REDEFINIR
+#define FPICSTRUCTPRESENTLAG0 0x01 //REDEFINIR
+#define FBITSTREAMRESTRICTIONFLAG0 0x01
+#define FBITSTREAMRESTRICTIONFLAG7 0x80
+#define FMONTIONVECTORSOVERPICBOUNDARIESFLAG7 0x80
+#define FMONTIONVECTORSOVERPICBOUNDARIESFLAG6 0x40
+#define FMAXBYTESPERPICDENOM6 0x40
+#define FMAXBYTESPERPICDENOM5 0x50
+#define FMAXBITSPERMBDENOM5 0x20
+#define FMAXBITSPERMBDENOM4 0x10
+#define FLOG2MAXMVLENGTHHORIZONTALH4 0x1F
+#define FLOG2MAXMVLENGTHHORIZONTALH3 0x0F
+#define FLOG2MAXMVLENGTHHORIZONTALL7 0xC0
+#define FLOG2MAXMVLENGTHHORIZONTALL75 0xE0
+#define FLOG2MAXMVLENGTHVERTICALH5 0x3F
+#define FLOG2MAXMVLENGTHVERTICALH4 0x1F
+#define FLOG2MAXMVLENGTHVERTICALL7 0x80
+#define FLOG2MAXMVLENGTHVERTICALL7 0x80
+#define FLOG2MAXMVLENGTHVERTICALL76 0xC0
+#define FMAXNUMREODERFRAMES6 0x40
+#define FMAXNUMREODERFRAMES5 0x20
 /* FMAXNUMREODERFRAMES
 The value of max_num_reorder_frames shall be in the range of 0 to max_dec_frame_buffering, inclusive. When the
 max_num_reorder_frames syntax element is not present, the value of max_num_reorder_frames value shall be inferred
@@ -185,7 +198,8 @@ max_num_reorder_frames shall be inferred to be equal to 0.
 – Otherwise (profile_idc is not equal to 44, 86, 100, 110, 122, or 244 or constraint_set3_flag is equal to 0), the value of
 max_num_reorder_frames shall be inferred to be equal to MaxDpbFrames. MaxDpbFrames (0-16)
 */
-#define FMAXEDCFRAMEBUFFERING 0x3E
+#define FMAXEDCFRAMEBUFFERING5 0x3E
+#define FMAXEDCFRAMEBUFFERING4 0x1F
 /* FMAXEDCFRAMEBUFFERING
 The value of max_dec_frame_buffering shall be greater than or equal to max_num_ref_frames. An upper bound for the value of
 max_dec_frame_buffering is specified by the level limits in subclauses A.3.1, A.3.2, G.10.2.1, and H.10.2. When the max_dec_frame_buffering syntax element is not present, the value of max_dec_frame_buffering shall be inferred as follows:
@@ -194,7 +208,8 @@ max_num_reorder_frames shall be inferred to be equal to 0.
 – Otherwise (profile_idc is not equal to 44, 86, 100, 110, 122, or 244 or constraint_set3_flag is equal to 0), the value of
 max_num_reorder_frames shall be inferred to be equal to MaxDpbFrames. MaxDpbFrames (0-16)
 */
-#define FRBSPSTOPBIT 0X01 //ESTO SE VE EN WIRESHARK PERO NO EN LA ESPECIFICACION
+#define FRBSPSTOPBIT0 0X01 //ESTO SE VE EN WIRESHARK PERO NO EN LA ESPECIFICACION
+#define FRBSPSTOPBIT7 0X80 //ESTO SE VE EN WIRESHARK PERO NO EN LA ESPECIFICACION
 //NAL HDR FLAGS
 #define FNALCPBCNTMINUS1H 0x07
 #define FNALCPBCNTMINUS1L 0xC0
@@ -207,6 +222,11 @@ max_num_reorder_frames shall be inferred to be equal to MaxDpbFrames. MaxDpbFram
 #define FVCLBITRATESCALE 0x1E
 #define FVCLCPBSIZESCALEH 0x01
 #define FVCLCPBSIZESCALEL 0xE0
+
+#define FVCLCPBCNTMINUS1 0x02
+#define FVCLBITRATESCALEH 0x01
+#define FVCLBITRATESCALEL 0xE0
+#define FVCLCPBSIZESCALE 0x1E
 
 #define FBITRATEVALUEMINUS1H0 0xFF
 #define FBITRATEVALUEMINUS1M 0xFF
@@ -308,13 +328,13 @@ typedef unsigned char byte;
 #include <netinet/in.h>
 
 typedef struct {
-	byte picParameterSetId; //ue(v)
-	byte seqParameterSetId; //ue(v)
+	byte picParameterSetId; //ue(v) (range of 0 to 255)
+	byte seqParameterSetId; //ue(v) (range of 0 to 31)
 	byte entropyCondingModeFlag; //u(1)
 	byte bottomFieldPicOrderInFramePresentFlag; //u(1)
-	byte numSliceGroupsMinus1; //ue(v)
-	byte sliceGroupMapType; //ue(v)
-	byte runLengthMinus1[MAXIGROUP]; //ue(v)
+	byte numSliceGroupsMinus1; //ue(v) (range of 0 to 7)
+	byte sliceGroupMapType; //ue(v) (range of 0 to 6)
+	byte runLengthMinus1[MAXIGROUP]; //ue(v) (range of 0 to (picSizeInMapUnits-1), picSizeInMapUnits = sps.picWidthInMbs * sps.picHeightInMapUnits)
 	byte topLef[MAXIGROUP]; //ue(v)
 	byte bottomRight[MAXIGROUP]; //ue(v)
 	byte sliceGroupChangeDirectionFlag; //u(1)
@@ -325,9 +345,9 @@ typedef struct {
 	byte numRefIdx11DefaultActiveMinus1; //ue(v)
 	byte weightedPredFlag; //u(1)
 	byte weightedBipredIdc; //u(2)
-	byte picInitQpMinus26; //se(v)
-	byte picInitQsMinus26; //se(v)
-	byte chromaQpIndexOffset; //se(v)
+	int picInitQpMinus26; //se(v)
+	int picInitQsMinus26; //se(v)
+	int chromaQpIndexOffset; //se(v)
 	byte deblockingFilterControlPresentFlag; //u(1)
 	byte constrainedIntraPredFlag; //u(1)
 	byte redundantPicCntPresentFlag; //u(1)
@@ -349,26 +369,26 @@ typedef struct {
 	byte constraintSet5Flag; //u(1)
 	byte reservedZero2bits; //u(2)
 	byte levelIdc; //u(8)
-	byte seqParameterSetId; //ue(v)
-	byte chromaFormatIdc; //ue(v)
+	byte seqParameterSetId; //ue(v) (range of 0 to 31, 5 bits)
+	byte chromaFormatIdc; //ue(v) (range of 0 to 3, 2 bits)
 	byte separateColourPlaneFlag; //u(1)
-	byte bitDepthLumaMinus8; //ue(v)
-	byte bitDepthChromaMinus8; //ue(v)
+	byte bitDepthLumaMinus8; //ue(v) (range of 0 to 6, 3 bits)
+	byte bitDepthChromaMinus8; //ue(v) (range of 0 to 6, 3 bits)
 	byte qpprimeYZeroTransformBypassFlag; //u(1)
 	byte seqScalingMatrixPresentFlag; //u(1)
 	byte seqScalingListPresentFlag[MAXMATRIX]; //u(1)
-	byte log2MaxFrameNumMinus4; //ue(v)
-	byte picOrderCntType; //ue(v)
-	byte log2MaxPicOrderCntLsbMinus4; //ue(v)
+	byte log2MaxFrameNumMinus4; //ue(v) (range of 0 to 12, 4 bits)
+	byte picOrderCntType; //ue(v) (range of 0 to 2, 2 bits)
+	byte log2MaxPicOrderCntLsbMinus4; //ue(v) (range of 0 to 12, 4 bits)
 	byte DeltaPicOrderAlwaysZeroFlag; //u(1)
-	byte offsetForNonRefPic; //se(v)
-	byte offsetForTopToBottomField; //se(v)
-	byte numRefFramesInPicOrderCntCycle; //ue(v)
-	byte offserForRefFrame[MAXCNTCYCLE]; //se(v)
-	byte maxNumRefFrames; //ue(v)
+	int offsetForNonRefPic; //se(v) (range of -2³¹ to 2³¹-1, 32 bits)
+	int offsetForTopToBottomField; //se(v) (range of -2³¹+1 to 2³¹-1, 32 bits)
+	int numRefFramesInPicOrderCntCycle; //ue(v) (range of -2³¹+1 to 2³¹-1, 32 bits)
+	int offserForRefFrame[MAXCNTCYCLE]; //se(v) (range of -2³¹ to 2³¹-1, 32 bits)
+	byte maxNumRefFrames; //ue(v) (range of 0 to maxDpbFrames, 5 bits)
 	byte gapsInFrameNumValueAlloweFlag; //u(1)
-	int  picWidthInMbsMinus1; //ue(v)
-	int  picHeightInMapUnitsMinus1; //ue(v)
+	uint16_t  picWidthInMbsMinus1; //ue(v) (15 bits)
+	uint16_t  picHeightInMapUnitsMinus1; //ue(v) (11 bits)
 	byte framMbsOnlyFlag; //u(1)
 	byte mbAdaptiveFrameFieldFlag; //u(1)
 	byte direct8x8InferenceFlag; //u(1)
@@ -378,6 +398,7 @@ typedef struct {
 	byte frameCroppinTopOffset; //u(1)
 	byte frameCroppinBottomOffset; //u(1)
 	byte vuiParametersPresentFlag; //u(1)
+
 	//VUI Parameters
 	byte aspectRatioInfoPresentFlag; //u(1)
 	byte aspectRatioIdc; //u(8)

@@ -24,7 +24,8 @@ int main(int argc, char *argv[]){
     fd_set ready;
     FILE *output_audio_i;
     float duration_sample_f = 0.00;
-    char* representation = "480";
+    char* representation = new char(3);
+	memcpy(representation, "480", 3);
 
     if (argc == 2)
         representation = argv[argc - 1];
@@ -88,7 +89,7 @@ int main(int argc, char *argv[]){
                     bzero(path, 250);
                     sprintf(path, "%s%s%s","/tmp/pruebas/i2lib/i2libtest_", representation, "_audio_init.m4a");
                     output_audio_i = fopen(path, "w");
-                    int k = 0;
+                    unsigned int k = 0;
                     for(k = 0; k < init_audio; k++) {
                         fputc(destination_data[k], output_audio_i);
                     }
@@ -112,7 +113,7 @@ int main(int argc, char *argv[]){
                 // Write samples
                 sample_pos = RTP_LENGTH_HEADER + (AU_LENGTH_HEADER*(au_num+1));
 
-                int j = 0;
+                unsigned int j = 0;
                 for(j = 0; j < au_num; j++)  {
                     memcpy(&hton_sample_size, previous_buffer+RTP_LENGTH_HEADER+(AU_LENGTH_HEADER + (AU_LENGTH_HEADER*j)), sizeof(hton_sample_size));
                     sample_size = ntohs(hton_sample_size);
@@ -144,7 +145,7 @@ int main(int argc, char *argv[]){
                         segment_count++;
                         duration_sample_f = 0.00;
                         output_audio_i = fopen(path, "w");
-                        int j = 0;
+                        unsigned int j = 0;
                         for(j = 0; j < segment_size; j++) {
                             fputc(destination_data[j], output_audio_i);
                         }
@@ -164,7 +165,7 @@ int main(int argc, char *argv[]){
                 printf("SEGMENT i2libtest_%s_audio_%d_1.m4a done\n", representation, segment_count);
                 sprintf(path, "%s%s%s%d%s","/tmp/pruebas/i2lib/i2libtest_", representation, "_audio_", segment_count, "_1.m4a");
                 output_audio_i = fopen(path, "w");
-                int j = 0;
+                unsigned int j = 0;
                 for(j = 0; j < seg_size; j++) {
                     fputc(destination_data[j], output_audio_i);
                 }

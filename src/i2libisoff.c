@@ -1738,7 +1738,7 @@ uint32_t write_trun(byte *data, uint32_t media_type, i2ctx *context) {
     uint32_t hton_sample_delay, sample_num, hton_sample_num, offset, hton_offset, moof_pos, size, hton_size, trun_pos;
     
     i2ctx_sample *samples;
-    int i  = 0;
+    unsigned int i  = 0;
     count = 4;
     nitems = 0;
     samples = NULL;

@@ -22,7 +22,8 @@ int main(int argc, char *argv[]){
     fd_set ready;
     FILE *output_video_i;
     float duration_sample_f = 0.00, decode_time_f = 0.00;
-    char* representation = "480";
+    char* representation = new char(3);
+	memcpy(representation, "480", 3);
     if (argc == 2)
         representation = argv[argc - 1];
 
@@ -113,7 +114,7 @@ int main(int argc, char *argv[]){
                         printf("INIT i2libtest_%s_video_init.m4v done\n", representation);
                         sprintf(path, "%s%s%s","/tmp/pruebas/i2lib/i2libtest_", representation, "_video_init.m4v");
                         output_video_i = fopen(path, "w");
-                        int k = 0;
+                        unsigned int k = 0;
                         for(k = 0; k < init_video; k++) {
                             fputc(destination_data[k], output_video_i);
                         }
@@ -159,7 +160,7 @@ int main(int argc, char *argv[]){
                         duration_sample_f = 0.00;
                         output_video_i = fopen(path, "w");
 
-                        int j = 0;
+                        unsigned int j = 0;
                         for(j = 0; j < seg_size; j++) {
                             fputc(destination_data[j], output_video_i);
                         }
@@ -240,7 +241,7 @@ int main(int argc, char *argv[]){
                 printf("SEGMENT i2libtest_%s_video_%d_1.m4v done\n", representation, segment_count);
                 sprintf(path, "%s%s%s%d%s","/tmp/pruebas/i2lib/i2libtest_", representation, "_video_", segment_count, "_1.m4v");
                 output_video_i = fopen(path, "w");
-                int j = 0;
+                unsigned int j = 0;
                 for(j = 0; j < seg_size; j++) {
                     fputc(destination_data[j], output_video_i);
                 }
