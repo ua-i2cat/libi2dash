@@ -1,19 +1,191 @@
 #include "../include/i2nalparser.h"
 
 //PPS
+
+void getValue (byte* buffer, byte* output, unsigned int bytePos, int bitPos, int lenghtBits) {
+	byte auxValue;
+	int valueBytePos = 0, valueBitPos = 0, bufferBytePos = 0;
+	int bitCopy = bitPos;
+	byte value[4];
+	//printf ("bytePos %u; bitPos %u; len %d\n", bytePos, bitPos, lenghtBits);
+	value[0] = 0;
+	value[1] = 0;
+	value[2] = 0;
+	value[3] = 0;
+
+	for (int i = bitPos; i < (lenghtBits + bitPos); i++) {
+		switch (bitCopy) {
+			case 0:
+				auxValue = buffer[bytePos + bufferBytePos] & 0x01;
+				value[3-valueBytePos] <<= (valueBitPos ? 1 : 0);
+				bufferBytePos++;
+				valueBitPos++;
+				value[3-valueBytePos] |= auxValue;
+				break;
+			case 1:
+				auxValue = (buffer[bytePos + bufferBytePos] & 0x02) >> 1;
+				value[3-valueBytePos] <<= (valueBitPos ? 1 : 0);
+				valueBitPos++;
+				value[3-valueBytePos] |= auxValue;
+				break;
+			case 2:
+				auxValue = (buffer[bytePos + bufferBytePos] & 0x04) >> 2;
+				value[3-valueBytePos] <<= (valueBitPos ? 1 : 0);
+				valueBitPos++;
+				value[3-valueBytePos] |= auxValue;
+				break;
+			case 3:
+				auxValue = (buffer[bytePos + bufferBytePos] & 0x08) >> 3;
+				value[3-valueBytePos] <<= (valueBitPos ? 1 : 0);
+				valueBitPos++;
+				value[3-valueBytePos] |= auxValue;
+				break;
+			case 4:
+				auxValue = (buffer[bytePos + bufferBytePos] & 0x10) >> 4;
+				value[3-valueBytePos] <<= (valueBitPos ? 1 : 0);
+				valueBitPos++;
+				value[3-valueBytePos] |= auxValue;
+				break;
+			case 5:
+				auxValue = (buffer[bytePos + bufferBytePos] & 0x20) >> 5;
+				value[3-valueBytePos] <<= (valueBitPos ? 1 : 0);
+				valueBitPos++;
+				value[3-valueBytePos] |= auxValue;
+				break;
+			case 6:
+				auxValue = (buffer[bytePos + bufferBytePos] & 0x40) >> 6;
+				value[3-valueBytePos] <<= (valueBitPos ? 1 : 0);
+				valueBitPos++;
+				value[3-valueBytePos] |= auxValue;
+				break;
+			case 7:
+				auxValue = (buffer[bytePos + bufferBytePos] & 0x80) >> 7;
+				value[3-valueBytePos] <<= (valueBitPos ? 1 : 0);
+				value[3-valueBytePos] |= auxValue;
+				valueBitPos++;
+				break;
+			default:
+				break;
+		}
+		bitCopy--;
+		if (bitCopy == -1) {
+			bitCopy= 7;
+		}
+		if ((valueBitPos % 8) == 0) {
+			valueBytePos++;
+		}
+	}
+	output[0] = value[3];
+	if (lenghtBits > 8)
+		output[1] = value[2];
+	if (lenghtBits > 16)
+		output[2] = value[1];
+	if (lenghtBits > 24)
+		output[3] = value[0];
+}
+
+void getValueInt16 (byte* buffer, int* output, unsigned int bytePos, int bitPos, int lenghtBits) {
+	byte auxValue;
+	int valueBytePos = 0, valueBitPos = 0, bufferBytePos = 0;
+	int bitCopy = bitPos;
+	byte value[4];
+	//printf ("bytePos %u; bitPos %u; len %d\n", bytePos, bitPos, lenghtBits);
+	value[0] = 0;
+	value[1] = 0;
+	value[2] = 0;
+	value[3] = 0;
+
+	for (int i = bitPos; i < (lenghtBits + bitPos); i++) {
+		switch (bitCopy) {
+			case 0:
+				auxValue = buffer[bytePos + bufferBytePos] & 0x01;
+				value[3-valueBytePos] <<= (valueBitPos ? 1 : 0);
+				bufferBytePos++;
+				valueBitPos++;
+				value[3-valueBytePos] |= auxValue;
+				break;
+			case 1:
+				auxValue = (buffer[bytePos + bufferBytePos] & 0x02) >> 1;
+				value[3-valueBytePos] <<= (valueBitPos ? 1 : 0);
+				valueBitPos++;
+				value[3-valueBytePos] |= auxValue;
+				break;
+			case 2:
+				auxValue = (buffer[bytePos + bufferBytePos] & 0x04) >> 2;
+				value[3-valueBytePos] <<= (valueBitPos ? 1 : 0);
+				valueBitPos++;
+				value[3-valueBytePos] |= auxValue;
+				break;
+			case 3:
+				auxValue = (buffer[bytePos + bufferBytePos] & 0x08) >> 3;
+				value[3-valueBytePos] <<= (valueBitPos ? 1 : 0);
+				valueBitPos++;
+				value[3-valueBytePos] |= auxValue;
+				break;
+			case 4:
+				auxValue = (buffer[bytePos + bufferBytePos] & 0x10) >> 4;
+				value[3-valueBytePos] <<= (valueBitPos ? 1 : 0);
+				valueBitPos++;
+				value[3-valueBytePos] |= auxValue;
+				break;
+			case 5:
+				auxValue = (buffer[bytePos + bufferBytePos] & 0x20) >> 5;
+				value[3-valueBytePos] <<= (valueBitPos ? 1 : 0);
+				valueBitPos++;
+				value[3-valueBytePos] |= auxValue;
+				break;
+			case 6:
+				auxValue = (buffer[bytePos + bufferBytePos] & 0x40) >> 6;
+				value[3-valueBytePos] <<= (valueBitPos ? 1 : 0);
+				valueBitPos++;
+				value[3-valueBytePos] |= auxValue;
+				break;
+			case 7:
+				auxValue = (buffer[bytePos + bufferBytePos] & 0x80) >> 7;
+				value[3-valueBytePos] <<= (valueBitPos ? 1 : 0);
+				value[3-valueBytePos] |= auxValue;
+				valueBitPos++;
+				break;
+			default:
+				break;
+		}
+		bitCopy--;
+		if (bitCopy == -1) {
+			bitCopy= 7;
+		}
+		if ((valueBitPos % 8) == 0) {
+			valueBytePos++;
+		}
+	}
+	(*output) = 0;
+	memcpy(output, value+3, 1);
+	memcpy(output+1, value+2, 1);
+	//printf("value[2] %u; value[3] %u; output %d\n", value[2], value[3], (*output));
+}
+
 bool ppsToRbsp(unsigned char* ppsHeader, uint32_t ppsLength, nalHeader* headers) {
 	uint32_t offset = 1;
+	int pos = 7;
+	printf ("\n\n ppsLength %u\n\n", ppsLength);
 	if ((ppsLength <=0) || (ppsLength > MAXLENGTHPPS) || (ppsHeader == NULL))
 		return false;
-	headers->pps.picParameterSetId = (ppsHeader[offset] & FPICPARAMETERSETID) >> 7;
-	headers->pps.seqParameterSetId = (ppsHeader[offset] & FPPSSEQPARAMETERSETID) >> 6;
-	headers->pps.entropyCondingModeFlag = (ppsHeader[offset] & FENTROPYCODINGMODEFLAG) >> 5;
-	headers->pps.bottomFieldPicOrderInFramePresentFlag = (ppsHeader[offset] & FBOTTOMFIELDPICORDERINFRAMEPRESENTFLAG) >> 4;
-	headers->pps.numSliceGroupsMinus1 = ((ppsHeader[offset] & FNUMSLICEGROUPMINUS1) >> 3) - 1;
+	getValue(ppsHeader, &(headers->pps.picParameterSetId), offset, pos, FLENGTHPICPARAMETERSETID);
+	pos-= FLENGTHPICPARAMETERSETID;
+	getValue(ppsHeader, &(headers->pps.seqParameterSetId), offset, pos, FLENGTHPPSSEQPARAMETERSETID);
+	pos-= FLENGTHPPSSEQPARAMETERSETID;
+	getValue(ppsHeader, &(headers->pps.entropyCondingModeFlag), offset, pos, FLENGTHENTROPYCODINGMODEFLAG);
+	pos-= FLENGTHENTROPYCODINGMODEFLAG;
+	getValue(ppsHeader, &(headers->pps.bottomFieldPicOrderInFramePresentFlag), offset, pos, FLENGTHBOTTOMFIELDPICORDERINFRAMEPRESENTFLAG);
+	pos-= FLENGTHBOTTOMFIELDPICORDERINFRAMEPRESENTFLAG;
+	getValue(ppsHeader, &(headers->pps.numSliceGroupsMinus1), offset, pos, FLENGTHNUMSLICEGROUPMINUS1);
+	headers->pps.numSliceGroupsMinus1--;
+	pos-= FLENGTHNUMSLICEGROUPMINUS1;
 	printf ("PPS\n");
 	printf ("picParameterSetId %u\nseqParameterSetId %u\nentropyCondingModeFlag %u\nbottomFieldPicOrderInFramePresentFlag %u\nnumSliceGroupsMinus1 %u\n", headers->pps.picParameterSetId, headers->pps.seqParameterSetId, headers->pps.entropyCondingModeFlag, headers->pps.bottomFieldPicOrderInFramePresentFlag, headers->pps.numSliceGroupsMinus1);
 	if (headers->pps.numSliceGroupsMinus1 > 0) {//TODO check this!
-		headers->pps.sliceGroupMapType = (ppsHeader[offset] & FSLICEGROUPSMAPTYPE);
+		getValue(ppsHeader, &(headers->pps.sliceGroupMapType), offset, pos, FLENGTHSLICEGROUPSMAPTYPE);
+		pos-= FLENGTHSLICEGROUPSMAPTYPE;
+		pos+= 8;
 		offset++;
 		if (headers->pps.sliceGroupMapType == 0) {
 			for (int iGroup = 0; iGroup <= headers->pps.numSliceGroupsMinus1; iGroup++) {
@@ -22,13 +194,19 @@ bool ppsToRbsp(unsigned char* ppsHeader, uint32_t ppsLength, nalHeader* headers)
 			}
 		} else if (headers->pps.sliceGroupMapType == 2) {
 			for (int iGroup = 0; iGroup <= headers->pps.numSliceGroupsMinus1; iGroup++) {
-				headers->pps.topLef[iGroup] = (ppsHeader[offset] & FTOPLEFT) >> 4;
-				headers->pps.bottomRight[iGroup] = (ppsHeader[offset] & FBOTTOMRIGHT);
+				getValue(ppsHeader, &(headers->pps.topLef[iGroup]), offset, pos, FLENGTHTOPLEFT);
+				pos-= FLENGTHTOPLEFT;
+				getValue(ppsHeader, &(headers->pps.bottomRight[iGroup]), offset, pos, FLENGTHBOTTOMRIGHT);
+				pos-= FLENGTHBOTTOMRIGHT;
+				pos+= 8;
 				offset++;
 			} 
 		} else if ((headers->pps.sliceGroupMapType > 2) && (headers->pps.sliceGroupMapType < 6)) {
-			headers->pps.sliceGroupChangeDirectionFlag = (ppsHeader[offset] & FSLICEGROUPCHANGEDIRECTIONFLAG) >> 7;
-			headers->pps.sliceGroupChangeRateMinus1 = (ppsHeader[offset] & FSLICEGROUPCHANGERATEMINUS1);
+			getValue(ppsHeader, &(headers->pps.sliceGroupChangeDirectionFlag), offset, pos, FLENGTHSLICEGROUPCHANGEDIRECTIONFLAG);
+			pos-= FLENGTHSLICEGROUPCHANGEDIRECTIONFLAG;
+			getValue(ppsHeader, &(headers->pps.sliceGroupChangeRateMinus1), offset, pos, FLENGTHSLICEGROUPCHANGERATEMINUS1);
+			pos-= FLENGTHSLICEGROUPCHANGERATEMINUS1;
+			pos+= 8;
 			offset++;			
 		} else if (headers->pps.sliceGroupMapType == 6) {
 			headers->pps.picSizeInMapUnitsMinus1 = ppsHeader[offset];
@@ -40,26 +218,43 @@ bool ppsToRbsp(unsigned char* ppsHeader, uint32_t ppsLength, nalHeader* headers)
 			
 		}
 	}
-	headers->pps.numRefIdx10DefaultActiveMinus1 = (ppsHeader[offset] & FNUMREFIDX10DEFAULTACTIVEMINUS1) - 1;
+	getValue(ppsHeader, &(headers->pps.numRefIdxl0DefaultActiveMinus1), offset, pos, FLENGTHNUMREFIDXl0DEFAULTACTIVEMINUS1);
+	headers->pps.numRefIdxl0DefaultActiveMinus1--;
+	pos-= FLENGTHNUMREFIDXl0DEFAULTACTIVEMINUS1;
+	pos+= 8;
 	offset++;
-	headers->pps.numRefIdx11DefaultActiveMinus1 = ((ppsHeader[offset] & FNUMREFIDX11DEFAULTACTIVEMINUS1) >> 7) - 1;
-	headers->pps.weightedPredFlag = (ppsHeader[offset] & FWEIGHTEDPREDFLAG) >> 6;
-	headers->pps.weightedBipredIdc = (ppsHeader[offset] & FWEIGHTEDBIPREDIDC) >> 5;
-	headers->pps.picInitQpMinus26 = ((((ppsHeader[offset] & FPICINITQPMINUS26H) << 1) | ((ppsHeader[offset+1] & FPICINITQPMINUS26L) >> 7)));//TODO check this
-	printf ("numRefIdx10DefaultActiveMinus1 %u\nnumRefIdx11DefaultActiveMinus1 %u\nweightedPredFlag %u\nweightedBipredIdc %u\npicInitQpMinus26 %d\n", headers->pps.numRefIdx10DefaultActiveMinus1, headers->pps.numRefIdx11DefaultActiveMinus1, headers->pps.weightedPredFlag, headers->pps.weightedBipredIdc, headers->pps.picInitQpMinus26);
+	getValue(ppsHeader, &(headers->pps.numRefIdxl1DefaultActiveMinus1), offset, pos, FLENGTHNUMREFIDXl1DEFAULTACTIVEMINUS1);
+	headers->pps.numRefIdxl1DefaultActiveMinus1--;
+	pos-= FLENGTHNUMREFIDXl1DEFAULTACTIVEMINUS1;
+	getValue(ppsHeader, &(headers->pps.weightedPredFlag), offset, pos, FLENGTHWEIGHTEDPREDFLAG);
+	pos-= FLENGTHWEIGHTEDPREDFLAG;
+	getValue(ppsHeader, &(headers->pps.weightedBipredIdc), offset, pos, FLENGTHWEIGHTEDBIPREDIDC);
+	pos-= FLENGTHWEIGHTEDBIPREDIDC;
+	getValueInt16(ppsHeader, &(headers->pps.picInitQpMinus26), offset, pos, FLENGTHPICINITQPMINUS26); //TODO check this!
+	pos-= FLENGTHPICINITQPMINUS26;
+	printf ("numRefIdx10DefaultActiveMinus1 %u\nnumRefIdx11DefaultActiveMinus1 %u\nweightedPredFlag %u\nweightedBipredIdc %u\npicInitQpMinus26 %d\n", headers->pps.numRefIdxl0DefaultActiveMinus1, headers->pps.numRefIdxl1DefaultActiveMinus1, headers->pps.weightedPredFlag, headers->pps.weightedBipredIdc, headers->pps.picInitQpMinus26);
+	pos+= 8;
 	offset++;
-	headers->pps.picInitQsMinus26 = (((ppsHeader[offset] & FPICINITQSMINUS26) >> 6)); //TODO check this
-	headers->pps.chromaQpIndexOffset = (ppsHeader[offset] & FCHROMAQPINDEXOFFSET) >> 1; //Mirar esto
-	headers->pps.deblockingFilterControlPresentFlag = (ppsHeader[offset] & FDEBLOCKINGFILTERTCONTROLPRESENTFLAG);
+	getValueInt16(ppsHeader, &(headers->pps.picInitQsMinus26), offset, pos, FLENGTHPICINITQSMINUS26);
+	pos-= FLENGTHPICINITQSMINUS26;
+	getValueInt16(ppsHeader, &(headers->pps.chromaQpIndexOffset), offset, pos, FLENGTHCHROMAQPINDEXOFFSET);
+	pos-= FLENGTHCHROMAQPINDEXOFFSET;
+	getValue(ppsHeader, &(headers->pps.deblockingFilterControlPresentFlag), offset, pos, FLENGTHDEBLOCKINGFILTERTCONTROLPRESENTFLAG);
+	pos-= FLENGTHDEBLOCKINGFILTERTCONTROLPRESENTFLAG;
+	pos+= 8;
 	offset++;
-	headers->pps.constrainedIntraPredFlag = (ppsHeader[offset] & FCONSTRAINEDINTRAPREDFLAG) >> 7;
-	headers->pps.redundantPicCntPresentFlag = (ppsHeader[offset] & FREDUNDANTPICCNTPRESENTLAG) >> 6;
+	getValue(ppsHeader, &(headers->pps.constrainedIntraPredFlag), offset, pos, FLENGTHCONSTRAINEDINTRAPREDFLAG);
+	pos-= FLENGTHCONSTRAINEDINTRAPREDFLAG;
+	getValue(ppsHeader, &(headers->pps.redundantPicCntPresentFlag), offset, pos, FLENGTHREDUNDANTPICCNTPRESENTLAG);
+	pos-= FLENGTHREDUNDANTPICCNTPRESENTLAG;
 
-	printf ("picInitQsMinus26 %d\nchromaQpIndexOffset %d\ndeblockingFilterControlPresentFlag %u\nbottomFieldPicOrderInFramePresentFlag %u\nredundantPicCntPresentFlag %u\n", headers->pps.picInitQsMinus26, headers->pps.chromaQpIndexOffset, headers->pps.deblockingFilterControlPresentFlag, headers->pps.constrainedIntraPredFlag, headers->pps.redundantPicCntPresentFlag);
+	printf ("picInitQsMinus26 %d\nchromaQpIndexOffset %d\ndeblockingFilterControlPresentFlag %u\nconstrainedIntraPredFlag %u\nredundantPicCntPresentFlag %u\n", headers->pps.picInitQsMinus26, headers->pps.chromaQpIndexOffset, headers->pps.deblockingFilterControlPresentFlag, headers->pps.constrainedIntraPredFlag, headers->pps.redundantPicCntPresentFlag);
 
 	if (true) {//TODO more_rbsp_data()
-		headers->pps.transform8x8ModeFlag = (ppsHeader[offset] & FTRANSFORM8X8MODEFLAG) >> 5;
-		headers->pps.picScalingMatrixPresentFlag = (ppsHeader[offset] & FPICSACALINGMATRIXPRESENTFLAG) >> 4;
+		getValue(ppsHeader, &(headers->pps.transform8x8ModeFlag), offset, pos, FLENGTHTRANSFORM8X8MODEFLAG);
+		pos-= FLENGTHTRANSFORM8X8MODEFLAG;
+		getValue(ppsHeader, &(headers->pps.picScalingMatrixPresentFlag), offset, pos, FLENGTHPICSACALINGMATRIXPRESENTFLAG);
+		pos-= FLENGTHPICSACALINGMATRIXPRESENTFLAG;
 		printf ("transform8x8ModeFlag %u\npicScalingMatrixPresentFlag %u\n", headers->pps.transform8x8ModeFlag, headers->pps.picScalingMatrixPresentFlag);
 		if (headers->pps.picScalingMatrixPresentFlag) {
 			int index = 0;
@@ -67,40 +262,54 @@ bool ppsToRbsp(unsigned char* ppsHeader, uint32_t ppsLength, nalHeader* headers)
 				index = (i + 4) % 8;
 				switch (index) {
 				case 0:
-					headers->pps.picScalingListPresentFlag[i] = (ppsHeader[offset] & FPICSACALINGLISTPRESENTFLAG0) >> 7;
+					getValue(ppsHeader, &(headers->pps.picScalingListPresentFlag[i]), offset, pos, FLENGTHPICSACALINGLISTPRESENTFLAG0);
+					pos-= FLENGTHPICSACALINGLISTPRESENTFLAG0;
 					break;
 				case 1:
-					headers->pps.picScalingListPresentFlag[i] = (ppsHeader[offset] & FPICSACALINGLISTPRESENTFLAG1) >> 6;
+					getValue(ppsHeader, &(headers->pps.picScalingListPresentFlag[i]), offset, pos, FLENGTHPICSACALINGLISTPRESENTFLAG1);
+					pos-= FLENGTHPICSACALINGLISTPRESENTFLAG1;
 					break;
 				case 2:
-					headers->pps.picScalingListPresentFlag[i] = (ppsHeader[offset] & FPICSACALINGLISTPRESENTFLAG2) >> 5;
+					getValue(ppsHeader, &(headers->pps.picScalingListPresentFlag[i]), offset, pos, FLENGTHPICSACALINGLISTPRESENTFLAG2);
+					pos-= FLENGTHPICSACALINGLISTPRESENTFLAG2;
 					break;
 				case 3:
-					headers->pps.picScalingListPresentFlag[i] = (ppsHeader[offset] & FPICSACALINGLISTPRESENTFLAG3) >> 4;
+					getValue(ppsHeader, &(headers->pps.picScalingListPresentFlag[i]), offset, pos, FLENGTHPICSACALINGLISTPRESENTFLAG3);
+					pos-= FLENGTHPICSACALINGLISTPRESENTFLAG3;
 					break;
 				case 4:
-					headers->pps.picScalingListPresentFlag[i] = (ppsHeader[offset] & FPICSACALINGLISTPRESENTFLAG4) >> 3;
+					getValue(ppsHeader, &(headers->pps.picScalingListPresentFlag[i]), offset, pos, FLENGTHPICSACALINGLISTPRESENTFLAG4);
+					pos-= FLENGTHPICSACALINGLISTPRESENTFLAG4;
 					break;
 				case 5:
-					headers->pps.picScalingListPresentFlag[i] = (ppsHeader[offset] & FPICSACALINGLISTPRESENTFLAG5) >> 2;
+					getValue(ppsHeader, &(headers->pps.picScalingListPresentFlag[i]), offset, pos, FLENGTHPICSACALINGLISTPRESENTFLAG5);
+					pos-= FLENGTHPICSACALINGLISTPRESENTFLAG5;
 					break;
 				case 6:
-					headers->pps.picScalingListPresentFlag[i] = (ppsHeader[offset] & FPICSACALINGLISTPRESENTFLAG6) >> 1;
+					getValue(ppsHeader, &(headers->pps.picScalingListPresentFlag[i]), offset, pos, FLENGTHPICSACALINGLISTPRESENTFLAG6);
+					pos-= FLENGTHPICSACALINGLISTPRESENTFLAG6;
 					break;
 				case 7:
-					headers->pps.picScalingListPresentFlag[i] = (ppsHeader[offset] & FPICSACALINGLISTPRESENTFLAG7) >> 0;
+					getValue(ppsHeader, &(headers->pps.picScalingListPresentFlag[i]), offset, pos, FLENGTHPICSACALINGLISTPRESENTFLAG7);
+					pos-= FLENGTHPICSACALINGLISTPRESENTFLAG7;
+					pos+= 8;
 					offset++;
 					break;
 				}
 			}
 		}
-		headers->pps.secondChromaQpIndexOffset = ((ppsHeader[offset] & FSECONDCHROMAQPINDEXOFFSETH) << 1) | ((ppsHeader[offset+1] & FSECONDCHROMAQPINDEXOFFSETL) >> 7);
+		getValueInt16(ppsHeader, &(headers->pps.secondChromaQpIndexOffset), offset, pos, FLENGTHSECONDCHROMAQPINDEXOFFSET);
+		pos-= FLENGTHSECONDCHROMAQPINDEXOFFSET;
 		printf ("secondChromaQpIndexOffset %u\n", headers->pps.secondChromaQpIndexOffset);
+		pos+= 8;
 		offset++;
 	}
-	headers->pps.rbspStopOneBit = (ppsHeader[offset] & FRBSPSTOPONEBIT) >> 6;
+	getValue(ppsHeader, &(headers->pps.rbspStopOneBit), offset, pos, FLENGTHRBSPSTOPONEBIT);
+	pos-= FLENGTHRBSPSTOPONEBIT;	
 	//TODO While(byte_aligned())
-	headers->pps.rbspAlignmentZeroBit = (ppsHeader[offset] & FRBSPALIGNMENTZEROBIT);
+	getValue(ppsHeader, &(headers->pps.rbspAlignmentZeroBit), offset, pos, FLENGTHRBSPALIGNMENTZEROBIT);
+	pos-= FLENGTHRBSPALIGNMENTZEROBIT;
+	pos+= 8;
 	offset++;
 	if (offset != ppsLength)
 		return false;
@@ -111,6 +320,8 @@ bool ppsToRbsp(unsigned char* ppsHeader, uint32_t ppsLength, nalHeader* headers)
 //SPS
 bool spsToRbsp(unsigned char* spsHeader, uint32_t spsLength, nalHeader* headers) {
 	uint32_t offset = 1;
+	//unsigned int picWidthLenght = 0;
+	printf ("\n\n spsLength %u\n\n", spsLength);
 	printf ("SPS \n");
 	if ((spsLength <=0) || (spsLength > MAXLENGTHSPS) || (spsHeader == NULL))
 		return false;
@@ -225,7 +436,13 @@ bool spsToRbsp(unsigned char* spsHeader, uint32_t spsLength, nalHeader* headers)
 	headers->sps.gapsInFrameNumValueAlloweFlag = (spsHeader[offset] & FGAPSINFRAMENUMVALUEALLOWEDFLAG) >> 6;
 	headers->sps.picWidthInMbsMinus1 = ((spsHeader[offset] & FPICWIDTHINMBSMINUS1H) * 128) + ((spsHeader[offset+1] & FPICWIDTHINMBSMINUS1L) >> 1) - 1;
 	offset++;
-	headers->sps.picHeightInMapUnitsMinus1 = ((spsHeader[offset] & FPICHEIGHTINMAPUNITSMINUS1H) * 1024) + ((spsHeader[offset+1] & FPICHEIGHTINMAPUNITSMINUS1M) * 4) + ((spsHeader[offset+2] & FPICHEIGHTINMAPUNITSMINUS1L) >> 6) - 1;
+	/*if ((spsHeader[offset+2] & FFRAMEMBSONLYFLAG) == 1) {*/
+		headers->sps.picHeightInMapUnitsMinus1 = ((spsHeader[offset] & FPICHEIGHTINMAPUNITSMINUS1H) * 1024) + ((spsHeader[offset+1] & FPICHEIGHTINMAPUNITSMINUS1M) * 4) + ((spsHeader[offset+2] & FPICHEIGHTINMAPUNITSMINUS1L) >> 6) - 1;
+		/*picWidthLenght = 11;
+	} else { 
+		headers->sps.picHeightInMapUnitsMinus1 = ((spsHeader[offset] & FPICHEIGHTINMAPUNITSMINUS1H) * 4096) + ((spsHeader[offset+1] & FPICHEIGHTINMAPUNITSMINUS1M) * 16) + ((spsHeader[offset+2] & FPICHEIGHTINMAPUNITSMINUS1L) >> 4) - 1;
+		picWidthLenght = 13;
+	}*/
 	offset += 2;
 	headers->sps.framMbsOnlyFlag = (spsHeader[offset] & FFRAMEMBSONLYFLAG) >> 5;
 	printf ("maxNumRefFrames %u\ngapsInFrameNumValueAlloweFlag %u\npicWidthInMbsMinus1 %u\npicHeightInMapUnitsMinus1 %u\nframMbsOnlyFlag %u\n", headers->sps.maxNumRefFrames, headers->sps.gapsInFrameNumValueAlloweFlag, headers->sps.picWidthInMbsMinus1, headers->sps.picHeightInMapUnitsMinus1, headers->sps.framMbsOnlyFlag);
