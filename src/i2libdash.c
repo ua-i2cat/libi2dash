@@ -287,6 +287,7 @@ uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *metada
 	//spsToRbsp(sps_data, sps_s, &((*context)->ctxvideo->nalsHeader));
 	//ppsToRbsp(pps_data, pps_size, &((*context)->ctxvideo->nalsHeader));	
     //if(get_width_height(&((*context)->ctxvideo)) == I2ERROR_SPS_PPS)
+	//i2nalparser descomentar estas 3 lineas y comentar el if de abajo
 	if(get_width_height(sps_data, sps_size, &((*context)->ctxvideo)) == I2ERROR_SPS_PPS)    
 	    return I2ERROR_SPS_PPS;
     initVideo = initVideoGenerator(sps_pps_data, sps_pps_data_length, output_data, context);

@@ -34,6 +34,7 @@
 
 uint8_t context_initializer(i2ctx **context, uint32_t media_type);
 
+//TODO: metadata1, 2 and 3 refactor (inside sps)
 uint32_t init_video_handler(byte *metadata, uint32_t metadata_size, byte *metadata2, uint32_t metadata2_size, byte *sps_data, uint32_t *sps_size, byte *metadata3, uint32_t metadata3_size, byte *pps_data, uint32_t pps_size, byte *output_data, i2ctx **context);
 
 uint32_t init_audio_handler(byte *input_data, uint32_t size_input, byte *output_data, i2ctx **context);

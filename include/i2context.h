@@ -32,6 +32,7 @@ typedef unsigned char byte;
 #define AUDIOVIDEO_TYPE 3
 #define MAX_MDAT_SAMPLE 65536
 #define MAX_DAT 100*1024*1024
+//TODO: error negative values
 #define I2ERROR_MAX 10
 #define I2ERROR_SPS_PPS 9
 #define I2ERROR_IS_INTRA 8
@@ -77,9 +78,9 @@ typedef struct {
     uint32_t        duration_ms;
     uint32_t        delay;
     uint32_t        timestamp;
-    unsigned        key:1;
+    unsigned        key:1;//Flags mp4parser.com
     uint32_t        index;
-    uint32_t        decode_time_ms;
+    uint32_t        decode_time_ms;//not used
 } mdat_sample;
 
 typedef struct {
@@ -128,7 +129,7 @@ typedef struct {
     i2ctx_video     *ctxvideo;
     uint32_t        duration_ms;
     uint32_t        threshold_ms;
-    uint32_t        reference_size;
+    uint32_t        reference_size;//TODO: refactor
     uint8_t         audio_segment_flag;
 } i2ctx;
 

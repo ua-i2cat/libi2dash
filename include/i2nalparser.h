@@ -331,6 +331,7 @@ typedef unsigned char byte;
 
 #include <netinet/in.h>
 
+//PPS
 typedef struct {
 	byte picParameterSetId; //ue(v) (range of 0 to 255)
 	byte seqParameterSetId; //ue(v) (range of 0 to 31)
@@ -363,6 +364,7 @@ typedef struct {
 	byte rbspAlignmentZeroBit; //u(6) = 0
 } ppsStruct;
 
+//SPS
 typedef struct {
 	byte profileIdc; //u(8)
 	byte constraintSet0Flag; //u(1)

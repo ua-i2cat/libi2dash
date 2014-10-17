@@ -3,6 +3,7 @@
 //PPS
 
 void getValue (byte* buffer, byte* output, unsigned int bytePos, int bitPos, int lenghtBits) {
+	//lenghtBits <= 32
 	byte auxValue;
 	int valueBytePos = 0, valueBitPos = 0, bufferBytePos = 0;
 	int bitCopy = bitPos;
@@ -85,6 +86,7 @@ void getValue (byte* buffer, byte* output, unsigned int bytePos, int bitPos, int
 }
 
 void getValueInt16 (byte* buffer, int* output, unsigned int bytePos, int bitPos, int lenghtBits) {
+	//lenghtBits <= 16
 	byte auxValue;
 	int valueBytePos = 0, valueBitPos = 0, bufferBytePos = 0;
 	int bitCopy = bitPos;
