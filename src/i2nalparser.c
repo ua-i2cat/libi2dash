@@ -214,8 +214,7 @@ bool ppsToRbsp(unsigned char* ppsHeader, uint32_t ppsLength, nalHeader* headers)
 			for (int i = 0; i <= headers->pps.picSizeInMapUnitsMinus1; i++) {
 				headers->pps.sliceGroupId[i] = ppsHeader[offset];
 				offset++;
-			}
-			
+			}			
 		}
 	}
 	getValue(ppsHeader, &(headers->pps.numRefIdxl0DefaultActiveMinus1), offset, pos, FLENGTHNUMREFIDXl0DEFAULTACTIVEMINUS1);
@@ -320,38 +319,55 @@ bool ppsToRbsp(unsigned char* ppsHeader, uint32_t ppsLength, nalHeader* headers)
 //SPS
 bool spsToRbsp(unsigned char* spsHeader, uint32_t spsLength, nalHeader* headers) {
 	uint32_t offset = 1;
+	int pos = 7;
 	//unsigned int picWidthLenght = 0;
 	printf ("\n\n spsLength %u\n\n", spsLength);
 	printf ("SPS \n");
 	if ((spsLength <=0) || (spsLength > MAXLENGTHSPS) || (spsHeader == NULL))
 		return false;
 	printf ("SPS\n");
-	headers->sps.profileIdc = spsHeader[offset];
+	getValue(spsHeader, &(headers->sps.profileIdc), offset, pos, FLENGTHPROFILEIDC);
 	offset++;
-	headers->sps.constraintSet0Flag = (spsHeader[offset] & FCONSTRAINTSET0FLAG) >> 7;
-	headers->sps.constraintSet1Flag = (spsHeader[offset] & FCONSTRAINTSET1FLAG) >> 6;
-	headers->sps.constraintSet2Flag = (spsHeader[offset] & FCONSTRAINTSET2FLAG) >> 5;
-	headers->sps.constraintSet3Flag = (spsHeader[offset] & FCONSTRAINTSET3FLAG) >> 4;
-	headers->sps.constraintSet4Flag = (spsHeader[offset] & FCONSTRAINTSET4FLAG) >> 3;
-	headers->sps.constraintSet5Flag = (spsHeader[offset] & FCONSTRAINTSET5FLAG) >> 2;
-	headers->sps.reservedZero2bits = (spsHeader[offset] & FRESERVEDZERO2BITS);
+	getValue(spsHeader, &(headers->sps.constraintSet0Flag), offset, pos, FLENGTHCONSTRAINTSET0FLAG);
+	pos-=FLENGTHCONSTRAINTSET0FLAG;
+	getValue(spsHeader, &(headers->sps.constraintSet1Flag), offset, pos, FLENGTHCONSTRAINTSET1FLAG);
+	pos-=FLENGTHCONSTRAINTSET1FLAG;
+	getValue(spsHeader, &(headers->sps.constraintSet2Flag), offset, pos, FLENGTHCONSTRAINTSET2FLAG);
+	pos-=FLENGTHCONSTRAINTSET2FLAG;
+	getValue(spsHeader, &(headers->sps.constraintSet3Flag), offset, pos, FLENGTHCONSTRAINTSET3FLAG);
+	pos-=FLENGTHCONSTRAINTSET3FLAG;
+	getValue(spsHeader, &(headers->sps.constraintSet4Flag), offset, pos, FLENGTHCONSTRAINTSET4FLAG);
+	pos-=FLENGTHCONSTRAINTSET4FLAG;
+	getValue(spsHeader, &(headers->sps.constraintSet5Flag), offset, pos, FLENGTHCONSTRAINTSET5FLAG);
+	pos-=FLENGTHCONSTRAINTSET5FLAG;
+	getValue(spsHeader, &(headers->sps.reservedZero2bits), offset, pos, FLENGTHRESERVEDZERO2BITS);
+	pos-=FLENGTHRESERVEDZERO2BITS;
+	pos+= 8;
 	offset++;
 	printf("profileIdc %u\nconstraintSet0Flag %u\nconstraintSet1Flag %u\nconstraintSet2Flag %u\nconstraintSet3Flag %u\nconstraintSet4Flag %u\nconstraintSet5Flag %u\nreservedZero2bits %u\n", headers->sps.profileIdc, headers->sps.constraintSet0Flag, headers->sps.constraintSet1Flag, headers->sps.constraintSet2Flag, headers->sps.constraintSet3Flag, headers->sps.constraintSet4Flag, headers->sps.constraintSet5Flag, headers->sps.reservedZero2bits);
-	headers->sps.levelIdc = spsHeader[offset];
+	getValue(spsHeader, &(headers->sps.levelIdc), offset, pos, FLENGTHLEVELIDC);
 	offset++;
-	headers->sps.seqParameterSetId = (spsHeader[offset] & FSPSSEQPARAMETERSETID) >> 7;
+	getValue(spsHeader, &(headers->sps.seqParameterSetId), offset, pos, FLENGTHSPSSEQPARAMETERSETID);
+	pos-=FLENGTHSPSSEQPARAMETERSETID;
 	if ((headers->sps.profileIdc == 100) || (headers->sps.profileIdc == 110) || (headers->sps.profileIdc == 122) || (headers->sps.profileIdc == 244) || (headers->sps.profileIdc == 44) || (headers->sps.profileIdc == 83) || (headers->sps.profileIdc == 86) || (headers->sps.profileIdc == 118) || (headers->sps.profileIdc == 128)) {
-		headers->sps.chromaFormatIdc = (spsHeader[offset] &FCHROMAFORMATIDC) >> 4;
+		getValue(spsHeader, &(headers->sps.chromaFormatIdc), offset, pos, FLENGTHCHROMAFORMATIDC);
+		pos-=FLENGTHCHROMAFORMATIDC;		
 		printf ("levelIdc %u\nseqParameterSetId %u\nchromaFormatIdc %u\n", headers->sps.levelIdc, headers->sps.seqParameterSetId, headers->sps.chromaFormatIdc);
 		if (headers->sps.chromaFormatIdc == 3) {
-			headers->sps.separateColourPlaneFlag = (spsHeader[offset] & FSEPARATECOLOURPLANEFLAG) >> 3;
+			getValue(spsHeader, &(headers->sps.separateColourPlaneFlag), offset, pos, FLENGTHSEPARATECOLOURPLANEFLAG);
+			pos-=FLENGTHSEPARATECOLOURPLANEFLAG;
 		} else {
 			headers->sps.separateColourPlaneFlag = 0;
 		}
-		headers->sps.bitDepthLumaMinus8 = ((spsHeader[offset] & FBITDEPTHLUMAMINUS8) >> 3);
-		headers->sps.bitDepthChromaMinus8 = ((spsHeader[offset] & FBITDEPTHCHROMAMINUS8) >> 2);
-		headers->sps.qpprimeYZeroTransformBypassFlag = (spsHeader[offset] & FQPPRIMEYZEROTRANSFORMBYPASSFLAG) >> 1;
-		headers->sps.seqScalingMatrixPresentFlag = (spsHeader[offset] & FSEQSCALINGMATRIXPRESENTLAG);
+		getValue(spsHeader, &(headers->sps.bitDepthLumaMinus8), offset, pos, FLENGTHBITDEPTHLUMAMINUS8);
+		pos-=FLENGTHBITDEPTHLUMAMINUS8;
+		getValue(spsHeader, &(headers->sps.bitDepthChromaMinus8), offset, pos, FLENGTHBITDEPTHCHROMAMINUS8);
+		pos-=FLENGTHBITDEPTHCHROMAMINUS8;
+		getValue(spsHeader, &(headers->sps.qpprimeYZeroTransformBypassFlag), offset, pos, FLENGTHQPPRIMEYZEROTRANSFORMBYPASSFLAG);
+		pos-=FLENGTHQPPRIMEYZEROTRANSFORMBYPASSFLAG;
+		getValue(spsHeader, &(headers->sps.seqScalingMatrixPresentFlag), offset, pos, FLENGTHSEQSCALINGMATRIXPRESENTLAG);
+		pos-=FLENGTHSEQSCALINGMATRIXPRESENTLAG;
+		pos+=8;
 		offset++;
 		printf ("separateColourPlaneFlag %u\nbitDepthLumaMinus8 %u\nbitDepthChromaMinus8 %u\nqpprimeYZeroTransformBypassFlag %u\nseqScalingMatrixPresentFlag %u\n", headers->sps.separateColourPlaneFlag, headers->sps.bitDepthLumaMinus8, headers->sps.bitDepthChromaMinus8, headers->sps.qpprimeYZeroTransformBypassFlag, headers->sps.seqScalingMatrixPresentFlag);
 		if (headers->sps.seqScalingMatrixPresentFlag) {
