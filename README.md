@@ -1,4 +1,4 @@
-<h1>libi2dash</h1>
+libi2dash
 =========
 
 An open source library for MPEG-DASH H264/AVC segments generation.
